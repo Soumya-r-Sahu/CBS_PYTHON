@@ -1,0 +1,109 @@
+-- Stored procedures, triggers, and functions for Core Banking System
+-- Compatible with MariaDB (XAMPP)
+
+-- Drop existing objects to avoid conflicts
+DROP PROCEDURE IF EXISTS check_daily_withdrawal_limit;
+DROP PROCEDURE IF EXISTS process_fund_transfer;
+DROP TRIGGER IF EXISTS cbs_accounts_after_update;
+DROP TRIGGER IF EXISTS cbs_customers_after_insert;
+
+DELIMITER $$
+
+-- Procedure: Check daily withdrawal limit
+CREATE PROCEDURE check_daily_withdrawal_limit(
+    IN p_card_number VARCHAR(20),
+    IN p_amount DECIMAL(10,2),
+    IN p_channel VARCHAR(10),
+    OUT p_can_withdraw BOOLEAN,
+    OUT p_remaining_limit DECIMAL(10,2),
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE v_total_today DECIMAL(10,2);
+    DECLARE v_daily_limit DECIMAL(10,2);
+    DECLARE v_today DATE;
+    DECLARE v_card_status VARCHAR(20);
+    DECLARE v_account_status VARCHAR(20);
+    DECLARE v_account_number VARCHAR(20);
+
+    IF p_channel IS NULL THEN
+        SET p_channel = 'ATM';
+    END IF;
+    SET v_today = CURDATE();
+    SELECT c.status, c.account_id, a.status 
+        INTO v_card_status, v_account_number, v_account_status
+        FROM cbs_cards c
+        LEFT JOIN cbs_accounts a ON c.account_id = a.account_number
+        WHERE c.card_number = p_card_number;
+    IF v_card_status IS NULL THEN
+        SET p_can_withdraw = FALSE;
+        SET p_remaining_limit = 0;
+        SET p_message = 'Invalid card number';
+        RETURN;
+    ELSEIF v_card_status != 'ACTIVE' THEN
+        SET p_can_withdraw = FALSE;
+        SET p_remaining_limit = 0;
+        SET p_message = CONCAT('Card is ', v_card_status);
+        RETURN;
+    ELSEIF v_account_status != 'ACTIVE' THEN
+        SET p_can_withdraw = FALSE;
+        SET p_remaining_limit = 0;
+        SET p_message = CONCAT('Account is ', v_account_status);
+        RETURN;
+    END IF;
+    IF p_channel = 'ATM' THEN
+        SELECT daily_atm_limit INTO v_daily_limit FROM cbs_cards WHERE card_number = p_card_number;
+    ELSEIF p_channel = 'POS' THEN
+        SELECT daily_pos_limit INTO v_daily_limit FROM cbs_cards WHERE card_number = p_card_number;
+    ELSE
+        SELECT daily_online_limit INTO v_daily_limit FROM cbs_cards WHERE card_number = p_card_number;
+    END IF;
+    SELECT COALESCE(SUM(amount), 0) INTO v_total_today FROM cbs_daily_withdrawals WHERE card_number = p_card_number AND withdrawal_date = v_today;
+    SET p_remaining_limit = v_daily_limit - v_total_today;
+    IF (v_total_today + p_amount) <= v_daily_limit THEN
+        SET p_can_withdraw = TRUE;
+        SET p_message = 'Withdrawal allowed';
+    ELSE
+        SET p_can_withdraw = FALSE;
+        SET p_message = CONCAT('Exceeds daily limit. Remaining limit: ', p_remaining_limit);
+    END IF;
+END$$
+
+-- Procedure: Process fund transfer (simplified)
+CREATE PROCEDURE process_fund_transfer(
+    IN p_source_account VARCHAR(20),
+    IN p_destination_account VARCHAR(20),
+    IN p_amount DECIMAL(12,2),
+    IN p_transfer_type VARCHAR(20),
+    IN p_remarks VARCHAR(255),
+    IN p_channel VARCHAR(20),
+    IN p_user_id VARCHAR(50),
+    OUT p_transaction_id VARCHAR(36),
+    OUT p_status VARCHAR(10),
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    SET p_transaction_id = UUID();
+    SET p_status = 'SUCCESS';
+    SET p_message = 'Transfer simulated';
+END$$
+
+-- Trigger: After update on accounts
+CREATE TRIGGER cbs_accounts_after_update
+AFTER UPDATE ON cbs_accounts
+FOR EACH ROW
+BEGIN
+    IF OLD.balance != NEW.balance THEN
+        SET @temp_var = 'Balance changed';
+    END IF;
+END$$
+
+-- Trigger: After insert on customers
+CREATE TRIGGER cbs_customers_after_insert
+AFTER INSERT ON cbs_customers
+FOR EACH ROW
+BEGIN
+    SET @temp_var = 'Customer created';
+END$$
+
+DELIMITER ;

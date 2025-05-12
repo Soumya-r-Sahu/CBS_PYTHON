@@ -1,0 +1,19 @@
+# Core Banking System settings
+# NOTE: This file is now for reference only.
+# All actual configuration is managed through config.py and environment variables.
+# Do not store credentials in this file.
+app_name: CBS System
+version: 0.1.0
+debug: true
+
+# Database configuration
+database:
+  driver: mysql+mysqlconnector
+  host: localhost
+  port: 3307
+  name: core_banking_system
+  user: root
+  # password should come from .env or environment variables
+  pool_size: 5
+  max_overflow: 10
+  timeout: 30

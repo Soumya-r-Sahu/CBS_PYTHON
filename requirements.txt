@@ -1,0 +1,48 @@
+# Development
+black==24.1.1
+flake8==7.0.0
+isort==5.13.2
+mypy==1.8.0
+
+# Database
+alembic==1.13.1
+mysql-connector-python==8.3.0
+psycopg2-binary==2.9.9
+pymysql==1.1.0
+sqlalchemy==2.0.25
+
+# GUI
+PyQt5==5.15.10
+PyQt5-Qt5==5.15.11
+
+# ORM and Data Validation
+marshmallow==3.20.1
+pydantic==2.5.3
+
+# Security
+argon2-cffi
+bcrypt==4.1.2
+clamd
+cryptography==41.0.7
+passlib==1.7.4
+pyotp
+python-jose[cryptography]==3.3.0
+python-magic
+python-multipart==0.0.9
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Utilities
+pillow==10.2.0
+PyYAML==6.0.1
+python-dotenv==1.0.1
+qrcode==7.4.2
+requests==2.31.0
+
+# Web Framework
+fastapi==0.109.2
+flask==2.3.3
+uvicorn==0.27.1
