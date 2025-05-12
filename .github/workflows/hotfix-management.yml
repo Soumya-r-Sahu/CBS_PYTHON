@@ -1,0 +1,42 @@
+name: Hotfix Management
+
+on:
+  push:
+    branches:
+      - hotfix/* # Trigger when a hotfix branch is pushed
+
+jobs:
+  apply-hotfix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Merge hotfix into main
+        run: |
+          git checkout main
+          git merge ${GITHUB_REF#refs/heads/} --no-commit --no-ff || echo "Merge conflicts detected."
+          git commit -m "Hotfix applied to main" || echo "Nothing to commit."
+          git push origin main
+
+      - name: Merge hotfix into develop
+        run: |
+          git checkout develop
+          git merge ${GITHUB_REF#refs/heads/} --no-commit --no-ff || echo "Merge conflicts detected."
+          git commit -m "Hotfix applied to develop" || echo "Nothing to commit."
+          git push origin develop
+
+      - name: Merge hotfix into test
+        run: |
+          git checkout test
+          git merge ${GITHUB_REF#refs/heads/} --no-commit --no-ff || echo "Merge conflicts detected."
+          git commit -m "Hotfix applied to test" || echo "Nothing to commit."
+          git push origin test
