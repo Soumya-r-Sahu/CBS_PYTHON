@@ -1,0 +1,35 @@
+name: Release to Production
+
+on:
+  workflow_dispatch: # Manually triggered for production release
+    inputs:
+      version:
+        description: 'Version number for the release (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Merge test into main
+        run: |
+          git checkout main
+          git merge test --no-commit --no-ff || echo "Merge conflicts detected."
+          git commit -m "Release preparation from test to main" || echo "Nothing to commit."
+          git push origin main
+
+      - name: Tag the release
+        run: |
+          git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          git push origin ${{ github.event.inputs.version }}
