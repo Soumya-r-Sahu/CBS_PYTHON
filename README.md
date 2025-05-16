@@ -122,27 +122,6 @@ erDiagram
 
 ---
 
-## 🧩 Architecture Overview
-
-```mermaid
-graph TD
-    A[User/Customer/Employee/Admin] -->|Login| B[Main Menu]
-    B -->|ATM| C[ATM Interface]
-    B -->|UPI| D[UPI Services]
-    B -->|Admin| E[Admin Dashboard]
-    B -->|Customer| F[Customer Dashboard]
-    C -->|Withdraw/Inquiry| G[Database]
-    D -->|Pay/Register| G
-    E -->|User Mgmt/Logs| G
-    F -->|Account/Fund Transfer| G
-    G -->|Show Results| H[Results/Confirmation]
-    H -->|Logout| I[End]
-    S[Security Layer] -->|Protects| G
-    S -->|Authenticates| A
-```
-
----
-
 ## 🐞 Troubleshooting Guide
 
 | Problem Type         | Solution/Tip                                              | Emoji  |
