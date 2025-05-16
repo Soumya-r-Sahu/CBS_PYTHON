@@ -1,180 +1,297 @@
 """
-Core Banking System - Data Validation Utilities
+Input Validation Utilities for Core Banking System.
+
+This module provides validators for various data types used in the banking system.
 """
 
 import re
-import datetime
+import logging
+from datetime import datetime
+from colorama import init, Fore, Style
+from pathlib import Path
+import sys
+
+# Initialize colorama
+init(autoreset=True)
+
+# Use the import manager if available
 try:
-    from dateutil.relativedelta import relativedelta
+    # Add app/lib to path temporarily to import the import_manager
+    lib_path = str(Path(__file__).parent.parent / "app" / "lib")
+    if lib_path not in sys.path:
+        # Commented out direct sys.path modification
+        # sys.path.insert(0, lib_path)
+        from utils.lib.packages import fix_path
+        fix_path()
+        
+    # Import and use the centralized import manager
+    from utils.lib.packages import fix_path
+    fix_path()
 except ImportError:
-    pass  # Fallback handling is provided in validate_age function
+    # Fallback to direct path manipulation
+    parent_dir = str(Path(__file__).parent.parent)
+    if parent_dir not in sys.path:
+        sys.path.append(parent_dir)
+    print("Warning: Could not import centralized import manager, using direct sys.path modification")
 
-# Keep backward compatibility with legacy code
-def is_valid_email(email):
-    return validate_email(email)
-
-def is_valid_phone(phone):
-    return validate_phone(phone)
+# Configure logger
+logger = logging.getLogger(__name__)
 
 def is_valid_account_number(account_number):
-    return validate_account_number(account_number)
-
-def is_valid_amount(amount):
-    try:
-        amount = float(amount)
-        return amount > 0
-    except ValueError:
+    """
+    Validate account number format.
+    
+    Args:
+        account_number: The account number to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not account_number:
         return False
+        
+    # Account number should be 8-16 characters, alphanumeric
+    pattern = r'^[A-Z0-9]{8,16}$'
+    return bool(re.match(pattern, str(account_number)))
 
-def is_valid_pin(pin):
-    return validate_pin(pin)
+def is_valid_email(email):
+    """
+    Validate email format.
+    
+    Args:
+        email: The email to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not email:
+        return False
+        
+    # Simple email pattern
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, str(email)))
 
-# Enhanced validation functions
-def validate_email(email):
-    """Validate an email address format."""
-    email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-    return bool(email_pattern.match(email))
-
-def validate_phone(phone):
-    """Validate a phone number format."""
+def is_valid_phone(phone):
+    """
+    Validate phone number format.
+    
+    Args:
+        phone: The phone number to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not phone:
+        return False
+        
     # Remove any spaces, dashes, or parentheses
-    stripped_phone = re.sub(r"[\s\-\(\)]", "", phone)
+    phone = re.sub(r'[\s\-()]', '', str(phone))
     
-    # Check if the result is a valid phone number
-    # Accept 10-11 digits (as in legacy code) but allow for country codes
-    return stripped_phone.isdigit() and 10 <= len(stripped_phone) <= 15
+    # Check for 10-15 digit phone number
+    pattern = r'^[0-9]{10,15}$'
+    return bool(re.match(pattern, phone))
 
-def validate_pan(pan_number):
-    """Validate an Indian PAN card number."""
-    pan_pattern = re.compile(r"^[A-Z]{5}[0-9]{4}[A-Z]$")
-    return bool(pan_pattern.match(pan_number))
-
-def validate_aadhar(aadhar_number):
-    """Validate an Indian Aadhar number."""
-    # Remove any spaces
-    stripped_aadhar = re.sub(r"\s", "", aadhar_number)
+def is_valid_name(name):
+    """
+    Validate name format.
     
-    # Check if the result is a 12-digit number
-    aadhar_pattern = re.compile(r"^\d{12}$")
-    return bool(aadhar_pattern.match(stripped_aadhar))
+    Args:
+        name: The name to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not name:
+        return False
+        
+    # Name should be 2-50 characters, letters, spaces, hyphens, and apostrophes
+    pattern = r'^[A-Za-z\s\-\']{2,50}$'
+    return bool(re.match(pattern, str(name)))
 
-def validate_ifsc(ifsc_code):
-    """Validate an Indian IFSC code."""
-    ifsc_pattern = re.compile(r"^[A-Z]{4}0[A-Z0-9]{6}$")
-    return bool(ifsc_pattern.match(ifsc_code))
-
-def validate_date_format(date_str, format="%Y-%m-%d"):
-    """Validate a date string format."""
+def is_valid_date(date_str, format="%Y-%m-%d"):
+    """
+    Validate date format.
+    
+    Args:
+        date_str: The date string to validate
+        format: The expected date format
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not date_str:
+        return False
+        
     try:
-        datetime.datetime.strptime(date_str, format)
+        datetime.strptime(str(date_str), format)
         return True
     except ValueError:
         return False
 
-def validate_age(dob, min_age=18):
-    """Validate if a person is above the minimum age."""
-    try:
-        # Try to use dateutil if available
-        from dateutil.relativedelta import relativedelta
-        today = datetime.date.today()
-        age = relativedelta(today, dob).years
-        return age >= min_age
-    except ImportError:
-        # Fallback to approximate calculation
-        today = datetime.date.today()
-        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-        return age >= min_age
-
-def validate_card_number(card_number):
-    """Validate a credit/debit card number using the Luhn algorithm."""
+def is_valid_card_number(card_number):
+    """
+    Validate credit/debit card number using Luhn algorithm.
+    
+    Args:
+        card_number: The card number to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not card_number:
+        return False
+        
     # Remove spaces and dashes
-    card_number = re.sub(r"[\s\-]", "", card_number)
+    card_number = re.sub(r'[\s\-]', '', str(card_number))
     
-    # Check if the input contains only digits
-    if not card_number.isdigit():
+    # Check if all digits and proper length (13-19 digits)
+    if not re.match(r'^[0-9]{13,19}$', card_number):
         return False
     
-    # Check length (most card numbers are between 13 and 19 digits)
-    if not 13 <= len(card_number) <= 19:
-        return False
-    
-    # Apply Luhn algorithm
+    # Luhn algorithm
     digits = [int(d) for d in card_number]
     checksum = 0
+    odd_even = len(digits) % 2
     
-    for i, digit in enumerate(reversed(digits)):
-        if i % 2 == 1:
-            digit *= 2
-            if digit > 9:
-                digit -= 9
-        checksum += digit
+    for i, digit in enumerate(digits):
+        if ((i + odd_even) % 2) == 0:
+            doubled = digit * 2
+            checksum += doubled if doubled < 10 else doubled - 9
+        else:
+            checksum += digit
     
     return checksum % 10 == 0
 
-def validate_cvv(cvv):
-    """Validate a CVV/CVC code."""
-    # CVV should be 3 or 4 digits
-    cvv_pattern = re.compile(r"^\d{3,4}$")
-    return bool(cvv_pattern.match(cvv))
+def is_valid_cvv(cvv):
+    """
+    Validate CVV code.
+    
+    Args:
+        cvv: The CVV to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not cvv:
+        return False
+        
+    # CVV should be 3-4 digits
+    pattern = r'^[0-9]{3,4}$'
+    return bool(re.match(pattern, str(cvv)))
 
-def validate_account_number(account_number):
-    """Validate a bank account number."""
-    # Maintain backward compatibility with legacy code
-    return account_number.isdigit() and len(account_number) in [10, 12, 14, 16, 18]
+def is_valid_pin(pin):
+    """
+    Validate PIN code.
+    
+    Args:
+        pin: The PIN to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not pin:
+        return False
+        
+    # PIN should be 4-6 digits
+    pattern = r'^[0-9]{4,6}$'
+    return bool(re.match(pattern, str(pin)))
 
-def validate_password_strength(password):
-    """Validate password strength."""
-    issues = []
+def is_valid_amount_range(amount, min_amount=0.01, max_amount=None):
+    """
+    Validate that the amount is within the specified range.
     
-    if len(password) < 8:
-        issues.append("Password must be at least 8 characters long")
-    
-    if not re.search(r"[A-Z]", password):
-        issues.append("Password must include at least one uppercase letter")
-    
-    if not re.search(r"[a-z]", password):
-        issues.append("Password must include at least one lowercase letter")
-    
-    if not re.search(r"[0-9]", password):
-        issues.append("Password must include at least one digit")
-    
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        issues.append("Password must include at least one special character")
-    
-    if issues:
-        return False, issues
-    
-    return True, ["Password meets strength requirements"]
-
-def validate_pin(pin):
-    """Validate a PIN."""
-    # PIN should be 4 or 6 digits
-    return pin.isdigit() and len(pin) in [4, 6]
-
-def validate_transaction_amount(amount, min_amount=1.0, max_amount=None):
-    """Validate a transaction amount."""
+    Args:
+        amount: The amount to validate
+        min_amount: Minimum allowed amount (default: 0.01)
+        max_amount: Maximum allowed amount (default: None, no upper limit)
+        
+    Returns:
+        bool: True if valid, False otherwise
+        
+    Raises:
+        ValueError: If the amount is not a valid number or outside the range
+        TypeError: If the amount cannot be converted to float
+    """
     try:
         amount = float(amount)
         
         if amount < min_amount:
-            return False
+            raise ValueError(f"Amount must be at least {min_amount}")
         
         if max_amount is not None and amount > max_amount:
-            return False
+            raise ValueError(f"Amount must not exceed {max_amount}")
         
         return True
-    except (ValueError, TypeError):
-        return False
+    except ValueError as e:
+        logger.warning(f"Invalid amount value: {e}")
+        raise
+    except TypeError as e:
+        logger.warning(f"Invalid amount type: {e}")
+        raise TypeError(f"Amount must be a number, got {type(amount).__name__}")
+
+def validate_amount(amount):
+    """
+    Validate that the amount is a positive number.
+    
+    Args:
+        amount: The amount to validate
+        
+    Returns:
+        bool: True if valid, False otherwise
+        
+    Raises:
+        ValueError: If the amount is not positive
+        TypeError: If the amount cannot be converted to float
+    """
+    try:
+        amount = float(amount)
+        if amount <= 0:
+            raise ValueError("Amount must be greater than zero.")
+        return True
+    except ValueError as e:
+        logger.warning(f"Validation error: {e}")
+        raise
+    except TypeError as e:
+        logger.warning(f"Type error in validation: {e}")
+        raise TypeError(f"Amount must be a number, got {type(amount).__name__}")
 
 def is_valid_user_input(user_input, input_type):
-    if input_type == 'email':
-        return is_valid_email(user_input)
-    elif input_type == 'phone':
-        return is_valid_phone(user_input)
-    elif input_type == 'account_number':
-        return is_valid_account_number(user_input)
-    elif input_type == 'amount':
-        return is_valid_amount(user_input)
-    elif input_type == 'pin':
-        return is_valid_pin(user_input)
-    return False
+    """
+    Validates user input based on input type.
+    
+    Args:
+        user_input: The user input to validate
+        input_type: Type of input to validate ('email', 'phone', 'name', etc.)
+        
+    Returns:
+        bool: True if input is valid, False otherwise
+        
+    Raises:
+        ValueError: If the input_type is unrecognized or the validation fails with specific details
+        TypeError: If the input is of incorrect type for the validation
+    """
+    try:
+        if input_type == 'email':
+            return is_valid_email(user_input)
+        elif input_type == 'phone':
+            return is_valid_phone(user_input)
+        elif input_type == 'account_number':
+            return is_valid_account_number(user_input)
+        elif input_type == 'amount':
+            return validate_amount(user_input)
+        elif input_type == 'pin':
+            return is_valid_pin(user_input)
+        else:
+            raise ValueError(f"Unrecognized input type: '{input_type}'")
+    except ValueError as e:
+        # Handle validation-specific errors
+        logger.error(f"Validation error ({input_type}): {str(e)}")
+        raise
+    except TypeError as e:
+        # Handle type errors
+        logger.error(f"Type error in validation ({input_type}): {str(e)}")
+        raise TypeError(f"Invalid type for {input_type} validation: {str(e)}")
+    except Exception as e:
+        # Handle any other unexpected errors
+        logger.error(f"Unexpected error in validation ({input_type}): {str(e)}")
+        raise ValueError(f"Validation failed for {input_type}: {str(e)}")

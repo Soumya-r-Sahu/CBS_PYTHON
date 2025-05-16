@@ -1,0 +1,457 @@
+"""
+Core Banking System Import Manager (packages.py)
+
+A centralized import system for the CBS_PYTHON project. This module provides 
+utilities to handle imports across the system without modifying sys.path in
+multiple files.
+
+This centralized middleware handles:
+1. Common imports across the system
+2. Path management for imports
+3. Fallbacks for missing modules
+4. Virtual modules when needed
+"""
+
+import sys
+import os
+import importlib
+import logging
+import inspect
+import importlib.util
+from pathlib import Path
+from types import ModuleType
+from typing import Dict, Any, List, Callable, Optional, Union, Tuple
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+class ImportManager:
+    """
+    A centralized import manager for the Core Banking System.
+    Simplifies imports across the system.
+    """
+    
+    _instance = None
+    _initialized = False
+    _module_cache = {}  # Cache for imported modules
+    _module_aliases = {
+        # Define aliases for modules (for backwards compatibility or convenience)
+        'environment': 'app.config.environment',
+        'db_connection': 'database.python.connection',
+        'database_connection': 'database.python.connection'
+    }
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ImportManager, cls).__new__(cls)
+        return cls._instance
+        
+    def __init__(self):
+        if self._initialized:
+            return
+            
+        # Get the project root directory
+        self.root_dir = self._find_project_root()
+        
+        # Map of module paths for quick access
+        self.module_paths = self._scan_module_paths()
+        
+        # Add root directory to path if not already there
+        if str(self.root_dir) not in sys.path:
+            sys.path.insert(0, str(self.root_dir))
+        
+        self._initialized = True
+        logger.info(f"Import manager initialized. Root: {self.root_dir}")
+        
+        # Register common virtual modules
+        self._register_common_virtual_modules()
+    
+    def _find_project_root(self):
+        """Find the project root directory based on key markers."""
+        # Direct path if we know it
+        direct_path = Path("d:/vs code/github/CBS_PYTHON")
+        if direct_path.exists():
+            return direct_path
+            
+        # Start from the current file
+        current_dir = Path(__file__).resolve().parent
+        
+        # Go up to find project root (max 5 levels up)
+        for _ in range(5):
+            # Check if this could be the project root
+            if (current_dir / "main.py").exists() and (current_dir / "README.md").exists():
+                return current_dir
+            
+            # Move up one directory
+            parent = current_dir.parent
+            if parent == current_dir:  # Reached filesystem root
+                break
+            current_dir = parent
+        
+        # Fallback: return 2 levels up from this file
+        return Path(__file__).resolve().parent.parent.parent
+    
+    def _scan_module_paths(self):
+        """Scan the project for modules and map their paths."""
+        module_paths = {}
+        
+        # Add first-level directories as potential modules
+        for item in self.root_dir.iterdir():
+            if item.is_dir() and not item.name.startswith('.') and not item.name.startswith('__'):
+                module_paths[item.name] = item
+        
+        return module_paths
+    
+    def _register_common_virtual_modules(self):
+        """Register common virtual modules for fallback."""
+        # Environment module
+        env_module = ModuleType('app.config.environment')
+        env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
+        debug_mode = os.environ.get("CBS_DEBUG", "true").lower() in ("true", "1", "yes")
+        
+        # Add environment functions
+        env_module.is_production = lambda: env_str == "production"
+        env_module.is_development = lambda: env_str == "development"
+        env_module.is_test = lambda: env_str == "test"
+        env_module.is_debug_enabled = lambda: debug_mode and env_str != "production"
+        env_module.get_environment_name = lambda: env_str
+        
+        # Add Environment class
+        class Environment:
+            DEVELOPMENT = "development"
+            TEST = "test"
+            PRODUCTION = "production"
+        
+        env_module.Environment = Environment
+        env_module.current_env = env_str
+        env_module.debug_mode = debug_mode
+        
+        # Register the module
+        env_module.__virtual__ = True
+        env_module.__file__ = "<virtual module app.config.environment>"
+        self._module_cache['app.config.environment'] = env_module
+    
+    def import_module(self, name, fallback=None):
+        """
+        Import a module with fallback support.
+        
+        Args:
+            name: The name of the module to import
+            fallback: A fallback module or function if import fails
+            
+        Returns:
+            The imported module or fallback
+        """
+        # Check the cache first
+        cached_module = self.get_cached_module(name)
+        if cached_module:
+            return cached_module
+            
+        # Check for aliases
+        if name in self._module_aliases:
+            alias_name = self._module_aliases[name]
+            try:
+                module = importlib.import_module(alias_name)
+                self._module_cache[name] = module  # Cache both the alias and real name
+                self._module_cache[alias_name] = module
+                return module
+            except ImportError:
+                pass
+        
+        # Standard import attempt
+        try:
+            module = importlib.import_module(name)
+            self._module_cache[name] = module  # Cache the module
+            return module
+        except ImportError as e:
+            logger.warning(f"Could not import '{name}': {e}")
+            
+            # Use provided fallback if available
+            if fallback is not None:
+                logger.info(f"Using fallback for '{name}'")
+                return fallback
+                
+            # Try common fallbacks for well-known modules
+            if name == 'app.config.environment':
+                # Special handling for environment module
+                env_module = ModuleType('app.config.environment')
+                env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
+                debug_mode = os.environ.get("CBS_DEBUG", "true").lower() in ("true", "1", "yes")
+                
+                env_module.is_production = lambda: env_str == "production"
+                env_module.is_development = lambda: env_str == "development"
+                env_module.is_test = lambda: env_str == "test"
+                env_module.is_debug_enabled = lambda: debug_mode and env_str != "production"
+                env_module.get_environment_name = lambda: env_str
+                
+                class Environment:
+                    DEVELOPMENT = "development"
+                    TEST = "test"
+                    PRODUCTION = "production"
+                
+                env_module.Environment = Environment
+                env_module.current_env = env_str
+                env_module.debug_mode = debug_mode
+                
+                self._module_cache[name] = env_module
+                logger.info(f"Created fallback environment module for '{name}'")
+                return env_module
+            
+            # Try to create a minimal module for other cases
+            minimal_module = self._create_minimal_module(name)
+            self._module_cache[name] = minimal_module  # Cache the minimal module
+            return minimal_module
+    
+    def _create_minimal_module(self, name):
+        """Create a minimal empty module as fallback."""
+        module = ModuleType(name)
+        module.__file__ = f"<virtual module {name}>"
+        module.__package__ = name.partition('.')[0]
+        module.__path__ = []
+        module.__name__ = name
+        
+        # Add a warning to indicate this is a virtual module
+        module.__virtual__ = True
+        
+        sys.modules[name] = module
+        return module
+    
+    def import_from(self, module_name, item_names):
+        """
+        Import specific items from a module with fallback.
+        
+        Args:
+            module_name: The name of the module to import from
+            item_names: List of item names to import
+            
+        Returns:
+            Dictionary mapping item names to their imported values
+        """
+        try:
+            module = self.import_module(module_name)
+            result = {}
+            for item in item_names:
+                if hasattr(module, item):
+                    result[item] = getattr(module, item)
+                else:
+                    logger.warning(f"Item '{item}' not found in module '{module_name}'")
+            return result
+        except ImportError:
+            logger.error(f"Could not import items {item_names} from '{module_name}'")
+            return {}
+    
+    def get_cached_module(self, name):
+        """Get a module from cache or import it."""
+        if name in self._module_cache:
+            return self._module_cache[name]
+        
+        # Check for aliases
+        if name in self._module_aliases:
+            alias_name = self._module_aliases[name]
+            if alias_name in self._module_cache:
+                return self._module_cache[alias_name]
+            
+            # Try to import the alias
+            try:
+                module = importlib.import_module(alias_name)
+                self._module_cache[name] = module
+                self._module_cache[alias_name] = module
+                return module
+            except ImportError:
+                pass
+        
+        # Not found in cache, try to import
+        try:
+            module = importlib.import_module(name)
+            self._module_cache[name] = module
+            return module
+        except ImportError:
+            return None
+    
+    def fix_path(self):
+        """
+        Ensure the sys.path is correctly configured for the project.
+        This adds the project root to sys.path once.
+        """
+        # Make sure the root directory is in path
+        if str(self.root_dir) not in sys.path:
+            sys.path.insert(0, str(self.root_dir))
+            logger.info(f"Added project root to sys.path: {self.root_dir}")
+            
+    def get_submodule_from_caller(self, submodule_path):
+        """
+        Get a submodule relative to the caller's module.
+        
+        Args:
+            submodule_path: Relative submodule path (e.g. '.config')
+            
+        Returns:
+            The imported submodule or None
+        """
+        # Get caller's frame
+        frame = inspect.currentframe().f_back.f_back
+        caller_module = inspect.getmodule(frame)
+        
+        if not caller_module:
+            return None
+        
+        # Get caller's module name
+        caller_name = caller_module.__name__
+        
+        # Build the full module name
+        if submodule_path.startswith('.'):
+            parts = caller_name.split('.')
+            if submodule_path.startswith('..'):
+                # Go up one level
+                parent_module = '.'.join(parts[:-1])
+                submodule_path = submodule_path[2:]
+                if submodule_path.startswith('.'):
+                    # More levels up
+                    count = 3
+                    while submodule_path.startswith('.'):
+                        parts = parts[:-1]
+                        submodule_path = submodule_path[1:]
+                        count += 1
+                    parent_module = '.'.join(parts)
+                full_name = f"{parent_module}{submodule_path}"
+            else:
+                # Same level, different module
+                full_name = f"{caller_name}{submodule_path}"
+        else:
+            # Absolute import
+            full_name = submodule_path
+        
+        return self.import_module(full_name)
+    
+    def get_module_attributes(self, module_name):
+        """Get all non-private attributes from a module."""
+        module = self.import_module(module_name)
+        if not module:
+            return {}
+            
+        return {
+            name: getattr(module, name)
+            for name in dir(module)
+            if not name.startswith('_')
+        }
+
+
+# Create a singleton instance
+import_manager = ImportManager()
+
+# ======================================================================
+# CONVENIENCE FUNCTIONS
+# ======================================================================
+
+def import_module(name, fallback=None):
+    """Import a module with fallback support."""
+    return import_manager.import_module(name, fallback)
+
+def fix_path():
+    """Fix the sys.path to include project root."""
+    import_manager.fix_path()
+
+def get_root():
+    """Get the project root directory."""
+    return import_manager.root_dir
+
+def import_from(module_name, *item_names):
+    """
+    Import specific items from a module with fallback.
+    
+    Example:
+        db_connection = import_from('database.python.connection', 'DatabaseConnection')['DatabaseConnection']
+    """
+    return import_manager.import_from(module_name, item_names)
+
+# ======================================================================
+# COMMON MODULE IMPORTS
+# ======================================================================
+
+# Environment functions
+def get_environment_module():
+    """
+    Get the environment module with standardized functions.
+    Centralizes environment-related imports across the system.
+    """
+    try:
+        # Try to import from app.config.environment
+        env_module = import_module('app.config.environment')
+        return env_module
+    except ImportError:
+        # Create a fallback environment module
+        try:
+            # Try to import from config
+            config_module = import_module('config')
+            if hasattr(config_module, 'is_production'):
+                return config_module
+        except ImportError:
+            pass
+        
+        # Create a minimal environment module as fallback
+        env_module = ModuleType('environment')
+        env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
+        debug_mode = os.environ.get("CBS_DEBUG", "true").lower() in ("true", "1", "yes")
+        
+        # Define necessary environment functions
+        env_module.get_environment_name = lambda: env_str
+        env_module.is_production = lambda: env_str == "production"
+        env_module.is_development = lambda: env_str == "development"
+        env_module.is_test = lambda: env_str == "test"
+        env_module.is_debug_enabled = lambda: debug_mode and env_str != "production"
+        
+        # Define Environment class for compatibility
+        class Environment:
+            DEVELOPMENT = "development"
+            TEST = "test" 
+            PRODUCTION = "production"
+        
+        env_module.Environment = Environment
+        env_module.current_env = env_str
+        env_module.debug_mode = debug_mode
+        
+        logger.warning("Created fallback environment module")
+        return env_module
+
+# Pre-load common modules
+_ENV_MODULE = get_environment_module()
+
+# Expose common environment functions directly
+is_production = _ENV_MODULE.is_production
+is_development = _ENV_MODULE.is_development  
+is_test = _ENV_MODULE.is_test
+is_debug_enabled = _ENV_MODULE.is_debug_enabled
+get_environment_name = getattr(_ENV_MODULE, 'get_environment_name', lambda: _ENV_MODULE.current_env)
+Environment = _ENV_MODULE.Environment
+
+# Database connection helper
+def get_database_connection():
+    """Get the DatabaseConnection class with fallback support."""
+    try:
+        db_module = import_module('database.python.connection')
+        return db_module.DatabaseConnection
+    except (ImportError, AttributeError):
+        # Create a minimal DatabaseConnection class
+        class FallbackDatabaseConnection:
+            def __init__(self):
+                logger.warning("Using fallback DatabaseConnection")
+                
+            def get_connection(self):
+                logger.error("Fallback DatabaseConnection cannot provide a real connection")
+                return None
+                
+            def close_connection(self, connection):
+                pass
+                
+            def transaction(self, max_retries=3, retry_delay=0.5):
+                class DummyContextManager:
+                    def __enter__(self):
+                        return (None, None)
+                    def __exit__(self, exc_type, exc_val, exc_tb):
+                        pass
+                return DummyContextManager()
+                
+        return FallbackDatabaseConnection
+
+# Initialize automatically when imported
+fix_path()

@@ -1,0 +1,3 @@
+"""
+Accounts module tests package.
+"""

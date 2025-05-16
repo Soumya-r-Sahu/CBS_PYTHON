@@ -62,7 +62,7 @@ If you're having connection issues:
 | 1 | **Check Services** | Ensure MySQL service is running in XAMPP/WAMP Control Panel |
 | 2 | **Verify Settings** | Check credentials in `utils/config.py` match your MySQL setup |
 
-## ⚙️ SQL Syntax Error in Stored Procedures <a name="sql-syntax-errors"></a>
+## ⚙️ SQL Syntax Errors <a name="sql-syntax-errors"></a>
 
 If you encounter syntax errors when importing or executing stored procedures, such as:
 
@@ -78,11 +78,6 @@ You have an error in your SQL syntax; check the manual that corresponds to your 
    ```powershell
    cd "path_to_xampp\mysql\bin"
    mysql -u root -p core_banking_system < "d:\vs code\github\CBS-python\database\fixed_procedure.sql"
-   ```
-   
-   Or using PHP:
-   ```powershell
-   php database/import_fixed_procedure.php
    ```
 
 ### Solution 2: Fix the Syntax Manually 🔍

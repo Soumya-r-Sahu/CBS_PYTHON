@@ -13,31 +13,28 @@ with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md'),
     long_description = f.read()
 
 # Package metadata
-setup(
-    name="core-banking-system",
-    version="1.0.0",
+setup(    name="core_banking_system",
+    version="1.1.0",
     description="A Core Banking System implementation in Python",
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    author="CBS Team",
+    long_description_content_type="text/markdown",    author="CBS Team",
     author_email="example@example.com",
-    url="https://github.com/your-username/CBS-python",
-    license="MIT",
-    classifiers=[
+    url="https://github.com/your-username/CBS_PYTHON",
+    license="Apache License 2.0",    classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Financial and Insurance Industry",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Topic :: Office/Business :: Financial",
         "Topic :: Software Development :: Libraries",
-    ],
-    python_requires=">=3.9",
+    ],    python_requires=">=3.9",
     packages=find_packages(exclude=["tests", "tests.*"]),
     package_data={
         "": ["*.yaml", "*.json", "*.sql"],
+        "core_banking": ["**/*.yaml", "**/*.json", "**/*.sql"],
     },
     include_package_data=True,
     install_requires=[
@@ -61,10 +58,10 @@ setup(
         "gui": ["PyQt5>=5.15.0"],
         "postgresql": ["psycopg2-binary>=2.9.0"],
         "mysql": ["mysql-connector-python>=8.0.0"],
-    },
-    entry_points={
+    },    entry_points={
         "console_scripts": [
             "cbs=app.bin.cli:main",
+            "cbs-init=init_system:main",
         ],
     },
     zip_safe=False,

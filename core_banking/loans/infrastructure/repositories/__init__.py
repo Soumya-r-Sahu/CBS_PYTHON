@@ -1,0 +1,3 @@
+"""
+Loans infrastructure repositories initialization
+"""

@@ -12,7 +12,8 @@ import sys
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from database.connection import DatabaseConnection
+from utils.lib.packages import import_module
+            DatabaseConnection = import_module("database.python.connection").DatabaseConnection
 from database.db_manager import get_db_session
 
 # Import workflow utilities

@@ -1,0 +1,3 @@
+"""
+Database Python module initialization
+"""

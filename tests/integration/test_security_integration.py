@@ -12,7 +12,17 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
 # Add project root to path to be able to import modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+# Use centralized import manager
+try:
+    from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment
+    fix_path()  # Ensures the project root is in sys.path
+except ImportError:
+    # Fallback for when the import manager is not available
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))  # Adjust levels as needed
+
 
 # Import security components
 from security import (

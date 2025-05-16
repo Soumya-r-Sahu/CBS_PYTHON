@@ -7,11 +7,19 @@ Direct all new imports to the root config.py file.
 """
 
 import sys
-import os
-from pathlib import Path
 
 # Add the parent directory to sys.path to ensure we can import from the root
-sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Use centralized import manager
+try:
+    from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment
+    fix_path()  # Ensures the project root is in sys.path
+except ImportError:
+    # Fallback for when the import manager is not available
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))  # Adjust levels as needed
+
 
 # Import everything from the main config file
 from config import *

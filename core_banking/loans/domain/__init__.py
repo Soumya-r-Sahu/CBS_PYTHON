@@ -1,0 +1,3 @@
+"""
+Loans module initialization
+"""

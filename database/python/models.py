@@ -184,21 +184,22 @@ class TransactionStatus(enum.Enum):
 class Customer(Base):
     __tablename__ = 'cbs_customers'
     
-    customer_id = Column(String(20), primary_key=True)
+    customer_id = Column(String(20), primary_key=True, 
+                       comment="Format: YYDDD-BBBBB-SSSS (YY=year, DDD=day of year, BBBBB=branch, SSSS=sequence)")
     name = Column(String(100), nullable=False)
     dob = Column(Date, nullable=False)
     address = Column(String(255), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     phone = Column(String(20), nullable=False)
     status = Column(Enum(CustomerStatus), nullable=False, default=CustomerStatus.ACTIVE)
-    registration_date = Column(DateTime, default=datetime.datetime.utcnow)
+    registration_date = Column(DateTime, default=datetime.datetime.utcnow())
     kyc_status = Column(Enum(KYCStatus), nullable=False, default=KYCStatus.PENDING)
     kyc_expiry_date = Column(Date)
     pan_number = Column(String(10))
     aadhar_number = Column(String(12))
     customer_segment = Column(Enum(CustomerSegment), nullable=False, default=CustomerSegment.RETAIL)
     credit_score = Column(Integer)
-    last_updated = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    last_updated = Column(DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow())
     risk_category = Column(Enum(RiskCategory), default=RiskCategory.MEDIUM)
     fatca_compliance = Column(Boolean, default=False)
     consent_marketing = Column(Boolean, default=False)
@@ -214,16 +215,18 @@ class Customer(Base):
 class Account(Base):
     __tablename__ = 'cbs_accounts'
     
-    account_number = Column(String(20), primary_key=True)
+    account_number = Column(String(20), primary_key=True, 
+                          comment="Format: BBBBB-AATT-CCCCCC-CC (BBBBB=branch, AA=account type, TT=subtype, CCCCCC=customer, CC=checksum)")
     customer_id = Column(String(20), ForeignKey('cbs_customers.customer_id'), nullable=False)
     account_type = Column(Enum(AccountType), nullable=False)
     branch_code = Column(String(20), nullable=False)
-    ifsc_code = Column(String(20), nullable=False)
-    opening_date = Column(DateTime, default=datetime.datetime.utcnow)
+    ifsc_code = Column(String(20), nullable=False, 
+                     comment="Format: AAAA0CCDDD (AAAA=bank code, 0=reserved, CC=city code, DDD=branch code)")
+    opening_date = Column(DateTime, default=datetime.datetime.utcnow())
     balance = Column(DECIMAL(12,2), nullable=False, default=0.00)
     interest_rate = Column(DECIMAL(5,2))
     status = Column(Enum(AccountStatus), nullable=False, default=AccountStatus.ACTIVE)
-    last_transaction = Column(DateTime, default=datetime.datetime.utcnow)
+    last_transaction = Column(DateTime, default=datetime.datetime.utcnow())
     nominee_name = Column(String(100))
     nominee_relation = Column(String(50))
     service_charges_applicable = Column(Boolean, default=True)
@@ -236,7 +239,7 @@ class Account(Base):
     sweep_out_facility = Column(Boolean, default=False)
     sweep_account = Column(String(20))
     auto_renewal = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow())
     closing_date = Column(DateTime)
     closing_reason = Column(String(255))
     
@@ -283,7 +286,8 @@ class Card(Base):
 class Transaction(Base):
     __tablename__ = 'cbs_transactions'
     
-    transaction_id = Column(String(36), primary_key=True)
+    transaction_id = Column(String(36), primary_key=True, 
+                          comment="Format: TRX-YYYYMMDD-SSSSSS (TRX=prefix, YYYYMMDD=date, SSSSSS=sequence)")
     card_number = Column(String(20), ForeignKey('cbs_cards.card_number'), nullable=True)
     account_number = Column(String(20), ForeignKey('cbs_accounts.account_number'), nullable=False)
     transaction_type = Column(Enum(TransactionType), nullable=False)
@@ -292,10 +296,11 @@ class Transaction(Base):
     currency = Column(String(3), default="INR")
     balance_before = Column(DECIMAL(12,2), nullable=False)
     balance_after = Column(DECIMAL(12,2), nullable=False)
-    transaction_date = Column(DateTime, default=datetime.datetime.utcnow)
+    transaction_date = Column(DateTime, default=datetime.datetime.utcnow())
     value_date = Column(Date, nullable=False)
     status = Column(Enum(TransactionStatus), nullable=False, default=TransactionStatus.PENDING)
-    reference_number = Column(String(50))
+    reference_number = Column(String(50),
+                            comment="Format: REF-YYMMDD-NNNNNNNN (YYMMDD=date, NNNNNNNN=sequence)")
     remarks = Column(String(255))
     transaction_location = Column(String(255))
     merchant_category_code = Column(String(4))
@@ -326,7 +331,7 @@ class DailyWithdrawal(Base):
     card_number = Column(String(20), ForeignKey('cbs_cards.card_number'), nullable=False)
     amount = Column(DECIMAL(10,2), nullable=False)
     withdrawal_date = Column(Date, nullable=False)
-    withdrawal_time = Column(DateTime, default=datetime.datetime.utcnow)
+    withdrawal_time = Column(DateTime, default=datetime.datetime.utcnow())
     atm_id = Column(String(20))
     location = Column(String(255))
     status = Column(String(20), nullable=False, default='COMPLETED')
@@ -349,7 +354,7 @@ class BillPayment(Base):
     consumer_id = Column(String(50), nullable=False)
     bill_amount = Column(DECIMAL(12,2), nullable=False)
     due_date = Column(Date)
-    payment_date = Column(DateTime, default=datetime.datetime.utcnow)
+    payment_date = Column(DateTime, default=datetime.datetime.utcnow())
     payment_channel = Column(String(20), nullable=False)
     status = Column(String(20), nullable=False, default='PENDING')
     receipt_number = Column(String(50))
@@ -378,7 +383,7 @@ class Transfer(Base):
     beneficiary_ifsc = Column(String(20))
     transfer_type = Column(String(20), nullable=False)
     amount = Column(DECIMAL(12,2), nullable=False)
-    transfer_date = Column(DateTime, default=datetime.datetime.utcnow)
+    transfer_date = Column(DateTime, default=datetime.datetime.utcnow())
     processing_date = Column(DateTime)
     status = Column(String(20), nullable=False, default='INITIATED')
     reference_number = Column(String(50))
@@ -412,7 +417,8 @@ class AdminUser(Base):
     mobile = Column(String(20), nullable=False)
     department = Column(String(50), nullable=False)
     branch_code = Column(String(20), nullable=False)
-    employee_id = Column(String(20), nullable=False, unique=True)
+    employee_id = Column(String(12), nullable=False, unique=True, 
+                       comment="Format: ZZBB-DD-EEEE (ZZ=zone code, BB=branch code, DD=designation, EEEE=sequence)")
     role = Column(String(50), nullable=False)
     status = Column(String(50), nullable=False, default='PENDING_ACTIVATION')
     password_expiry_date = Column(Date, nullable=False)
@@ -421,9 +427,9 @@ class AdminUser(Base):
     last_login = Column(DateTime)
     last_password_change = Column(DateTime)
     access_level = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow())
     created_by = Column(String(20))
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow())
     updated_by = Column(String(20))
     requires_2fa = Column(Boolean, default=True)
     two_fa_method = Column(String(20), default='SMS')
@@ -460,7 +466,7 @@ class MobileUser(Base):
     status = Column(String(20), default='PENDING_ACTIVATION')
     failed_login_attempts = Column(Integer, default=0)
     last_login = Column(DateTime)
-    registered_at = Column(DateTime, default=datetime.datetime.utcnow)
+    registered_at = Column(DateTime, default=datetime.datetime.utcnow())
     last_activity = Column(DateTime)
     preferred_language = Column(String(10), default='en')
     notification_preferences = Column(Text)
@@ -487,7 +493,7 @@ def initialize_database():
         # Create all tables defined in the models
         Base.metadata.create_all(engine)
         print("Database tables created successfully")
-          # Create an admin user if it doesn't exist
+        # Create an admin user if it doesn't exist
         session = SessionLocal()
         admin_exists = session.query(AdminUser).filter_by(username="admin").first()
         

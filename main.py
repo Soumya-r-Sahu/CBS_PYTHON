@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Core Banking System (CBS) - Main application entry point
 
@@ -11,40 +12,191 @@ import argparse
 import logging
 from pathlib import Path
 
-# Add parent directory to path so we can import our modules
-sys.path.insert(0, str(Path(__file__).parent))
+# Add project root to path to ensure app modules can be imported correctly
+project_root = Path(__file__).resolve().parent
 
+# Use centralized import manager with proper error handling
 try:
-    from app.lib.logging_utils import get_info_logger, get_error_logger
+    from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment, get_database_connection
+    fix_path()  # Ensures the project root is in sys.path
 except ImportError:
-    # Fallback if the new structure isn't fully implemented
-    logging.basicConfig(level=logging.INFO, 
-                      format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    get_info_logger = lambda name: logging.getLogger(name)
-    get_error_logger = lambda name: logging.getLogger(name)
+    # Fallback for when the import manager is not available
+    sys.path.insert(0, str(project_root))  # Use current directory as root
+    print("Warning: Centralized import manager not available. Using direct path modification.")
+
+# Note: Import handling for hyphenated directories has been removed
+# as there are no hyphenated directories being imported in this file
+
+# Import colorama safely
+try:
+    from colorama import init, Fore, Style
+    # Initialize colorama
+    init(autoreset=True)
+except ImportError:
+    # Create fallback if colorama is not available
+    class DummyColorama:
+        def __init__(self): pass
+        def __str__(self): return ""
+    
+    class DummyStyle:
+        RESET_ALL = ""
+    
+    class DummyFore:
+        BLACK = ""
+        RED = ""
+        GREEN = ""
+        YELLOW = ""
+        BLUE = ""
+        MAGENTA = ""
+        CYAN = ""
+        WHITE = ""
+    
+    Fore = DummyFore()
+    Style = DummyStyle()
+    
+    def init(autoreset=False): pass
+    
+    print("Warning: Colorama not available. Terminal colors disabled.")
+
+# Import environment functions directly from utils/lib/packages
+# We already imported these above, so we can use them directly
+# is_production, is_development, is_test, is_debug_enabled are already imported
+
+# Define additional environment functions for backward compatibility
+def get_environment():
+    """Get the current environment."""
+    if is_production():
+        return Environment.PRODUCTION
+    elif is_test():
+        return Environment.TEST
+    else:
+        return Environment.DEVELOPMENT
+
+def get_environment_name():
+    """Get the current environment name as a string."""
+    return get_environment()
+
+def is_testing():
+    """Alias for is_test()."""
+    return is_test()
+
+# Set up logging utilities
+# Create simple versions that can be used throughout the application
+def get_info_logger(name):
+    """Get a logger for info messages."""
+    import logging
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    return logger
+
+def get_error_logger(name):
+    """Get a logger for error messages."""
+    import logging
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.ERROR)
+    return logger
+
+def configure_root_logger():
+    """Configure the root logger."""
+    import logging
+    import os
+    from pathlib import Path
+    
+    # Create logs directory if it doesn't exist
+    log_dir = Path(__file__).parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    
+    # Configure root logger
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_dir / "cbs.log"),
+            logging.StreamHandler()
+        ]
+    )
+
+# Set up environment color
+if is_production():
+    ENV_COLOR = Fore.RED
+    ENV_NAME = "PRODUCTION"
+elif is_testing() or is_test():
+    ENV_COLOR = Fore.YELLOW
+    ENV_NAME = "TESTING"
+else:
+    ENV_COLOR = Fore.GREEN
+    ENV_NAME = "DEVELOPMENT"
 
 # Set up logger
 logger = get_info_logger(__name__)
 error_logger = get_error_logger(__name__)
 
+# Configure root logger
+configure_root_logger()
+
 # Try to import from new structure, fall back to old structure if needed
 try:
-    from database.db_manager import DatabaseManager, Base
+    # Try to import from the core_banking structure first
+    from core_banking.database.models import Base, Account, Customer, Transaction, Card
+    from core_banking.database.db_helper import execute_query, execute_transaction
     
-    # Try to import new model structure
+    class DatabaseManager:
+        def __init__(self):
+            pass
+        def create_tables(self, base):
+            print(f"{Fore.GREEN}Using Core Banking structure for database.")
+            return True
+    
+    NEW_STRUCTURE = True
+except ImportError:
+    # Fall back to old structure
     try:
-        from app.models.models import Customer, Account, Transaction, Card
-        NEW_STRUCTURE = True
+        # Try to import from the legacy structure
+        from database.python.db_manager import DatabaseManager, Base
+        
+        # Try to import new model structure
+        try:
+            from app.models.models import Customer, Account, Transaction, Card
+            NEW_STRUCTURE = True
+        except ImportError:
+            # Fall back to old structure
+            from database.python.models import initialize_database
+            from database.python.connection import DatabaseConnection
+            NEW_STRUCTURE = False
     except ImportError:
-        # Fall back to old structure
-        from database.models import initialize_database
-        from database.connection import DatabaseConnection
-        NEW_STRUCTURE = False
+        print(f"{Fore.YELLOW}Warning: Could not import database modules. Using fallbacks.")
         
 except ImportError:
     # Fall back to old structure completely
-    from database.models import initialize_database
-    from database.connection import DatabaseConnection
+    try:
+        from database.python.models import initialize_database
+        from database.python.connection import DatabaseConnection
+    except ImportError:
+        # Create placeholder functions if modules cannot be found
+        print("WARNING: Database modules not found. Using placeholder implementations.")
+        
+        class DatabaseConnection:
+            def __init__(self):
+                pass
+            def get_connection(self):
+                return None
+            def close_connection(self):
+                pass
+                
+        def initialize_database():
+            return False
+            
+        class Base:
+            """SQLAlchemy Base class placeholder"""
+            pass
+            
+        class DatabaseManager:
+            def __init__(self):
+                pass
+            def create_tables(self, base):
+                print("WARNING: Placeholder database manager cannot create tables.")
+                return False
+                
     NEW_STRUCTURE = False
 
 # Define UI component variables to prevent undefined errors
@@ -70,7 +222,7 @@ except ImportError as e:
     import_errors['AdminDashboard'] = str(e)
 
 try:
-    from upi.upi_registration import UpiRegistration
+    from payments.upi.upi_registration import UpiRegistration
 except ImportError as e:
     logger.warning(f"Failed to import UpiRegistration: {e}")
     import_errors['UpiRegistration'] = str(e)
@@ -87,12 +239,11 @@ if CustomerDashboard is None:
         def __init__(self):
             self.user_info = {}
             self.account_summary = {'Balance': '100,000.00', 'Account Type': 'Savings', 'Status': 'Active'}
-        
         def show(self):
-            print("\n===== Core Banking System - Customer Dashboard (DEMO MODE) =====")
-            print("This is running in demo mode with limited functionality.")
+            print(f"\n{Fore.CYAN}===== Core Banking System - Customer Dashboard (DEMO MODE) ====={Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}⚠️ This is running in demo mode with limited functionality.{Style.RESET_ALL}")
             if import_errors.get('CustomerDashboard'):
-                print(f"Import error: {import_errors['CustomerDashboard']}")
+                print(f"{Fore.RED}❌ Import error: {import_errors['CustomerDashboard']}{Style.RESET_ALL}")
             
             while True:
                 print("\nPlease select an option:")
@@ -445,8 +596,18 @@ def main():
     
     args = parse_args()
     
-    logger.info("Starting Core Banking System")
-    print("Core Banking System - Starting...")
+    # Display environment banner
+    env_banner = f"""
+    {ENV_COLOR}╔═══════════════════════════════════════════════════════════════╗
+    ║ CORE BANKING SYSTEM                                         ║
+    ║ Environment: {ENV_NAME.ljust(20)}                              ║
+    ║ Debug Mode: {"ENABLED" if is_debug_enabled() else "DISABLED".ljust(20)}                             ║
+    ╚═══════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
+    """
+    print(env_banner)
+    
+    logger.info(f"Starting Core Banking System in {ENV_NAME} environment")
+    print(f"Core Banking System - Starting in {ENV_COLOR}{ENV_NAME}{Style.RESET_ALL} environment...")
     
     # Check for missing dependencies
     missing_deps = []

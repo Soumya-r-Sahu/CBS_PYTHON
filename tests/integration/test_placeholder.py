@@ -4,7 +4,7 @@ This file is a placeholder for an integration test file. Replace it with actual 
 Example:
 ```python
 import unittest
-from database.connection import DatabaseConnection
+from database.python.connection import DatabaseConnection
 
 class TestDatabaseConnection(unittest.TestCase):
     def test_database_connection(self):

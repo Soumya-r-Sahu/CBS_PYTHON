@@ -8,11 +8,19 @@ in an end-to-end scenario that simulates real user behavior.
 import requests
 import json
 import time
-import sys
-import os
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+# Use centralized import manager
+try:
+    from utils.lib.packages import fix_path, import_module
+    fix_path()  # Ensures the project root is in sys.path
+except ImportError:
+    # Fallback for when the import manager is not available
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))  # Adjust levels as needed
+
 
 from tests.integration.test_upi_api import (
     get_auth_token, 

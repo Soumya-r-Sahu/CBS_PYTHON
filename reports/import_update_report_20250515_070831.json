@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-05-15T07:08:31.797800",
+  "project_root": "D:\\vs code\\github\\CBS_PYTHON",
+  "total_files_scanned": 377,
+  "files_with_sys_path": 79,
+  "active_sys_path_modifications": 79,
+  "commented_sys_path_modifications": 0,
+  "updated_files": 0,
+  "files_detail": [
+    {
+      "file": "config.py",
+      "status": "active",
+      "uses_import_manager": true,
+      "sys_path_modifications": [
+        "sys.path.insert(0, str(Path(__file__)"
+      ],
+      "updated": 

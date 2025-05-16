@@ -1,0 +1,3 @@
+"""
+Loans application interfaces initialization
+"""

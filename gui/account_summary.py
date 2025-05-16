@@ -1,3 +1,7 @@
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 class AccountSummary:
     def __init__(self, user_id, database_connection):
         self.user_id = user_id

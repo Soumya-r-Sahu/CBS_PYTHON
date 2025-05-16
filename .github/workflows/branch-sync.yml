@@ -10,6 +10,8 @@ on:
 jobs:
   sync-to-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,6 +27,6 @@ jobs:
       - name: Merge develop into test
         run: |
           git checkout test
-          git merge develop --no-commit --no-ff || echo "Merge conflicts detected."
+          git merge develop --no-commit --no-ff --allow-unrelated-histories || echo "Merge conflicts detected."
           git commit -m "Automated sync from develop to test" || echo "Nothing to commit."
           git push origin test

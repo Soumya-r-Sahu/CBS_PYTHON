@@ -14,7 +14,17 @@ import time
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Use centralized import manager
+try:
+    from utils.lib.packages import fix_path, import_module
+    fix_path()  # Ensures the project root is in sys.path
+except ImportError:
+    # Fallback for when the import manager is not available
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))  # Adjust levels as needed
+
 
 def print_header(text):
     """Print a formatted header"""
@@ -29,7 +39,9 @@ def run_unit_tests(args):
     
     cmd = ["pytest", "tests/unit", "-v"]
     if args.coverage:
-        cmd.extend(["--cov=app", "--cov=database", "--cov=upi", "--cov=utils"])
+        cmd.extend(["--cov=app", "--cov=database", "--cov=upi", "--cov=utils", 
+                   "--cov=digital_channels", "--cov=risk_compliance", "--cov=loan_management", 
+                   "--cov=payment_processors", "--cov-report=html"])
     
     result = subprocess.run(cmd)
     return result.returncode == 0
@@ -40,7 +52,9 @@ def run_integration_tests(args):
     
     cmd = ["pytest", "tests/integration", "-v"]
     if args.coverage:
-        cmd.extend(["--cov=integration", "--cov-report=html"])
+        cmd.extend(["--cov=integration", "--cov=app", "--cov=database", "--cov=upi", 
+                   "--cov=digital_channels", "--cov=risk_compliance", "--cov=loan_management", 
+                   "--cov=payment_processors", "--cov-report=html"])
     
     result = subprocess.run(cmd)
     return result.returncode == 0
@@ -76,7 +90,9 @@ def run_e2e_tests(args):
     
     cmd = ["pytest", "tests/e2e", "-v"]
     if args.coverage:
-        cmd.extend(["--cov=app", "--cov=database", "--cov=upi", "--cov=utils"])
+        cmd.extend(["--cov=app", "--cov=database", "--cov=upi", "--cov=utils",
+                   "--cov=digital_channels", "--cov=risk_compliance", "--cov=loan_management", 
+                   "--cov=payment_processors", "--cov-report=html"])
         
     result = subprocess.run(cmd)
     return result.returncode == 0

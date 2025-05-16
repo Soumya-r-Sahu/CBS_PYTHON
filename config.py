@@ -11,16 +11,52 @@ Production environments should use environment variables instead of hard-coded v
 import os
 import logging
 from pathlib import Path
-from datetime import timedelta
 from dotenv import load_dotenv
+
+# Use centralized import manager
+try:
+    from utils.lib.packages import fix_path, Environment
+    fix_path()  # Ensures the project root is in sys.path
+except ImportError:
+    pass  # No fallback sys.path modification as per new guidelines
 
 # Load environment variables from .env file if it exists
 env_path = Path(__file__).parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
-# Environment-specific configuration
-ENVIRONMENT = os.environ.get("CBS_ENVIRONMENT", "development")
-DEBUG_MODE = ENVIRONMENT != "production"
+# ======================================================================
+# ENVIRONMENT SETTINGS
+# ======================================================================
+# Import environment module with proper fallback for new path structure
+try:
+    from utils.config.environment import (
+        Environment, current_env, debug_mode,
+        is_production, is_development, is_test, is_debug_enabled
+    )
+except ImportError:
+    try:
+        from app.config.environment import (
+            Environment, current_env, debug_mode,
+            is_production, is_development, is_test, is_debug_enabled
+        )
+    except ImportError:
+        class Environment:
+            DEVELOPMENT = "development"
+            TEST = "test"
+            PRODUCTION = "production"
+        env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
+        current_env = env_str
+        debug_mode = os.environ.get("CBS_DEBUG", "true").lower() in ("true", "1", "yes")
+        if env_str == "production":
+            debug_mode = False
+        def is_production(): return current_env == Environment.PRODUCTION
+        def is_development(): return current_env == Environment.DEVELOPMENT
+        def is_test(): return current_env == Environment.TEST
+        def is_debug_enabled(): return debug_mode
+
+# For backward compatibility
+ENVIRONMENT = current_env if isinstance(current_env, str) else current_env.value
+DEBUG_MODE = debug_mode
 
 # ======================================================================
 # DATABASE CONFIGURATION
@@ -203,7 +239,15 @@ SERVICE_URLS = {
 }
 
 # Initialize logging with the defined configuration
-logging.config.dictConfig(LOGGING_CONFIG)
+try:
+    import logging.config
+    logging.config.dictConfig(LOGGING_CONFIG)
+except (ImportError, AttributeError):
+    # Fallback for Python versions without dictConfig
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 logger = logging.getLogger(__name__)
 
 # Log a message on successful config loading

@@ -4,26 +4,47 @@ This directory contains the security module for the Core Banking System, which p
 
 ## Module Structure
 
-### Core Security Components
+The security module has been organized into logical categories:
+
+### Core Configuration
 
 - `__init__.py`: Module initialization and exports
-- `auth.py`: Authentication functionality including JWT token management
-- `access_control.py`: Role-based access control and permission management
-- `encryption.py`: Data encryption utilities using AES-256-CBC
-- `password_manager.py`: Secure password handling and policy enforcement
-- `mfa.py`: Multi-factor authentication with TOTP and backup codes
 - `config.py`: Centralized security configuration
 
-### Subdirectories
+### Authentication (`./authentication/`)
 
+- `auth.py`: Authentication functionality including JWT token management
+- `password_manager.py`: Secure password handling and policy enforcement
+- `mfa.py`: Multi-factor authentication with TOTP and backup codes
+- `session_manager.py`: Session handling and management
+
+### Access Control (`./access/`)
+
+- `access_control.py`: Role-based access control and permission management
+
+### Encryption (`./encryption/`)
+
+- `encryption.py`: Data encryption utilities using AES-256-CBC
 - `certificates/`: SSL/TLS certificate management
   - `certificate_manager.py`: Certificate operations and lifecycle management
   - `tls_config.py`: TLS security settings and cipher configurations
+  - `certs/`: Certificate storage
+  - `private/`: Private key storage
+  - `crl/`: Certificate revocation lists
+  - `csr/`: Certificate signing requests
 
-- `logs/`: Security logging and monitoring
-  - `audit_logger.py`: Security event audit logging
-  - `security_monitor.py`: Security incident detection and monitoring
+### Upload Security (`./upload/`)
 
+- `secure_upload.py`: Secure file upload handling with validation
+- `fixed_secure_upload.py`: Improved version of secure file upload
+
+### Security Monitoring (`./monitoring/`)
+
+- `vulnerability_scanner.py`: System vulnerability scanning utilities
+
+### API Security (`./api/`)
+
+- `api_gateway.py`: Security gateway for API endpoints
 - `middleware/`: Security middleware components
   - `auth_middleware.py`: Authentication middleware for Flask
   - `validation_middleware.py`: Request validation and sanitization
@@ -31,6 +52,8 @@ This directory contains the security module for the Core Banking System, which p
   - `security_headers.py`: Security HTTP headers
   - `cors_middleware.py`: Cross-Origin Resource Sharing protection
   - `xss_protection.py`: Cross-Site Scripting protection
+  - `csp_manager.py`: Content Security Policy management
+  - `api_security.py`: API-specific security measures
 
 ## Usage
 

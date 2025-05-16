@@ -1,0 +1,378 @@
+{
+  "timestamp": "2025-05-15 18:43:34",
+  "dry_run": true,
+  "files_analyzed": 386,
+  "files_changed": 102,
+  "changes": {
+    "config.py": [
+      "Found direct sys.path modification"
+    ],
+    "init_system.py": [
+      "Found direct sys.path modification"
+    ],
+    "main.py": [
+      "Noted 'app.lib.import_finder' import",
+      "Noted 'app.lib.logging_utils' import",
+      "Found direct sys.path modification"
+    ],
+    "run_api.py": [
+      "Noted 'app.lib.import_finder' import",
+      "Found direct sys.path modification"
+    ],
+    "analytics_bi/config.py": [
+      "Found direct sys.path modification"
+    ],
+    "analytics_bi/dashboards/admin_panel/user_management.py": [
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "analytics_bi/performance_reports/report_generator.py": [
+      "Found direct sys.path modification"
+    ],
+    "app/lib/import_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "app/lib/setup_imports.py": [
+      "Noted 'app.lib.setup_imports' import",
+      "Replaced 'import_manager' with 'utils.lib.packages'",
+      "Replaced 'import_manager' with 'utils.lib.packages'",
+      "Found direct sys.path modification"
+    ],
+    "backups/system_backups/backup_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "backups/system_backups/db_backup.py": [
+      "Found direct sys.path modification"
+    ],
+    "backups/system_backups/recovery_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "core_banking/accounts/account_processor.py": [
+      "Noted 'app.lib.notification_service' import",
+      "Noted 'app.lib.task_manager' import",
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "core_banking/accounts/account_service.py": [
+      "Found direct sys.path modification"
+    ],
+    "core_banking/database/connection.py": [
+      "Found direct sys.path modification"
+    ],
+    "core_banking/database/db_helper.py": [
+      "Found direct sys.path modification"
+    ],
+    "core_banking/database/models.py": [
+      "Found direct sys.path modification"
+    ],
+    "core_banking/transactions/transaction_processor.py": [
+      "Found direct sys.path modification"
+    ],
+    "crm/config.py": [
+      "Found direct sys.path modification"
+    ],
+    "crm/customer_database.py": [
+      "Found direct sys.path modification"
+    ],
+    "crm/campaign_management/campaign_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "crm/customer_360_view/customer_360.py": [
+      "Found direct sys.path modification"
+    ],
+    "crm/lead_management/lead_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "database/python/connection.py": [
+      "Found direct sys.path modification"
+    ],
+    "digital_channels/atm-switch/atm_interface.py": [
+      "Replaced 'app.config' with 'utils.config'",
+      "Found direct sys.path modification"
+    ],
+    "digital_channels/atm-switch/pin_change.py": [
+      "Noted 'app.lib.encryption' import"
+    ],
+    "digital_channels/atm-switch/transaction_processor.py": [
+      "Noted 'app.lib.notification_service' import",
+      "Noted 'app.lib.task_manager' import"
+    ],
+    "hr_erp/config.py": [
+      "Found direct sys.path modification"
+    ],
+    "hr_erp/employee_management/employee_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "hr_erp/leave/leave_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "hr_erp/payroll/payroll_processor.py": [
+      "Found direct sys.path modification"
+    ],
+    "hr_erp/performance/performance_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "hr_erp/recruitment/recruitment_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "integration_interfaces/api/app.py": [
+      "Noted 'app.lib.logging_utils' import"
+    ],
+    "integration_interfaces/api/backup/app_original.py": [
+      "Found direct sys.path modification"
+    ],
+    "integration_interfaces/api/controllers/auth_controller.py": [
+      "Noted 'app.lib.encryption' import"
+    ],
+    "integration_interfaces/api/controllers/card_controller.py": [
+      "Noted 'app.lib.encryption' import"
+    ],
+    "integration_interfaces/api/controllers/transaction_controller.py": [
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "integration_interfaces/api/controllers/upi_controller.py": [
+      "Noted 'app.lib.encryption' import"
+    ],
+    "integration_interfaces/api/middleware/authentication.py": [
+      "Noted 'app.lib.encryption' import"
+    ],
+    "integration_interfaces/api/services/account_service.py": [
+      "Noted 'app.lib.id_generator' import",
+      "Noted 'app.lib.notification_service' import"
+    ],
+    "integration_interfaces/api/services/card_service.py": [
+      "Noted 'app.lib.notification_service' import",
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "integration_interfaces/api/services/customer_service.py": [
+      "Noted 'app.lib.notification_service' import"
+    ],
+    "integration_interfaces/api/services/external_service.py": [
+      "Found direct sys.path modification"
+    ],
+    "integration_interfaces/api/services/transaction_service.py": [
+      "Noted 'app.lib.notification_service' import",
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "payments/upi/transaction_processor.py": [
+      "Noted 'app.lib.notification_service' import"
+    ],
+    "payments/upi/upi_registration.py": [
+      "Noted 'app.lib.encryption' import"
+    ],
+    "payments/upi/upi_transactions.py": [
+      "Noted 'app.lib.id_generator' import",
+      "Noted 'app.lib.encryption' import",
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "payments/upi/upi_transactions_backup_20250513145153.py": [
+      "Noted 'app.lib.id_generator' import",
+      "Noted 'app.lib.encryption' import",
+      "Noted 'app.lib.encryption' import",
+      "Noted 'app.lib.id_generator' import"
+    ],
+    "risk_compliance/integration_example.py": [
+      "Found direct sys.path modification"
+    ],
+    "risk_compliance/audit_trail/audit_integration.py": [
+      "Found direct sys.path modification"
+    ],
+    "risk_compliance/audit_trail/audit_trail_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "risk_compliance/fraud_detection/transaction_monitor.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/deployment/app/deploy_environment.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/maintenance/environment/show_environment.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/maintenance/environment/validate_environment.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/maintenance/system/troubleshoot.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/migration/test_account_migration.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/utilities/debug_imports.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/utilities/enhance_update_imports.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/utilities/manage_aliases.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/utilities/replace_packages.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/utilities/test_packages.py": [
+      "Found direct sys.path modification"
+    ],
+    "scripts/utilities/validate_imports.py": [
+      "Found direct sys.path modification"
+    ],
+    "security/config.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/conftest.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/environment_test_config.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/run_tests.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/test_bank_id_formats.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/test_db_connection.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/test_id_validation.py": [
+      "Noted 'app.lib.id_validator' import",
+      "Found direct sys.path modification"
+    ],
+    "tests/e2e/db_workflow_utils.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/e2e/test_database_workflow.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/e2e/test_upi_flow.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/integration/db_data_verification.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/integration/db_verification.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/integration/test_database_connection.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/integration/test_import_system_integration.py": [
+      "Noted 'app.lib.import_finder' import",
+      "Found direct sys.path modification"
+    ],
+    "tests/integration/test_security_integration.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/integration/test_upi_api.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/temp/db_crud_test.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/temp/db_relationship_test.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/temp/direct_db_test.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/troubleshooting/import_troubleshooter.py": [
+      "Noted 'app.lib.import_finder' import",
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/test_database_connection.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/test_database_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/test_import_system.py": [
+      "Noted 'app.lib.import_finder' import",
+      "Noted 'app.lib.import_finder' import",
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/test_mfa.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/test_password_manager.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/test_security_config.py": [
+      "Found direct sys.path modification"
+    ],
+    "tests/unit/treasury/test_derivatives.py": [
+      "Found direct sys.path modification"
+    ],
+    "transactions/transaction_processor.py": [
+      "Found direct sys.path modification"
+    ],
+    "transactions/backup/transaction_processor_original.py": [
+      "Found direct sys.path modification"
+    ],
+    "treasury/integration_example.py": [
+      "Found direct sys.path modification"
+    ],
+    "treasury/__init__.py": [
+      "Found direct sys.path modification"
+    ],
+    "treasury/bonds/__init__.py": [
+      "Found direct sys.path modification"
+    ],
+    "treasury/derivatives/__init__.py": [
+      "Found direct sys.path modification"
+    ],
+    "treasury/forex/__init__.py": [
+      "Found direct sys.path modification"
+    ],
+    "utils/config.py": [
+      "Found direct sys.path modification"
+    ],
+    "utils/config_usage_example.py": [
+      "Found direct sys.path modification"
+    ],
+    "utils/logging.py": [
+      "Found direct sys.path modification"
+    ],
+    "utils/validators.py": [
+      "Replaced 'import_manager' with 'utils.lib.packages'",
+      "Found direct sys.path modification"
+    ]
+  },
+  "duplicate_files": {
+    "core_banking\\accounts": [
+      "account_processor_new.py",
+      "account_processor_new.py",
+      "account_processor_new.py",
+      "account_processor_new.py"
+    ],
+    "integration_interfaces\\api\\backup": [
+      "app_original.py",
+      "app_original.py",
+      "app_original.py",
+      "app_original.py"
+    ],
+    "payments\\upi": [
+      "upi_transactions_backup_20250513145153.py",
+      "upi_transactions_backup_20250513145153.py",
+      "upi_transactions_backup_20250513145153.py",
+      "upi_transactions_backup_20250513145153.py"
+    ],
+    "transactions\\backup": [
+      "transaction_processor_original.py",
+      "transaction_processor_original.py",
+      "transaction_processor_original.py",
+      "transaction_processor_original.py"
+    ]
+  },
+  "rename_suggestions": {
+    "core_banking\\accounts": {
+      "account_processor_new.py": "account_processor.py"
+    },
+    "integration_interfaces\\api\\backup": {
+      "app_original.py": "archive/app.py"
+    },
+    "payments\\upi": {
+      "upi_transactions_backup_20250513145153.py": "backups/upi_transactions_20250513145153.py"
+    },
+    "transactions\\backup": {
+      "transaction_processor_original.py": "archive/transaction_processor.py"
+    }
+  }
+}
