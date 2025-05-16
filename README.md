@@ -5,7 +5,7 @@
 
 ---
 
-**Version:** ![Version 1.1.0](https://img.shields.io/badge/Version-1.1.0-brightgreen) !
+![Version 1.1.0](https://img.shields.io/badge/Version-1.1.0-brightgreen) 
 _Last updated: May 17, 2025_
 
 ---
