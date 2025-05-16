@@ -77,7 +77,7 @@ graph TD
 | 💸 **Transactions** | ![95%](https://progress-bar.dev/95) | ![80%](https://progress-bar.dev/80) | ![70%](https://progress-bar.dev/70) | ![Complete](https://img.shields.io/badge/-In%20Progress-yellow) |
 | 💰 **Loans** | ![90%](https://progress-bar.dev/90) | ![70%](https://progress-bar.dev/70) | ![60%](https://progress-bar.dev/60) | ![Complete](https://img.shields.io/badge/-In%20Progress-yellow) |
 | 💱 **Foreign Exchange** | ![80%](https://progress-bar.dev/80) | ![60%](https://progress-bar.dev/60) | ![40%](https://progress-bar.dev/40) | ![Complete](https://img.shields.io/badge/-In%20Progress-yellow) |
-| 📊 **Reporting** | ![70%](https://progress-bar.dev/70) | ![50%](https://progress-bar.dev/50) | ![30%](https://progress-bar.dev/30) | ![Complete](https://img.shields.io/badge/-In%20Progress-yellow) |
+| 📊 **Reporting** | 🟨🟨🟨🟨🟨🟨🟨⬜⬜⬜ 70% | 🟨🟨🟨⬜⬜⬜⬜⬜⬜⬜ 50% | 🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜ 30% | 🟡 In Progress |
 
 ## 📂 Directory Structure
 

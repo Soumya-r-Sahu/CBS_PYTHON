@@ -34,12 +34,12 @@ Before running the system, configure your environment:
 
 | Feature                | Status      | Progress |
 |------------------------|-------------|----------|
-| Clean Architecture     | 🟡 In Progress | ![60%](https://progress-bar.dev/60/) |
-| Modular Domains        | ✅ Complete | ![100%](https://progress-bar.dev/100/) |
-| CLI Interface          | ✅ Complete | ![100%](https://progress-bar.dev/100/) |
-| GUI                    | 🟡 In Progress | ![40%](https://progress-bar.dev/40/) |
-| API Layer              | ✅ Complete | ![100%](https://progress-bar.dev/100/) |
-| Documentation          | 🟡 In Progress | ![70%](https://progress-bar.dev/70/) |
+| Clean Architecture     | 🟡 In Progress | 🟨🟨🟨🟨🟨🟨⬜⬜⬜⬜ 60% |
+| Modular Domains        | ✅ Complete | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| CLI Interface          | ✅ Complete | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| GUI                    | 🟡 In Progress | 🟨🟨🟨🟨⬜⬜⬜⬜⬜⬜ 40% |
+| API Layer              | ✅ Complete | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Documentation          | 🟡 In Progress | 🟨🟨🟨🟨🟨🟨🟨⬜⬜⬜ 70% |
 
 ---
 
@@ -72,19 +72,19 @@ python main.py --mode api --env development
 
 | Module             | Status        | Progress |
 |--------------------|--------------|----------|
-| Accounts           | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Customers          | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Loans              | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Transactions       | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| ATM                | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Internet Banking   | 🟠 In Progress| ![60%](https://progress-bar.dev/60/) |
-| Mobile Banking     | 🟠 In Progress| ![40%](https://progress-bar.dev/40/) |
-| UPI                | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| NEFT               | 🟠 In Progress| ![50%](https://progress-bar.dev/50/) |
-| RTGS               | 🟡 Planned    | ![10%](https://progress-bar.dev/10/) |
-| Fraud Detection    | 🟠 In Progress| ![30%](https://progress-bar.dev/30/) |
-| Audit Trail        | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| BI Dashboards      | 🟠 In Progress| ![20%](https://progress-bar.dev/20/) |
+| Accounts           | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Customers          | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Loans              | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Transactions       | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| ATM                | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Internet Banking   | 🟠 In Progress| 🟨🟨🟨🟨🟨🟨⬜⬜⬜⬜ 60% |
+| Mobile Banking     | 🟠 In Progress| 🟨🟨🟨🟨⬜⬜⬜⬜⬜⬜ 40% |
+| UPI                | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| NEFT               | 🟠 In Progress| 🟨🟨🟨⬜⬜⬜⬜⬜⬜⬜ 50% |
+| RTGS               | 🟡 Planned    | 🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜ 10% |
+| Fraud Detection    | 🟠 In Progress| 🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜ 30% |
+| Audit Trail        | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| BI Dashboards      | 🟠 In Progress| 🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜ 20% |
 
 ---
 

@@ -475,8 +475,8 @@ graph TD
 | Accounts | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) |
 | Customers | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![80%](https://progress-bar.dev/80/?width=90) | ![95%](https://progress-bar.dev/95/?width=90) |
 | Transactions | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) | ![100%](https://progress-bar.dev/100/?width=90) |
-| Loans | ![100%](https://progress-bar.dev/100/?width=90) | ![75%](https://progress-bar.dev/75/?width=90) | ![60%](https://progress-bar.dev/60/?width=90) | ![50%](https://progress-bar.dev/50/?width=90) | ![71%](https://progress-bar.dev/71/?width=90) |
-| Payments | ![100%](https://progress-bar.dev/100/?width=90) | ![80%](https://progress-bar.dev/80/?width=90) | ![70%](https://progress-bar.dev/70/?width=90) | ![60%](https://progress-bar.dev/60/?width=90) | ![77%](https://progress-bar.dev/77/?width=90) |
+| Loans | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% | 🟨🟨🟨🟨🟨⬜⬜⬜⬜⬜ 75% | 🟨🟨🟨🟨⬜⬜⬜⬜⬜⬜ 60% | 🟨🟨🟨⬜⬜⬜⬜⬜⬜⬜ 50% | 🟨🟨🟨🟨🟨🟨🟨⬜⬜⬜ 71% |
+| Payments | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% | 🟨🟨🟨🟨🟨🟨🟨🟨⬜⬜ 80% | 🟨🟨🟨🟨🟨🟨🟨⬜⬜⬜ 70% | 🟨🟨🟨🟨🟨🟨⬜⬜⬜⬜ 60% | 🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜ 77% |
 
 </div>
 
