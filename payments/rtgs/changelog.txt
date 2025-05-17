@@ -1,0 +1,68 @@
+# CHANGELOG
+
+## [2025-05-17] - Clean Architecture Implementation
+
+### Added
+- Implemented Clean Architecture pattern for RTGS module:
+  - Created domain entities:
+    - rtgs_transaction.py: RTGS transaction entity with business rules
+    - rtgs_batch.py: RTGS batch entity for grouped transactions
+  
+  - Created domain services:
+    - rtgs_validation_service.py: Business rules for validating RTGS transactions
+    - rtgs_batch_service.py: Business logic for batch operations and scheduling
+  
+  - Created application interfaces:
+    - rtgs_transaction_repository_interface.py: Interface for transaction repositories
+    - rtgs_batch_repository_interface.py: Interface for batch repositories
+    - rtgs_notification_service_interface.py: Interface for notification services
+    - rtgs_rbi_interface_service_interface.py: Interface for RBI integration
+    - rtgs_audit_log_service_interface.py: Interface for audit logging
+  
+  - Created application use cases:
+    - transaction_creation_use_case.py: Logic for creating new transactions
+    - transaction_processing_use_case.py: Logic for processing transactions
+    - transaction_query_use_case.py: Logic for querying transactions
+    - batch_processing_use_case.py: Logic for processing batches
+    - batch_query_use_case.py: Logic for querying batches
+  
+  - Created infrastructure implementations:
+    - SQLRTGSTransactionRepository: SQL implementation of transaction repository
+    - SQLRTGSBatchRepository: SQL implementation of batch repository
+    - RTGSRBIInterfaceService: Implementation of RBI interface
+    - SMSNotificationService: Implementation of notification service
+    - SQLAuditLogService: Implementation of audit logging
+  
+  - Created presentation layer:
+    - rtgs_controller.py: REST API endpoints for RTGS operations
+    - rtgs_cli.py: Command Line Interface for RTGS operations
+  
+  - Created dependency injection container:
+    - di_container.py: Manages dependencies and their lifecycles
+  
+  - Created main application entry point:
+    - main_clean_architecture.py: Flask application for RTGS module
+
+### Changed
+- Moved from legacy architecture to Clean Architecture pattern
+- Improved separation of concerns with distinct layers
+- Enhanced testability with dependency injection
+- Strengthened domain logic encapsulation
+- Better maintainability with clear boundaries between modules
+
+### Implemented Best Practices
+- Domain-Driven Design principles
+- SOLID principles adherence
+- Dependency Injection for better testability
+- Clear separation of concerns
+- Interface segregation
+- Explicit dependencies
+- Clean domain models
+
+### Benefits
+- Enhanced modularity and maintainability
+- Easier to test each component in isolation
+- Domain logic is protected from external changes
+- Framework independence (core business logic doesn't depend on Flask)
+- Better adaptability to changing requirements
+- Clearer architecture for new developers to understand

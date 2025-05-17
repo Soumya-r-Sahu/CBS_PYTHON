@@ -1,16 +1,28 @@
 """
-UPI Payment Module Entry Point.
+UPI Payment Module Entry Point (Clean Architecture Implementation).
 """
 import logging
+import os
+import sys
 from typing import Dict, Any
 from flask import Flask, Blueprint
 
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Import dependency injection container
+from .di_container import UpiDiContainer
+
+# Import controllers with blueprints
 from .controllers.transaction_controller import upi_transaction_api
 from .controllers.registration_controller import upi_registration_api
-from .config.upi_config import upi_config
 
-# Set up logging
-logger = logging.getLogger(__name__)
+# Import config
+from .config.upi_config import UpiConfig
 
 # Create Blueprint for UPI APIs
 upi_api_blueprint = Blueprint('upi_api', __name__)
@@ -29,6 +41,9 @@ def create_app() -> Flask:
     """
     # Create and configure the app
     app = Flask(__name__)
+    
+    # Get configuration
+    upi_config = UpiConfig()
     
     # Load configuration
     app.config.update(upi_config.get_all())
@@ -51,6 +66,9 @@ def initialize_module() -> Dict[str, Any]:
         Dictionary with initialization status
     """
     logger.info("Initializing UPI Payment Module")
+    
+    # Get configuration
+    upi_config = UpiConfig()
     
     # Check configuration
     env_name = upi_config.get('ENVIRONMENT', 'development')
@@ -75,6 +93,9 @@ if __name__ == "__main__":
     # Initialize the module
     init_status = initialize_module()
     logger.info(f"UPI module initialization: {init_status}")
+    
+    # Get configuration
+    upi_config = UpiConfig()
     
     # Create and run the app
     app = create_app()
