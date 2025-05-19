@@ -10,6 +10,11 @@ import math
 
 from ...domain.entities.loan import Loan, RepaymentFrequency
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class LoanCalculatorService:
     """

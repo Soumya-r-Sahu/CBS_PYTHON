@@ -8,7 +8,7 @@ This directory contains scripts for deploying the Core Banking System applicatio
   - Handles binary file copying
   - Sets up application configurations
   - Registers services
-  
+
 - `deploy_environment.py` - Sets up the environment for deployment
   - Configures environment variables
   - Sets up necessary paths

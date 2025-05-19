@@ -13,6 +13,11 @@ from ....domain.validators.transaction_validator import TransactionValidator
 from ....domain.services.transaction_rules import TransactionRules
 from ..interfaces import AtmRepository, NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class WithdrawCashUseCase:
     """Use case for withdrawing cash from an ATM"""

@@ -8,6 +8,11 @@ from uuid import UUID
 
 from ...domain.entities.user import InternetBankingUser
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class UserRepositoryInterface(ABC):
     """Interface for user repository operations."""

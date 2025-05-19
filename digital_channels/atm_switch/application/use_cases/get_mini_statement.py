@@ -9,6 +9,11 @@ from datetime import datetime
 
 from ..interfaces import AtmRepository
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class GetMiniStatementUseCase:
     """Use case for getting mini statement via ATM"""

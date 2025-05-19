@@ -1,85 +1,97 @@
 # Core Banking System - Main Requirements
+#
+# This is the main requirements file for the CBS_PYTHON project.
+# It includes all dependencies needed for the full system.
+#
+# Last updated: May 18, 2025
 
-# Development
-black==24.1.1
-flake8==7.0.0
-isort==5.13.2
-mypy==1.8.0
-pre-commit==3.5.0
-
-# CLI and Output formatting
-colorama==0.4.6
-rich==13.7.0
-tqdm==4.66.1
-
-# Data Processing
-numpy==1.26.0
-pandas==2.1.3
-matplotlib==3.8.0
-openpyxl==3.1.2
+# Core Dependencies
+colorama>=0.4.6
+PyYAML>=6.0.1
+python-dotenv>=1.0.1
+requests>=2.31.0
+python-dateutil>=2.8.2
+uuid>=1.30
 
 # Database
-alembic==1.13.1
-mysql-connector-python==8.3.0
-psycopg2-binary==2.9.9
-pymysql==1.1.0
-sqlalchemy==2.0.25
-sqlalchemy-utils==0.41.1
-
-# GUI
-PyQt5==5.15.10
-PyQt5-Qt5==5.15.11
+mysql-connector-python>=8.3.0
+sqlalchemy>=2.0.25
+sqlalchemy-utils>=0.41.1
+alembic>=1.13.1
+psycopg2-binary>=2.9.9
+pymysql>=1.1.0
 
 # ORM and Data Validation
-marshmallow==3.20.1
-pydantic==2.5.3
-dataclasses-json==0.6.1
+marshmallow>=3.20.1
+pydantic>=2.5.3
+dataclasses-json>=0.6.1
 
 # Security
-argon2-cffi==23.1.0
-bcrypt==4.1.2
-cryptography==41.0.7
-passlib==1.7.4
-pyotp==2.9.0
-python-jose[cryptography]==3.3.0
-python-magic==0.4.27
-python-multipart==0.0.9
-clamd==1.0.2
-
-# Testing
-pytest==7.4.3
-pytest-cov==4.1.0
-pytest-mock==3.12.0
-pytest-asyncio==0.23.2
-coverage==7.3.2
-
-# Machine Learning (for AI-based fraud detection)
-scikit-learn==1.3.1
-tensorflow-lite==2.14.0
-joblib==1.3.2
-
-# Utilities
-pillow==10.2.0
-PyYAML==6.0.1
-python-dotenv==1.0.1
-qrcode==7.4.2
-requests==2.31.0
-uuid==1.30
-python-dateutil==2.8.2
-faker==20.1.0  # For generating test data
-typer==0.9.0   # For CLI applications
+argon2-cffi>=23.1.0
+bcrypt>=4.1.2
+cryptography>=41.0.7
+passlib>=1.7.4
+pyotp>=2.9.0
+python-jose[cryptography]>=3.3.0
+python-magic>=0.4.27
+python-multipart>=0.0.9
+clamd>=1.0.2
 
 # Web Framework
-fastapi==0.109.2
-flask==2.3.3
-uvicorn==0.27.1
-starlette==0.36.3
-httpx==0.25.1  # HTTP client for API testing
+fastapi>=0.109.2
+flask>=2.3.3
+uvicorn>=0.27.1
+starlette>=0.36.3
+httpx>=0.25.1
+
+# Django Portal Components
+Django>=4.2.10
+djangorestframework>=3.14.0
+django-cors-headers>=4.3.1
+gunicorn>=21.2.0
+whitenoise>=6.6.0
+PyJWT>=2.8.0
+
+# Data Processing
+numpy>=1.26.0
+pandas>=2.1.3
+matplotlib>=3.8.0
+openpyxl>=3.1.2
+
+# GUI
+PyQt5>=5.15.10
+PyQt5-Qt5>=5.15.11
 
 # Logging and Monitoring
-structlog==23.2.0
-prometheus-client==0.17.1
-sentry-sdk==1.32.0
+structlog>=23.2.0
+prometheus-client>=0.17.1
+sentry-sdk>=1.32.0
 
+# Machine Learning (for AI-based fraud detection)
+scikit-learn>=1.3.1
+tensorflow-lite>=2.14.0
+joblib>=1.3.2
+
+# Utilities
+pillow>=10.2.0
+qrcode>=7.4.2
+faker>=20.1.0  # For generating test data
+typer>=0.9.0   # For CLI applications
+rich>=13.7.0   # Rich text and formatting for terminal
+tqdm>=4.66.1   # Progress bars
+
+# Development and Testing
+black>=24.1.1
+flake8>=7.0.0
+isort>=5.13.2
+mypy>=1.8.0
+pre-commit>=3.5.0
+pytest>=7.4.3
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+pytest-asyncio>=0.23.2
+coverage>=7.3.2
+
+black-formatter>=23.1.0  # New code formatter
 # Dependency Injection
-dependency-injector==4.41.0
+dependency-injector>=4.41.0

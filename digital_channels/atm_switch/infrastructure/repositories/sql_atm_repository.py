@@ -15,6 +15,11 @@ from ....domain.entities.transaction import Transaction
 from ....domain.entities.account import Account
 from ...application.interfaces.atm_repository import AtmRepository
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SqlAtmRepository(AtmRepository):
     """SQL implementation of ATM repository"""

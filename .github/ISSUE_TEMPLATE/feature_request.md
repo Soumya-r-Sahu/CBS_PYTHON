@@ -17,9 +17,9 @@ assignees: ''
 
 ## Use Cases
 <!-- Describe specific use cases or scenarios where this feature would be valuable -->
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Benefits
 <!-- Explain the benefits of implementing this feature -->

@@ -14,6 +14,11 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 from presentation.cli.atm_interface import AtmCli
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class TestAtmCli(unittest.TestCase):
     def setUp(self):
@@ -62,8 +67,7 @@ class TestAtmCli(unittest.TestCase):
             'success': False,
             'message': 'Invalid card or PIN'
         }
-        
-        # Act
+          # Act
         with patch('builtins.input', side_effect=['1234567890', '4321']):
             with patch('builtins.print') as mock_print:
                 result = self.cli.validate_card()
@@ -72,7 +76,7 @@ class TestAtmCli(unittest.TestCase):
         self.assertFalse(result)
         self.assertIsNone(self.cli.session_token)
         self.mock_atm_service.login.assert_called_once_with('1234567890', '4321')
-    
+        
     def test_check_balance_no_session(self):
         # Arrange
         self.cli.session_token = None
@@ -84,7 +88,8 @@ class TestAtmCli(unittest.TestCase):
         # Assert
         mock_print.assert_any_call("\nPlease insert card and enter PIN first.")
         self.mock_atm_service.get_balance.assert_not_called()
-      def test_check_balance_success(self):
+    
+    def test_check_balance_success(self):
         # Arrange
         self.cli.session_token = 'test_token'
         self.cli.account_number = '1234567890'

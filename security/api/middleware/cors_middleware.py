@@ -10,7 +10,24 @@ from flask import request, current_app
 from functools import wraps
 
 # Import configuration
-from security.config import CORS_CONFIG
+try:
+    # Try to import from the new compatibility module
+    from utils.config.compatibility import get_cors_settings
+    CORS_CONFIG = get_cors_settings()
+except ImportError:
+    try:
+        # Fall back to old import path
+        from security.config import CORS_CONFIG
+    except ImportError:
+        # Default fallback configuration
+        CORS_CONFIG = {
+            "allowed_origins": ["*"],
+            "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allowed_headers": ["Authorization", "Content-Type", "Accept", "Origin"],
+            "expose_headers": [],
+            "supports_credentials": True,
+            "max_age": 3600
+        }
 
 # Configure logger
 logger = logging.getLogger(__name__)

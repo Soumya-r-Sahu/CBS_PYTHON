@@ -13,6 +13,11 @@ from uuid import UUID
 from ....domain.entities.transaction import Transaction, TransactionType, TransactionStatus
 from ...interfaces.transaction_repository import TransactionRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SqlTransactionRepository(TransactionRepositoryInterface):
     """SQL implementation of transaction repository"""

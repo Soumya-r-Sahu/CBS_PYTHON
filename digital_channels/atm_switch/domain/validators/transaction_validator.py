@@ -7,6 +7,11 @@ This module defines the transaction validation logic for the ATM system.
 from decimal import Decimal
 from typing import Dict, Any
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class TransactionValidator:
     """Validator for ATM transactions"""
     

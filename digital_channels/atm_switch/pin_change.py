@@ -1,68 +1,15 @@
 import re
 import datetime
-try:
-    from database.python.connection import DatabaseConnection
-except ImportError:
-    # Fallback implementation
-    class DatabaseConnection:
-        def __init__(self):
-            print("Using mock database connection")
-        def get_connection(self):
-            return None
-        def close_connection(self):
-            pass
-
-try:
-    
-# Import with fallback for backward compatibility
-try:
-    from utils.lib.encryption import hash_password, verify_password
-except ImportError:
-    # Fallback to old import path
-    try:
-        
-# Import with fallback for backward compatibility
-try:
-    from utils.lib.encryption import hash_password, verify_password
-except ImportError:
-    # Fallback to old import path
-    try:
-        
-# Import with fallback for backward compatibility
-try:
-    from utils.lib.encryption import hash_password, verify_password
-except ImportError:
-    # Fallback to old import path
-    try:
-        from app.lib.encryption import hash_password, verify_password
-    except ImportError:
-        # Define fallback implementation if needed
-        pass  # No fallback implementation provided
-
-    except ImportError:
-        # Define fallback implementation if needed
-        pass  # No fallback implementation provided
-
-    except ImportError:
-        # Define fallback implementation if needed
-        pass  # No fallback implementation provided
-
-except ImportError:
-    # Fallback implementation
-    def hash_password(password):
-        # Not secure, only for development
-        return f"hash_{password}", "salt_123"
-    
-    def verify_password(password, hash_val, salt):
-        # Not secure, only for development
-        return hash_val == f"hash_{password}"
-        
 from colorama import init, Fore, Style
-
 
 # Use centralized import system
 from utils.lib.packages import fix_path
 fix_path()  # Ensures project root is in sys.path
+
+# Import database connection after path is fixed
+from database.python.connection import DatabaseConnection
+from utils.lib.encryption import hash_password, verify_password
+
 # Initialize colorama
 init(autoreset=True)
 
@@ -70,6 +17,10 @@ class PinChange:
     def __init__(self):
         self.db = DatabaseConnection()
         self.card_number = None
+
+    def change_pin(self):
+        if not self.card_number:
+            self.card_number = input("Enter your card number: ")
 
     def change_pin(self):
         if not self.card_number:

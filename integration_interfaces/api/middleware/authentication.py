@@ -4,26 +4,44 @@ Authentication Middleware for Mobile Banking API
 Implements JWT-based authentication and authorization for API endpoints.
 """
 
-from flask import Flask, request, jsonify
+import os
+import sys
+from pathlib import Path
+from flask import Flask, request, jsonify, g
 from functools import wraps
 import jwt
 from datetime import datetime, timedelta
+
+# Add project root to path to enable imports
+current_dir = Path(__file__).resolve().parent
+project_root = current_dir.parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 # Import with fallback for backward compatibility
 try:
     from utils.lib.encryption import verify_password
 except ImportError:
     # Fallback to old import path
-    from app.lib.encryption import verify_password
+    try:
+        from app.lib.encryption import verify_password
+    except ImportError:
+        # Simple fallback implementation
+        import hashlib
+        def verify_password(plain_password, hashed_password):
+            """Simple fallback password verification"""
+            return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
 
+# Import configuration with fallback
+try:
+    from utils.config.api import get_api_config
+except ImportError:
+    # Define fallback
+    def get_api_config():
+        return {"secret_key": JWT_SECRET_KEY}
 
-
-# Use centralized import system
-from utils.lib.packages import fix_path
-fix_path()  # Ensures project root is in sys.path
 # Secret key should be stored in environment variables or secure config
-JWT_SECRET_KEY = "your-secret-key-should-be-secure-and-in-env-variables"
-JWT_EXPIRY_MINUTES = 60  # Token expiry time in minutes
+JWT_SECRET_KEY = os.environ.get("CBS_JWT_SECRET", "your-secret-key-should-be-secure-and-in-env-variables")
+JWT_EXPIRY_MINUTES = int(os.environ.get("CBS_JWT_EXPIRY", "60"))  # Token expiry time in minutes
 
 def setup_auth_middleware(app: Flask):
     """

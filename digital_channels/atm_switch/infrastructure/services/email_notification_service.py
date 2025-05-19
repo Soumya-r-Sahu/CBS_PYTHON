@@ -14,6 +14,11 @@ from datetime import datetime
 
 from ...application.interfaces.notification_service import NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class EmailNotificationService(NotificationServiceInterface):
     """Email implementation of notification service"""

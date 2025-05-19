@@ -1,0 +1,455 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}System Health - CBS Admin{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --cpu-usage: {{ system_health.cpu_usage }}%;
+        --memory-usage: {{ system_health.memory_usage }}%;
+        --health-status-class: {{ health_status_class }};
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">System Health Monitor</h1>
+    
+    <div class="row">        <!-- Overall Health Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-{% raw %}{{ health_status_class }}{% endraw %} shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-{% raw %}{{ health_status_class }}{% endraw %} text-uppercase mb-1">
+                                System Status</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ system_health.status }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas {% if system_health.status == 'HEALTHY' %}fa-check-circle{% elif system_health.status == 'DEGRADED' %}fa-exclamation-triangle{% else %}fa-times-circle{% endif %} fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- CPU Usage Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">CPU Usage
+                            </div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ system_health.cpu_usage }}%</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                            style="width: var(--cpu-usage)" aria-valuenow="{{ system_health.cpu_usage }}" aria-valuemin="0"
+                                            aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-microchip fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        <!-- Memory Usage Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Memory Usage</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ system_health.memory_usage }}%</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                            style="width: var(--memory-usage)" aria-valuenow="{{ system_health.memory_usage }}" aria-valuemin="0"
+                                            aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-memory fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Response Time Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Avg Response Time</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ system_health.average_response_time|floatformat:2 }} ms</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tachometer-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Health Status -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Module Health Status</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="moduleHealthTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Module Name</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                            <th>Error Rate</th>
+                            <th>Last Check</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in module_health %}
+                        <tr>
+                            <td>{{ module.name }}</td>
+                            <td>
+                                <span class="badge badge-{{ module.status_class }}">{{ module.status }}</span>
+                            </td>
+                            <td>{{ module.details.response_time|floatformat:2 }} ms</td>
+                            <td>{{ module.details.error_rate|floatformat:2 }}%</td>
+                            <td>{{ module.last_check|default:"Never checked" }}</td>
+                            <td>
+                                <a href="{% url 'dashboard:module_detail' module.module_id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <button class="btn btn-sm btn-info check-health" data-id="{{ module.module_id }}">
+                                    <i class="fas fa-sync"></i> Check
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No modules found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Charts -->
+    <div class="row">
+        <!-- CPU Usage Chart -->
+        <div class="col-xl-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">CPU Usage History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Usage Chart -->
+        <div class="col-xl-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Memory Usage History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="memoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Time Chart -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Response Time History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="responseTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Define Django variables in a JSON structure for JS -->
+<script type="application/json" id="django-data">
+{
+    "timestampLabels": {{ timestamp_labels|safe }},
+    "cpuHistoryData": {{ cpu_history|safe }},
+    "memoryHistoryData": {{ memory_history|safe }},
+    "responseTimeHistoryData": {{ response_time_history|safe }},
+    "cpuUsage": "{{ system_health.cpu_usage }}",
+    "memoryUsage": "{{ system_health.memory_usage }}"
+}
+</script>
+
+<!-- Charts & interactions -->  
+<script>
+    // Parse data from JSON to avoid template syntax in JS
+    const djangoData = JSON.parse(document.getElementById('django-data').textContent);
+    const timestampLabels = djangoData.timestampLabels;
+    const cpuHistoryData = djangoData.cpuHistoryData;
+    const memoryHistoryData = djangoData.memoryHistoryData;
+    const responseTimeHistoryData = djangoData.responseTimeHistoryData;
+    
+    // Chart.js setup for CPU usage
+    var cpuCtx = document.getElementById("cpuChart").getContext('2d');
+    var cpuChart = new Chart(cpuCtx, {
+        type: 'line',
+        data: {
+            labels: timestampLabels,
+            datasets: [{
+                label: "CPU Usage (%)",
+                backgroundColor: "rgba(78, 115, 223, 0.05)",
+                borderColor: "rgba(78, 115, 223, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointBorderColor: "rgba(78, 115, 223, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: cpuHistoryData
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        beginAtZero: true,
+                        max: 100
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }]
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10
+            }
+        }
+    });
+
+    // Chart.js setup for Memory usage
+    var memoryCtx = document.getElementById("memoryChart").getContext('2d');
+    var memoryChart = new Chart(memoryCtx, {
+        type: 'line',
+        data: {
+            labels: timestampLabels,
+            datasets: [{
+                label: "Memory Usage (%)",
+                backgroundColor: "rgba(246, 194, 62, 0.05)",
+                borderColor: "rgba(246, 194, 62, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(246, 194, 62, 1)",
+                pointBorderColor: "rgba(246, 194, 62, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(246, 194, 62, 1)",
+                pointHoverBorderColor: "rgba(246, 194, 62, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: memoryHistoryData
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        beginAtZero: true,
+                        max: 100
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }]
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10
+            }
+        }
+    });
+
+    // Chart.js setup for Response Time
+    var responseTimeCtx = document.getElementById("responseTimeChart").getContext('2d');
+    var responseTimeChart = new Chart(responseTimeCtx, {
+        type: 'line',
+        data: {
+            labels: timestampLabels,
+            datasets: [{
+                label: "Average Response Time (ms)",
+                backgroundColor: "rgba(28, 200, 138, 0.05)",
+                borderColor: "rgba(28, 200, 138, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(28, 200, 138, 1)",
+                pointBorderColor: "rgba(28, 200, 138, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(28, 200, 138, 1)",
+                pointHoverBorderColor: "rgba(28, 200, 138, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: responseTimeHistoryData
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        beginAtZero: true
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }]
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10
+            }
+        }
+    });
+
+    // Health check button
+    $('.check-health').on('click', function() {
+        var moduleId = $(this).data('id');
+        $.ajax({
+            url: '/api/modules/' + moduleId + '/health-check/',
+            type: 'POST',
+            success: function(data) {
+                // Show success message
+                alert('Health check completed');
+                // Reload the page to see updated data
+                location.reload();
+            },
+            error: function(error) {
+                alert('Error performing health check: ' + error.responseJSON.detail);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -15,7 +15,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from utils.lib.packages import import_module
-            DatabaseConnection = import_module("database.python.connection").DatabaseConnection
+DatabaseConnection = import_module("database.python.connection").DatabaseConnection
 
 
 def create_test_customer(cursor, customer_data=None):

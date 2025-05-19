@@ -11,6 +11,11 @@ Base = declarative_base()
 # Create MySQL connection URL from config
 # Handle special characters in password with URL encoding
 import urllib.parse
+
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 password = urllib.parse.quote_plus(DATABASE_CONFIG['password'])
 DB_URL = f"mysql+mysqlconnector://{DATABASE_CONFIG['user']}:{password}@{DATABASE_CONFIG['host']}:{DATABASE_CONFIG['port']}/{DATABASE_CONFIG['database']}"
 

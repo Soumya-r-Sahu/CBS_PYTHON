@@ -1,0 +1,21 @@
+{
+  "name": "cbs-banking-react-client",
+  "version": "1.0.0",
+  "description": "React client for Core Banking System API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "banking",
+    "api",
+    "react",
+    "client"
+  ],
+  "author": "CBS Banking Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  }
+}

@@ -8,6 +8,11 @@ from uuid import UUID
 
 from ...domain.entities.mobile_user import MobileBankingUser
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class MobileUserRepositoryInterface(ABC):
     """Interface for mobile user repository operations."""

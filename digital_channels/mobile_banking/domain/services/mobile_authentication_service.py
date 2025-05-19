@@ -10,6 +10,11 @@ import os
 from ..entities.mobile_user import MobileBankingUser, MobileUserStatus
 from ..entities.mobile_session import MobileBankingSession
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class MobileAuthenticationService:
     """Domain service for authentication business rules and logic."""

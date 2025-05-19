@@ -5,10 +5,10 @@ This module handles UPI-related operations through the API.
 """
 
 from flask import Blueprint, request, jsonify
-from app.api.middleware.authentication import token_required
-from app.api.middleware.validation import validate_request_schema
-from app.api.middleware.rate_limiter import rate_limit
-from app.api.middleware.error_handler import APIException
+from integration_interfaces.api.middleware.authentication import token_required
+from integration_interfaces.api.middleware.validation import validate_request_schema
+from integration_interfaces.api.middleware.rate_limiter import rate_limit
+from integration_interfaces.api.middleware.error_handler import APIException
 from app.api.schemas.upi_schemas import (
     UPIRegistrationSchema, 
     UPITransactionSchema,

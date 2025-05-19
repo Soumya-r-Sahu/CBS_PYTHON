@@ -15,6 +15,11 @@ from ..interfaces.transaction_repository_interface import TransactionRepositoryI
 from ..interfaces.account_service_interface import AccountServiceInterface
 from ..interfaces.notification_service_interface import NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class CreateTransactionUseCase:
     """Use case for creating a transaction"""
     

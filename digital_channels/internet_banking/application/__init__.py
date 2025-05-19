@@ -1,3 +1,7 @@
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 """
 Application layer for the Internet Banking domain.
 The application layer contains use cases and services that orchestrate domain entities.

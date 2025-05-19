@@ -1,0 +1,316 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Audit Logs - CBS Admin{% endblock %}
+
+{% block header_title %}Audit Logs{% endblock %}
+
+{% block header_buttons %}
+<div class="btn-group">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+        <i class="fas fa-filter"></i> Filter
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-primary" id="exportLogsBtn">
+        <i class="fas fa-download"></i> Export
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card dashboard-card mb-4 collapse" id="filterCollapse">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Audit Logs</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'audit_logs' %}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="userFilter" class="form-label">User</label>
+                    <select class="form-select" id="userFilter" name="user">
+                        <option value="">All Users</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if filters.user_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="actionFilter" class="form-label">Action</label>
+                    <select class="form-select" id="actionFilter" name="action">
+                        <option value="">All Actions</option>
+                        <option value="create" {% if filters.action == 'create' %}selected{% endif %}>Create</option>
+                        <option value="read" {% if filters.action == 'read' %}selected{% endif %}>Read</option>
+                        <option value="update" {% if filters.action == 'update' %}selected{% endif %}>Update</option>
+                        <option value="delete" {% if filters.action == 'delete' %}selected{% endif %}>Delete</option>
+                        <option value="login" {% if filters.action == 'login' %}selected{% endif %}>Login</option>
+                        <option value="logout" {% if filters.action == 'logout' %}selected{% endif %}>Logout</option>
+                        <option value="enable" {% if filters.action == 'enable' %}selected{% endif %}>Enable</option>
+                        <option value="disable" {% if filters.action == 'disable' %}selected{% endif %}>Disable</option>
+                        <option value="configure" {% if filters.action == 'configure' %}selected{% endif %}>Configure</option>
+                        <option value="restart" {% if filters.action == 'restart' %}selected{% endif %}>Restart</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="resourceTypeFilter" class="form-label">Resource Type</label>
+                    <select class="form-select" id="resourceTypeFilter" name="resource_type">
+                        <option value="">All Resource Types</option>
+                        <option value="module" {% if filters.resource_type == 'module' %}selected{% endif %}>Module</option>
+                        <option value="api_endpoint" {% if filters.resource_type == 'api_endpoint' %}selected{% endif %}>API Endpoint</option>
+                        <option value="admin_user" {% if filters.resource_type == 'admin_user' %}selected{% endif %}>Admin User</option>
+                        <option value="system_config" {% if filters.resource_type == 'system_config' %}selected{% endif %}>System Config</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="severityFilter" class="form-label">Severity</label>
+                    <select class="form-select" id="severityFilter" name="severity">
+                        <option value="">All Severities</option>
+                        <option value="info" {% if filters.severity == 'info' %}selected{% endif %}>Info</option>
+                        <option value="warning" {% if filters.severity == 'warning' %}selected{% endif %}>Warning</option>
+                        <option value="error" {% if filters.severity == 'error' %}selected{% endif %}>Error</option>
+                        <option value="critical" {% if filters.severity == 'critical' %}selected{% endif %}>Critical</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="startDateFilter" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="startDateFilter" name="start_date">
+                </div>
+                <div class="col-md-4">
+                    <label for="endDateFilter" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="endDateFilter" name="end_date">
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'audit_logs' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card dashboard-card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Resource</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        <td>{{ log.user.username|default:"System" }}</td>
+                        <td>
+                            {% if log.action == 'create' %}
+                                <span class="badge bg-success">Create</span>
+                            {% elif log.action == 'read' %}
+                                <span class="badge bg-info">Read</span>
+                            {% elif log.action == 'update' %}
+                                <span class="badge bg-primary">Update</span>
+                            {% elif log.action == 'delete' %}
+                                <span class="badge bg-danger">Delete</span>
+                            {% elif log.action == 'login' %}
+                                <span class="badge bg-info">Login</span>
+                            {% elif log.action == 'logout' %}
+                                <span class="badge bg-secondary">Logout</span>
+                            {% elif log.action == 'enable' %}
+                                <span class="badge bg-success">Enable</span>
+                            {% elif log.action == 'disable' %}
+                                <span class="badge bg-warning">Disable</span>
+                            {% elif log.action == 'configure' %}
+                                <span class="badge bg-primary">Configure</span>
+                            {% elif log.action == 'restart' %}
+                                <span class="badge bg-info">Restart</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ log.action|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.resource_type|title }}: {{ log.resource_id }}</td>
+                        <td>
+                            {% if log.severity == 'info' %}
+                                <span class="badge bg-info">Info</span>
+                            {% elif log.severity == 'warning' %}
+                                <span class="badge bg-warning">Warning</span>
+                            {% elif log.severity == 'error' %}
+                                <span class="badge bg-danger">Error</span>
+                            {% elif log.severity == 'critical' %}
+                                <span class="badge bg-danger text-uppercase">Critical</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ log.severity|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.success %}
+                                <span class="badge bg-success">Success</span>
+                            {% else %}
+                                <span class="badge bg-danger">Failed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-info" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#logDetailsModal{{ log.id }}">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            
+                            <!-- Log Details Modal -->
+                            <div class="modal fade" id="logDetailsModal{{ log.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Log Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <h6>Basic Information</h6>
+                                                <table class="table table-sm">
+                                                    <tr>
+                                                        <th>ID:</th>
+                                                        <td>{{ log.id }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Timestamp:</th>
+                                                        <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>User:</th>
+                                                        <td>{{ log.user.username|default:"System" }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Action:</th>
+                                                        <td>{{ log.action|title }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Resource Type:</th>
+                                                        <td>{{ log.resource_type|title }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Resource ID:</th>
+                                                        <td>{{ log.resource_id }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Severity:</th>
+                                                        <td>{{ log.severity|title }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Status:</th>
+                                                        <td>{% if log.success %}Success{% else %}Failed{% endif %}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>IP Address:</th>
+                                                        <td>{{ log.ip_address|default:"N/A" }}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            
+                                            {% if log.details %}
+                                            <div class="mb-3">
+                                                <h6>Details</h6>
+                                                <div class="bg-light p-3 rounded">
+                                                    <pre class="mb-0"><code>{{ log.details|pprint }}</code></pre>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if log.error_message %}
+                                            <div class="mb-3">
+                                                <h6>Error Message</h6>
+                                                <div class="alert alert-danger mb-0">
+                                                    {{ log.error_message }}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No audit logs found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Audit logs pagination">
+            <ul class="pagination justify-content-center mt-4">
+                <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ current_page|add:'-1' }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                
+                {% for i in total_pages|get_range %}
+                <li class="page-item {% if current_page == i %}active{% endif %}">
+                    <a class="page-link" href="?page={{ i }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                </li>
+                {% endfor %}
+                
+                <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ current_page|add:'1' }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Audit Logs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm" action="#" method="get">
+                    {% for key, value in filters.items %}
+                        {% if value %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Export Format</label>
+                        <select class="form-select" id="exportFormat" name="format">
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="exportForm" class="btn btn-primary">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('exportLogsBtn').addEventListener('click', function() {
+        const exportModal = new bootstrap.Modal(document.getElementById('exportModal'));
+        exportModal.show();
+    });
+</script>
+{% endblock %}

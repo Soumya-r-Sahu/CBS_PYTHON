@@ -10,6 +10,11 @@ from typing import Optional
 from ..entities.account import Account, AccountType, AccountStatus, AccountStatus
 from ..value_objects.money import Money
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AccountRules:
     """

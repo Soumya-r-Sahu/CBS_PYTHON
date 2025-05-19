@@ -8,6 +8,11 @@ from sqlalchemy.orm import sessionmaker
 import urllib.parse
 import logging
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 # Set up logging
 logger = logging.getLogger(__name__)
 

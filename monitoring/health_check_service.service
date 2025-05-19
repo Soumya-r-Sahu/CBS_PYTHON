@@ -1,0 +1,16 @@
+[Unit]
+Description=CBS Health Check Monitoring Service
+After=network.target
+
+[Service]
+User=cbs_user
+Group=cbs_user
+WorkingDirectory=/path/to/CBS_PYTHON
+ExecStart=/usr/bin/python3 /path/to/CBS_PYTHON/monitoring/health_check_service.py --interval 300
+Restart=on-failure
+Environment=CBS_ADMIN_BASE_URL=http://localhost:8000/api/admin
+Environment=CBS_ADMIN_API_KEY=your_api_key_here
+Environment=PYTHONPATH=/path/to/CBS_PYTHON
+
+[Install]
+WantedBy=multi-user.target

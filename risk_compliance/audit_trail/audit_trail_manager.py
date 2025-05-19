@@ -28,6 +28,9 @@ import os
 
 # Try to use local config if available
 try:
+    from risk_compliance.config import AUDIT_CONFIG
+except ImportError:
+    AUDIT_CONFIG = {}
 
 # Use centralized import manager
 try:

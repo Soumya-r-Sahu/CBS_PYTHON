@@ -8,6 +8,11 @@ import hashlib
 import os
 from typing import Dict, Any
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class PinService:
     """Service for handling PIN operations"""

@@ -12,6 +12,11 @@ from ...domain.entities import Transaction
 from ...domain.validators import TransactionValidator
 from ...domain.services import TransactionRules
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class WithdrawFundsUseCase:
     """Use case for withdrawing funds from an ATM"""

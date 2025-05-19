@@ -22,32 +22,32 @@ This directory contains scripts to perform comprehensive system backups for the 
 ## 🛠️ Setup Instructions
 
 1. **Configure Backup Settings**:
-   
+
    Edit `backup_config.ini` to set your preferences:
-   
+
    ```ini
    [Backup]
    # Directory to store backups
    backup_dir = D:\CBS_Backups
-   
-   # MySQL binary directory 
+
+   # MySQL binary directory
    mysql_bin_dir = C:\Program Files\MySQL\MySQL Server 8.0\bin
-   
+
    # Other settings...
    ```
 
 2. **Test the Backup Process**:
-   
+
    Run a manual backup:
-   
+
    ```
    python backup_manager.py
    ```
 
 3. **Set Up Automated Backups**:
-   
+
    Schedule daily backups at 2:00 AM:
-   
+
    ```
    python backup_scheduler.py setup --freq DAILY --time 02:00
    ```
@@ -137,7 +137,7 @@ Commands:
 
 - Store backups on a separate physical drive or network location
 - Test restore process regularly to ensure backups are valid
-- Use encryption for sensitive data backups 
+- Use encryption for sensitive data backups
 - Implement off-site backup copies for disaster recovery
 - Monitor the backup process and set up alerts for failures
 
@@ -146,7 +146,7 @@ Commands:
 - **Database Backup Fails**: Check MySQL credentials and paths
   - Verify MySQL binary directory in `backup_config.ini`
   - Ensure database user has backup privileges
-  
+
 - **Scheduled Backup Not Running**: Check Task Scheduler
   - Open Windows Task Scheduler to check task status
   - Verify user credentials used for the task

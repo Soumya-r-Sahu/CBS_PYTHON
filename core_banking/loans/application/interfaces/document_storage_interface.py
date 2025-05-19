@@ -6,6 +6,11 @@ This module defines the interface for document storage services.
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional, BinaryIO
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class DocumentStorageInterface(ABC):
     """

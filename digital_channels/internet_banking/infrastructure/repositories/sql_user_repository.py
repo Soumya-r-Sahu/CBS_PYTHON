@@ -8,6 +8,11 @@ import sqlite3
 from ...domain.entities.user import InternetBankingUser, UserCredential, UserStatus
 from ...application.interfaces.user_repository_interface import UserRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SQLUserRepository(UserRepositoryInterface):
     """SQL implementation of the user repository."""

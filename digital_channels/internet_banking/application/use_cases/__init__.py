@@ -1,3 +1,7 @@
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 """
 Application use cases for the Internet Banking domain.
 Use cases orchestrate domain entities and services to fulfill business requirements.

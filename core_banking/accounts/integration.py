@@ -22,6 +22,11 @@ from core_banking.accounts.presentation.api.accounts_controller import register_
 from core_banking.accounts.presentation.cli.accounts_cli import main as run_accounts_cli
 from core_banking.accounts.presentation.gui.accounts_gui import run_gui as run_accounts_gui
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 def initialize_accounts_module(config=None):
     """

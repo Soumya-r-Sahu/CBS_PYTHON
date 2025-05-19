@@ -10,6 +10,11 @@ import urllib.parse
 import sys
 from utils.config import DATABASE_CONFIG
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 # Database configurations
 databases = {
     "CBS_PYTHON": {

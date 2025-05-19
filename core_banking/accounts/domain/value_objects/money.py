@@ -8,6 +8,11 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 @dataclass(frozen=True)
 class Money:

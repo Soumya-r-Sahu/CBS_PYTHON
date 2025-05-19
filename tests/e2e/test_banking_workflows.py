@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 # Import utilities
-from tests.e2e.db_workflow_utils import verify_transaction_flow
+from Tests.e2e.db_workflow_utils import verify_transaction_flow
 
 # Base URL for API
 API_BASE_URL = "http://localhost:5000/api/v1"

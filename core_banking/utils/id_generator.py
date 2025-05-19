@@ -10,6 +10,11 @@ from enum import Enum
 from datetime import datetime
 import uuid
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class AccountType(Enum):
     """
     Enum representing different types of bank accounts
@@ -22,66 +27,103 @@ class AccountType(Enum):
     NRI = "NRI"
     PENSION = "PENSION"
 
-def generate_account_number(state_code: str = "14", branch_code: str = "MAH00001") -> str:
+def calculate_checksum(digits: str) -> str:
     """
-    Generate a unique account number
-    
-    Format: {state_code}{branch_digit}{random_digits}
+    Calculate a Luhn algorithm checksum for account validation
     
     Args:
-        state_code: Two-digit state code (default: 14 for Maharashtra)
-        branch_code: Branch code
+        digits: String of digits
+    
+    Returns:
+        Two-digit checksum
+    """
+    # Luhn algorithm implementation
+    def digits_of(n):
+        return [int(d) for d in str(n)]
+    
+    digits = [int(d) for d in digits]
+    odd_digits = digits[-1::-2]
+    even_digits = digits[-2::-2]
+    checksum = sum(odd_digits)
+    for d in even_digits:
+        checksum += sum(digits_of(d * 2))
+    
+    return f"{(10 - (checksum % 10)) % 10:02d}"
+
+def generate_account_number(branch_code="12345", account_type="01", sub_type="01") -> str:
+    """
+    Generate a unique account number with format BBBBB-AATT-CCCCCC-CC
+    
+    Args:
+        branch_code: Five-digit branch code (default: 12345)
+        account_type: Two-digit account type (default: 01=Savings)
+        sub_type: Two-digit account sub-type/product code (default: 01)
         
     Returns:
-        Unique account number string
+        Account number string in the format BBBBB-AATT-CCCCCC-CC
     """
-    # Extract digit from branch code
-    branch_digit = ''.join(filter(str.isdigit, branch_code))[:1] or '1'
+    # Ensure branch code is 5 digits
+    branch_code = branch_code.zfill(5)[:5]
     
-    # Current timestamp as string, format: yymmddHHMMSS
-    timestamp = datetime.now().strftime('%y%m%d%H%M%S')
+    # Ensure account type and sub-type are 2 digits
+    account_type = account_type.zfill(2)[:2]
+    sub_type = sub_type.zfill(2)[:2]
     
-    # 5 random digits
-    random_digits = ''.join(random.choices(string.digits, k=5))
+    # Generate 6-digit customer serial number
+    customer_serial = ''.join(random.choices(string.digits, k=6))
     
-    # Combine to form account number
-    account_number = f"{state_code}{branch_digit}{timestamp[2:8]}{random_digits}"
+    # Calculate checksum
+    digits = f"{branch_code}{account_type}{sub_type}{customer_serial}"
+    checksum = calculate_checksum(digits)
+    
+    # Combine
+    account_number = f"{branch_code}-{account_type}{sub_type}-{customer_serial}-{checksum}"
     
     return account_number
 
-def generate_customer_id() -> str:
+def generate_customer_id(branch_code=1, user_type=1, sequence_num=None) -> str:
     """
-    Generate a unique customer ID
+    Generate a unique customer ID with format BBYYTSSSSS
     
+    Args:
+        branch_code: Two-digit branch code (default: 01)
+        user_type: Single digit user type (default: 1)
+        sequence_num: Optional sequence number (default: random 4-digit number)
+        
     Returns:
-        Customer ID string
+        Customer ID string in the format BBYYTSSSSS where:
+        - BB: Branch code (2 digits)
+        - YY: Year (2 digits)
+        - T: User type (1 digit)
+        - SSSSS: Sequence number (4 digits)
     """
-    # Current timestamp as string, format: yymmdd
-    timestamp = datetime.now().strftime('%y%m%d')
+    # Current year (last 2 digits)
+    year = datetime.now().year % 100  # e.g., 2025 -> 25
     
-    # 6 random digits
-    random_digits = ''.join(random.choices(string.digits, k=6))
+    # If sequence_num is not provided, generate a random 4-digit number
+    if sequence_num is None:
+        sequence_num = random.randint(1, 9999)
     
-    # Combine
-    customer_id = f"C{timestamp}{random_digits}"
+    # Combine and format
+    customer_id = f"{branch_code:02d}{year:02d}{user_type}{sequence_num:04d}"
     
     return customer_id
 
 def generate_transaction_id() -> str:
     """
-    Generate a unique transaction ID
+    Generate a unique transaction ID with format TRX-YYYYMMDD-SSSSSS
     
     Returns:
-        Transaction ID string
+        Transaction ID string in the format TRX-YYYYMMDD-SSSSSS
     """
-    # Generate a UUID
-    transaction_uuid = uuid.uuid4()
+    # Get current date in format YYYYMMDD
+    date_part = datetime.now().strftime("%Y%m%d")
     
-    # Current timestamp as string, format: yymmddHHMMSS
-    timestamp = datetime.now().strftime('%y%m%d%H%M%S')
+    # Generate 6-digit sequence number
+    seq_part = ''.join(random.choices(string.digits, k=6))
     
-    # Combine timestamp with part of UUID
-    transaction_id = f"TXN{timestamp}{str(transaction_uuid)[:8]}"
+    # Combine
+    transaction_id = f"TRX-{date_part}-{seq_part}"
     
     return transaction_id
 
@@ -105,3 +147,28 @@ def generate_ref_number(prefix: str = "REF") -> str:
     ref_number = f"{prefix}{timestamp}{random_chars}"
     
     return ref_number
+
+def generate_employee_id(zone_code="01", branch_code="01", designation_code="01") -> str:
+    """
+    Generate an employee ID with Bank of Baroda style format ZZBB-DD-EEEE
+    
+    Args:
+        zone_code: Two-digit zone code (default: 01)
+        branch_code: Two-digit branch or department code (default: 01)
+        designation_code: Two-digit designation code (default: 01)
+        
+    Returns:
+        Employee ID string in the format ZZBB-DD-EEEE
+    """
+    # Ensure codes are 2 digits
+    zone_code = zone_code.zfill(2)[:2]
+    branch_code = branch_code.zfill(2)[:2]
+    designation_code = designation_code.zfill(2)[:2]
+    
+    # Generate 4-digit employee sequence number
+    sequence = ''.join(random.choices(string.digits, k=4))
+    
+    # Combine
+    employee_id = f"{zone_code}{branch_code}-{designation_code}-{sequence}"
+    
+    return employee_id

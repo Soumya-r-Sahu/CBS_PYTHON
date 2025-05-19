@@ -22,23 +22,23 @@ graph TD
         A[GraphQL Endpoint] --> B[GraphQL Schema]
         B --> C[GraphQL Resolvers]
     end
-    
+
     subgraph "Application Layer"
         C --> D[Domain-Specific Query Services]
         D --> E[Authorization Services]
         D --> F[Use Cases]
     end
-    
+
     subgraph "Domain Layer"
         F --> G[Domain Entities]
         F --> H[Domain Services]
     end
-    
+
     subgraph "Infrastructure Layer"
         I[Data Sources] --> D
         J[Caching Services] --> D
     end
-    
+
     style A fill:#bbdefb,stroke:#0d47a1
     style B fill:#bbdefb,stroke:#0d47a1
     style C fill:#bbdefb,stroke:#0d47a1

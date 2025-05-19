@@ -10,6 +10,11 @@ from uuid import UUID
 
 from ..interfaces.account_repository import AccountRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class GetAccountDetailsUseCase:
     """Use case for retrieving account details"""

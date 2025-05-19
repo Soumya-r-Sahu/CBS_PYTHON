@@ -20,6 +20,11 @@ from ...domain.entities.loan import (
 )
 from ...application.interfaces.loan_repository_interface import LoanRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 # SQLAlchemy models
 Base = declarative_base()

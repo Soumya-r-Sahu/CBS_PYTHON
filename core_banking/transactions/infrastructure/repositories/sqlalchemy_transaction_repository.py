@@ -18,6 +18,11 @@ from core_banking.database.models import Transaction as TransactionModel
 from ...application.interfaces.transaction_repository_interface import TransactionRepositoryInterface
 from ...domain.entities.transaction import Transaction, TransactionStatus, TransactionType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class SQLAlchemyTransactionRepository(TransactionRepositoryInterface):
     """SQLAlchemy implementation of TransactionRepositoryInterface"""
     

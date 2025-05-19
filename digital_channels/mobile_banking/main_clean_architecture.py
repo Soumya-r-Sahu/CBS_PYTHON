@@ -19,6 +19,11 @@ from .di_container import MobileBankingDiContainer
 # Import API controller
 from .presentation.api.mobile_controller import register_blueprint
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 def get_config():
     """Get configuration for Mobile Banking module."""

@@ -1,21 +1,12 @@
 import datetime
-try:
-    from database.python.connection import DatabaseConnection
-except ImportError:
-    # Fallback implementation
-    class DatabaseConnection:
-        def __init__(self):
-            print("Using mock database connection")
-        def get_connection(self):
-            return None
-        def close_connection(self):
-            pass
-from colorama import init, Fore, Style
-
-
 # Use centralized import system
 from utils.lib.packages import fix_path
 fix_path()  # Ensures project root is in sys.path
+
+# Import database connection after path is fixed
+from database.python.connection import DatabaseConnection
+from colorama import init, Fore, Style
+
 # Initialize colorama
 init(autoreset=True)
 

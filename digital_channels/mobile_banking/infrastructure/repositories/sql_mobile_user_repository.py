@@ -10,6 +10,11 @@ import sqlite3
 from ...domain.entities.mobile_user import MobileBankingUser, RegisteredDevice, UserCredential
 from ...application.interfaces.mobile_user_repository_interface import MobileUserRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SQLMobileUserRepository(MobileUserRepositoryInterface):
     """SQLite implementation of the mobile user repository."""

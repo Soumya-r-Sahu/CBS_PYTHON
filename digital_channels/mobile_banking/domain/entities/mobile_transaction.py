@@ -8,6 +8,11 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class MobileTransactionType(Enum):
     """Types of Mobile Banking transactions."""

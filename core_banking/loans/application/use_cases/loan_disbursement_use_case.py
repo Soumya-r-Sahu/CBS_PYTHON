@@ -11,6 +11,11 @@ from ...domain.entities.loan import Loan, LoanStatus
 from ..interfaces.loan_repository_interface import LoanRepositoryInterface
 from ..interfaces.notification_service_interface import NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class LoanDisbursementError(Exception):
     """Exception raised for errors in the loan disbursement process."""

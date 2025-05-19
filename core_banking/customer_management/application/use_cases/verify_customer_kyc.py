@@ -10,6 +10,11 @@ from ...domain.entities.customer import Customer
 from ...domain.services.kyc_rules_service import KycRulesService
 from ..interfaces.customer_repository_interface import CustomerRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 @dataclass
 class VerifyCustomerKycRequest:

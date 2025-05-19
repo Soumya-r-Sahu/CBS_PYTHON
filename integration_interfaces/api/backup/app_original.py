@@ -25,14 +25,20 @@ except ImportError:
 
 # Try to import environment module
 try:
+    from utils.lib.packages import fix_path, import_module
+    fix_path()
+except ImportError:
+    pass
     
 # Import with fallback for backward compatibility
 try:
     from utils.config.environment import (
+        get_environment_name, is_production, is_development, 
+        is_test, is_debug_enabled
+    )
 except ImportError:
     # Fallback to old import path
     from app.config.environment import (
-
         get_environment_name, is_production, is_development, 
         is_test, is_debug_enabled
     )

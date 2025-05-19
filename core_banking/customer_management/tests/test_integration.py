@@ -20,6 +20,11 @@ from core_banking.customer_management.application.use_cases.create_customer impo
 from core_banking.customer_management.application.use_cases.verify_customer_kyc import VerifyCustomerKycRequest
 from core_banking.customer_management.domain.entities.customer import CustomerType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class TestCustomerManagementIntegration(unittest.TestCase):
     """Integration tests for the Customer Management module"""

@@ -12,6 +12,11 @@ from ...domain.services.account_rules import AccountRules
 from ..interfaces.account_repository import AccountRepository
 from ..interfaces.notification_service import NotificationService
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class CloseAccountUseCase:
     """

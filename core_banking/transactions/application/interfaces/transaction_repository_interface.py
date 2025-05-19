@@ -11,6 +11,11 @@ from uuid import UUID
 
 from ...domain.entities.transaction import Transaction, TransactionStatus, TransactionType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class TransactionRepositoryInterface(ABC):
     """Interface for transaction data access operations"""
     

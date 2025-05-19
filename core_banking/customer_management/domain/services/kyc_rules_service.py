@@ -7,6 +7,11 @@ from typing import List, Dict, Any, Optional
 from datetime import date, datetime, timedelta
 from ..entities.customer import Customer, CustomerType, RiskCategory
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class KycRulesService:
     """

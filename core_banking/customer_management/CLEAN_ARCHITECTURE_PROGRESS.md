@@ -3,7 +3,7 @@
 ## Completed Components
 
 ### Domain Layer
-- **Entities**: 
+- **Entities**:
   - `customer.py`: Defines the Customer entity with comprehensive validation and lifecycle methods
   - `Address` and `ContactInformation`: Value objects for customer details
   - Enum types: CustomerStatus, CustomerType, RiskCategory

@@ -16,6 +16,9 @@ from .application.use_cases.complete_transaction_use_case import CompleteTransac
 from .infrastructure.repositories.sql_upi_transaction_repository import SqlUpiTransactionRepository
 from .infrastructure.services.sms_notification_service import SmsNotificationService
 from .infrastructure.services.email_notification_service import EmailNotificationService
+from .infrastructure.services.npci_gateway_service import NpciGatewayService
+from .infrastructure.services.transaction_reconciliation_service import TransactionReconciliationService
+from .infrastructure.services.fraud_detection_service import FraudDetectionService
 
 # Presentation layer
 from .presentation.api.upi_controller import UpiController
@@ -86,7 +89,6 @@ class UpiDiContainer:
             db_path = self.config.get('db_path', os.path.join('database', 'upi_transactions.db'))
             self._instances['transaction_repository'] = SqlUpiTransactionRepository(db_path)
         return self._instances['transaction_repository']
-    
     def get_notification_service(self):
         """Get the notification service instance."""
         if 'notification_service' not in self._instances:
@@ -109,6 +111,33 @@ class UpiDiContainer:
                 )
         
         return self._instances['notification_service']
+    
+    def get_gateway_service(self):
+        """Get the NPCI gateway service instance."""
+        if 'gateway_service' not in self._instances:
+            self._instances['gateway_service'] = NpciGatewayService(
+                gateway_url=self.config.get('NPCI_GATEWAY_URL', 'https://npci-mock.bank.local/upi'),
+                merchant_id=self.config.get('NPCI_MERCHANT_ID', 'BANK001'),
+                timeout_seconds=self.config.get('TRANSACTION_TIMEOUT_SECONDS', 30),
+                use_mock=self.config.get('USE_MOCK', True)
+            )
+        return self._instances['gateway_service']
+    
+    def get_reconciliation_service(self):
+        """Get the transaction reconciliation service instance."""
+        if 'reconciliation_service' not in self._instances:
+            self._instances['reconciliation_service'] = TransactionReconciliationService(
+                transaction_repository=self.get_transaction_repository(),
+                gateway_service=self.get_gateway_service()
+            )
+        return self._instances['reconciliation_service']
+    def get_fraud_detection_service(self):
+        """Get the fraud detection service instance."""
+        if 'fraud_detection_service' not in self._instances:
+            self._instances['fraud_detection_service'] = FraudDetectionService(
+                transaction_repository=self.get_transaction_repository()
+            )
+        return self._instances['fraud_detection_service']
     
     def get_send_money_use_case(self):
         """Get the send money use case instance."""

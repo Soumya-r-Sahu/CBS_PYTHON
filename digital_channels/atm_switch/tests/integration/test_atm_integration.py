@@ -22,6 +22,11 @@ from digital_channels.atm_switch.domain.entities.transaction import Transaction
 from digital_channels.atm_switch.application.services.atm_service import AtmService
 from digital_channels.atm_switch.di_container import get_atm_service
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AtmIntegrationTests(unittest.TestCase):
     """Integration tests for ATM Switch module"""

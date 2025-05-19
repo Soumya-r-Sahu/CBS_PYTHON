@@ -1,16 +1,31 @@
 # 🏦 CBS_PYTHON: Core Banking System
 
-[![Status: Planning](https://img.shields.io/badge/Status-Planning-blue)](https://github.com/Soumya-r-Sahu/CBS_PYTHON)
+[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green)](https://github.com/Soumya-r-Sahu/CBS_PYTHON)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/Soumya-r-Sahu/CBS_PYTHON)
+![Version 1.1.1](https://img.shields.io/badge/Version-1.1.1-brightgreen)
+[![Changelog](https://img.shields.io/badge/Changelog-View-orange)](CHANGELOG.md)
 
 ---
 
-**Version:** ![Version 1.1.0](https://img.shields.io/badge/Version-1.1.0-brightgreen) !
-_Last updated: May 17, 2025_
+_Last updated: May 19, 2025_
 
 ---
 
-## 1️⃣ Project Overview
+## 📋 Quick Navigation
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [File Guide](#file-guide)
+- [Configuration](#configuration)
+- [Admin Portal](#admin-portal)
+- [Banking UI](#banking-ui)
+- [Module Progress](#module-progress)
+- [Frontend Integration](#frontend-integration)
+- [Database Reference](#database-reference)
+- [Changelog](CHANGELOG.md)
+- [Release Summary](release_summary.md)
+- [Contributing](#contributing)
+
+## 📝 Overview
 
 CBS_PYTHON is a modular, domain-driven Core Banking System designed for extensibility, security, and modern banking needs.
 - 🏗️ **Clean Architecture** (Domain, Application, Infrastructure, Presentation)
@@ -20,30 +35,11 @@ CBS_PYTHON is a modular, domain-driven Core Banking System designed for extensib
 - 📊 **Analytics & BI**: Real-time dashboards, fraud detection
 - 📚 **Comprehensive Documentation**
 
-## 2️⃣ Configuration
+## ⚡ Quick Start
 
-Before running the system, configure your environment:
-- ⚙️ **Database**: Edit `config.py` or `app/config/settings.yaml` for DB settings
-- 🔑 **Secrets**: Set up environment variables or `.env` for sensitive data
-- 🛡️ **Security**: Review `security/` for encryption and access control settings
-- 📝 **Modules**: Ensure all modules have `__init__.py` and correct import paths
+### Set Up Your Environment
 
----
-
-## ✨ Project Highlights
-
-| Feature                | Status      | Progress |
-|------------------------|-------------|----------|
-| Clean Architecture     | 🟡 In Progress | ![60%](https://progress-bar.dev/60/) |
-| Modular Domains        | ✅ Complete | ![100%](https://progress-bar.dev/100/) |
-| CLI Interface          | ✅ Complete | ![100%](https://progress-bar.dev/100/) |
-| GUI                    | 🟡 In Progress | ![40%](https://progress-bar.dev/40/) |
-| API Layer              | ✅ Complete | ![100%](https://progress-bar.dev/100/) |
-| Documentation          | 🟡 In Progress | ![70%](https://progress-bar.dev/70/) |
-
----
-
-## ⚡ Quick Setup
+Make sure you have Python 3.8+ installed, then set up the environment:
 
 ```bash
 # Clone the repo
@@ -58,37 +54,111 @@ source venv/bin/activate  # Linux/macOS
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Initialize the database
-python main.py --init-db
-
-# Run the system
-python main.py --mode api --env development
 ```
 
----
+### Start the Banking System
+
+The easiest way to start the system is to use the friendly startup script:
+
+```powershell
+# Start the entire banking system
+python start_banking_server.py
+
+# If you only need the API server
+python start_banking_server.py --api-only
+```
+
+### Update the Database (if needed)
+
+If you need to update your database to match code changes:
+
+```powershell
+# Update the development database safely
+python Backend\scripts\deployment\database\update_banking_database.py
+```
+
+## 📂 File Guide
+
+This section explains the user-friendly filenames in the Banking System and maps them to their technical counterparts.
+
+### Core System Files
+
+- **banking_system_server.py** - The main entry point for the entire banking system.
+- **start_banking_server.py** - A simple script to launch the banking system with configuration options.
+- **config.py** - Central configuration file for the entire banking system.
+
+### API and Controllers
+
+- **banking_api_endpoints.py** - Defines all available banking API services and their URL structures.
+- **customer_accounts_controller.py** - Handles customer account information and balances.
+- **money_transfer_controller.py** - Manages money transfers, payments, and transaction history.
+
+### Database Management
+
+- **banking_database_manager.py** - Internal tool for managing database structure and maintenance.
+- **update_banking_database.py** - User-friendly tool for safely updating the database schema.
+
+### Original File Mappings
+
+For reference, here are the original technical filenames and their friendly replacements:
+
+| Original Filename | User-Friendly Name |
+|-------------------|-------------------|
+| backend.py | banking_system_server.py |
+| run_backend.py | start_banking_server.py |
+| routes.py | banking_api_endpoints.py |
+| account_controller.py | customer_accounts_controller.py |
+| transaction_controller.py | money_transfer_controller.py |
+| manage_database.py | banking_database_manager.py |
+| run_migrations.py | update_banking_database.py |
+
+## ⚙️ Configuration
+
+Before running the system, configure your environment:
+- ⚙️ **Database**: Edit `config.py` or `app/config/settings.yaml` for DB settings
+- 🔑 **Secrets**: Set up environment variables or `.env` for sensitive data
+- 🛡️ **Security**: Review `security/` for encryption and access control settings
+- 📝 **Modules**: Ensure all modules have `__init__.py` and correct import paths
 
 ## 🗺️ Module Progress
 
 | Module             | Status        | Progress |
 |--------------------|--------------|----------|
-| Accounts           | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Customers          | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Loans              | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Transactions       | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| ATM                | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| Internet Banking   | 🟠 In Progress| ![60%](https://progress-bar.dev/60/) |
-| Mobile Banking     | 🟠 In Progress| ![40%](https://progress-bar.dev/40/) |
-| UPI                | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| NEFT               | 🟠 In Progress| ![50%](https://progress-bar.dev/50/) |
-| RTGS               | 🟡 Planned    | ![10%](https://progress-bar.dev/10/) |
-| Fraud Detection    | 🟠 In Progress| ![30%](https://progress-bar.dev/30/) |
-| Audit Trail        | ✅ Complete   | ![100%](https://progress-bar.dev/100/) |
-| BI Dashboards      | 🟠 In Progress| ![20%](https://progress-bar.dev/20/) |
+| Accounts           | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Customers          | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Loans              | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Transactions       | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| ATM                | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Admin              | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Internet Banking   | 🟠 In Progress| 🟩🟩🟩🟩🟩🟩🟨🟨⬜️⬜️ 60% |
+| Mobile Banking     | 🟠 In Progress| 🟩🟩🟩🟩🟧🟧⬜️⬜️⬜️⬜️ 40% |
+| UPI                | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| NEFT               | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| RTGS               | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Fraud Detection    | 🟠 In Progress| 🟩🟩🟩🟧🟧🟥🟥⬜️⬜️⬜️ 30% |
+| Audit Trail        | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Risk & Compliance  | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Treasury           | ✅ Complete   | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| BI Dashboards      | 🟠 In Progress| 🟩🟩🟥🟥⬜️⬜️⬜️⬜️⬜️⬜️ 20% |
 
----
+## 🖥️ Frontend Integration
 
-## 📊 Database Tab
+The banking system is designed to work with Django, a powerful Python web framework.
+
+### Connecting a Django Frontend
+
+```python
+# In your Django views.py
+from integration_interfaces.django_client import BankingAPIClient
+
+def account_view(request):
+    client = BankingAPIClient()
+    client.set_session_from_request(request)
+    accounts = client.get_accounts()
+    return render(request, 'accounts/list.html', {'accounts': accounts})
+```
+
+## 📊 Database Reference
 
 ### Key Tables
 | Table Name            | Key Columns                                               | Emoji |
@@ -98,6 +168,22 @@ python main.py --mode api --env development
 | transactions          | transaction_id, account_number, type, amount, timestamp   | 💸🔄 |
 | cards                 | card_id, account_id, card_number, expiry_date, cvv, pin   | 🃏💳 |
 | upi_registrations     | upi_id, account_number, linked_device, status, created_at | 📱💲 |
+
+## 🤝 Contributing
+
+Please refer to the Documentation directory for detailed contribution guidelines. We welcome contributions to improve this core banking system.
+
+### Contribution Areas
+
+- Bug fixes and issue reports
+- Feature enhancements
+- Documentation improvements
+- Test coverage expansion
+- UI/UX enhancements
+
+### Code of Conduct
+
+We expect all contributors to adhere to our code of conduct, which promotes a respectful and inclusive environment for collaboration.
 | admins                | admin_id, username, role, email, status, last_login       | 🛠️👨‍💼|
 | branches              | branch_id, name, address, contact, manager_id, status     | 🏢🏦 |
 | loans                 | loan_id, customer_id, amount, interest_rate, term, status | 💵📝 |
@@ -120,26 +206,6 @@ erDiagram
 ```
 
 ---
-
-## 🧩 Architecture Overview
-
-```mermaid
-graph TD
-    A[User/Customer/Employee/Admin] -->|Login| B[Main Menu]
-    B -->|ATM| C[ATM Interface]
-    B -->|UPI| D[UPI Services]
-    B -->|Admin| E[Admin Dashboard]
-    B -->|Customer| F[Customer Dashboard]
-    C -->|Withdraw/Inquiry| G[Database]
-    D -->|Pay/Register| G
-    E -->|User Mgmt/Logs| G
-    F -->|Account/Fund Transfer| G
-    G -->|Show Results| H[Results/Confirmation]
-    H -->|Logout| I[End]
-    S[Security Layer] -->|Protects| G
-    S -->|Authenticates| A
-```
-
 ---
 
 ## 🐞 Troubleshooting Guide
@@ -176,7 +242,7 @@ graph TD
 ## 🛠️ Initializing Scripts
 
 - **Database Initialization:**
-  - `python main.py --init-db`  
+  - `python main.py --init-db`
     Initializes all required tables and seeds initial data.
 - **Show Current Environment:**
   - `python scripts/utilities/show_environment.py`
@@ -190,19 +256,19 @@ graph TD
 ### System Flow
 ```mermaid
 flowchart TD
-    A[User/Customer/Employee/Admin] -->|Login/Access| B[Main Menu]
-    B -->|ATM| C[ATM Interface]
-    B -->|UPI| D[UPI Services]
-    B -->|Admin| E[Admin Dashboard]
-    B -->|Customer| F[Customer Dashboard]
-    C -->|Withdraw/Inquiry/PIN| G[Database]
-    D -->|Pay/Register/QR| G
-    E -->|User Mgmt/Logs| G
-    F -->|Account/Fund Transfer| G
-    G -->|Show Results| H[Results/Confirmation]
-    H -->|Logout| I[End]
-    S[Security Layer] -->|Protects| G
-    S -->|Authenticates| A
+    A[👤 User/Customer/Employee/Admin] -->|🔐 Login/Access| B[📋 Main Menu]
+    B -->|🏧 ATM| C[💻 ATM Interface]
+    B -->|📱 UPI| D[💳 UPI Services]
+    B -->|⚙️ Admin| E[🛠️ Admin Dashboard]
+    B -->|👨‍💼 Customer| F[📊 Customer Dashboard]
+    C -->|💵 Withdraw/Inquiry/PIN| G[🗄️ Database]
+    D -->|💲 Pay/Register/QR| G
+    E -->|👥 User Mgmt/Logs| G
+    F -->|💰 Account/Fund Transfer| G
+    G -->|📄 Show Results| H[✅ Results/Confirmation]
+    H -->|🚪 Logout| I[🏁 End]
+    S[🔒 Security Layer] -->|🛡️ Protects| G
+    S -->|🔍 Authenticates| A
 ```
 
 ### Architecture & Interfaces
@@ -219,17 +285,20 @@ flowchart TD
 
 ## 🌟 Features at a Glance
 
-| 🏷️ Feature           | 🚦 Status      | 💡 Emoji |
-|----------------------|---------------|----------|
-| Account Management   | ✅ Complete   | 👤💼     |
-| Transaction Engine   | ✅ Complete   | 💸🔄     |
-| UPI/NEFT/RTGS        | 🟡 In Progress| 📱💳     |
-| Audit Trail          | ✅ Complete   | 📋🕵️     |
-| Security             | ✅ Complete   | 🔒       |
-| Modular CLI          | ✅ Complete   | 💻⌨️     |
-| GUI                  | 🟡 In Progress| 🖥️✨     |
-| API Layer            | ✅ Complete   | 🌐🚀     |
-| Documentation        | 🟡 In Progress| 📚       |
+| 🏷️ Feature           | 🚦 Status      | 💡 Emoji | Progress |
+|----------------------|---------------|----------|----------|
+| Account Management   | ✅ Complete   | 👤💼     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Transaction Engine   | ✅ Complete   | 💸🔄     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| NEFT/RTGS Payments   | ✅ Complete   | 🏦💲     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| UPI Integration      | ✅ Complete   | 📱💳     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Admin Module         | ✅ Complete   | 🛠️🔄     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Audit Trail          | ✅ Complete   | 📋🕵️     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Security             | ✅ Complete   | 🔒       | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Modular CLI          | ✅ Complete   | 💻⌨️     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Multi-Framework API  | ✅ Complete   | 🔌🌐     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| GUI                  | 🟡 In Progress| 🖥️✨     | 🟩🟩🟩🟩🟧🟧🟥🟥⬜️⬜️ 40% |
+| API Layer            | ✅ Complete   | 🌐🚀     | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100% |
+| Documentation        | 🟡 In Progress| 📚       | 🟩🟩🟩🟩🟩🟩🟩🟩🟨🟨 80% |
 
 ---
 
@@ -238,6 +307,9 @@ flowchart TD
 - [Architecture Diagrams](documentation/architecture_diagrams/)
 - [User Manuals](documentation/user_manuals/)
 - [API Guides](documentation/api_guides/)
+- [Integration Guides](Documentation/integration_guides/admin_module_integration.md)
+- [Admin Module Integration](Documentation/integration_guides/admin_module_integration.md)
+- [Installation Guides](Documentation/implementation_guides/admin_module_integration_installation.md)
 
 ---
 
@@ -246,6 +318,41 @@ flowchart TD
 - Sensitive data encrypted at rest
 - Access control enforced
 - All actions logged for audit
+
+---
+
+## 🌐 Cross-Framework Compatibility
+
+The CBS_PYTHON system provides comprehensive integration capabilities with multiple frameworks and platforms:
+
+| Framework | Support | Client Library | Key Features |
+|-----------|---------|---------------|--------------|
+| Django (Python) | ✅ Complete | `integration_interfaces/django_client` | Session integration, CSRF protection, Authentication handling |
+| React (JavaScript) | ✅ Complete | `integration_interfaces/react_client` | JWT authentication, Redux store integration, Component hooks |
+| Vue.js (JavaScript) | ✅ Complete | `integration_interfaces/vue_client` | Vuex store integration, Composition API support, Vue Router integration |
+| Admin Module | ✅ Complete | `integration_interfaces/api/admin_client` | Centralized control, Configuration management, Health monitoring |
+
+### Integration Approach
+
+The system provides integration libraries for different frameworks:
+
+#### Web Frameworks
+- **Robust Django Client**: Thoroughly tested library for Django applications
+- **Full CSRF Protection**: Automatically handles Django CSRF token requirements
+- **Seamless Session Management**: Tight integration with Django session handling
+- **React/Vue Support**: Complete JavaScript libraries for modern frontend frameworks
+- **JWT Authentication**: Secure token-based authentication for SPA applications
+
+#### Admin Integration
+- **Modular Registry Interface**: Standardized module registration with the Admin module
+- **Health Monitoring**: Real-time health metrics and alerts for all system modules
+- **Centralized Configuration**: System-wide configuration management from a single dashboard
+- **Feature Flag Management**: Control feature availability across all modules
+- **API Endpoint Registry**: Automatic API documentation and management
+
+See the [Frontend Integration Guide](Documentation/api_guides/FRONTEND_INTEGRATION.md) and [Admin Module Integration Guide](Documentation/integration_guides/admin_module_integration.md) for detailed information and integration steps.
+
+> **Note**: Our modular design allows for quick addition of support for other frameworks. If you need integration with a specific framework, please open an issue on GitHub.
 
 ---
 
@@ -272,5 +379,7 @@ flowchart TD
 ---
 
 > © 2025 [Soumya-r-Sahu](https://github.com/Soumya-r-Sahu) | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-> 
+>
 > Made with ❤️ by [Soumya-r-Sahu](https://github.com/Soumya-r-Sahu)
+>
+> Version: v1.1.1 | Last Updated: May 19, 2025

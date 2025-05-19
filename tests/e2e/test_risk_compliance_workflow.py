@@ -27,7 +27,7 @@ from risk_compliance.audit_trail.logger import log_audit_event
 from risk_compliance.audit_trail.retrieval import get_audit_logs
 
 # Import from utils
-from tests.e2e.db_workflow_utils import (
+from Tests.e2e.db_workflow_utils import (
     create_test_customer,
     create_test_account,
     clean_up_test_data

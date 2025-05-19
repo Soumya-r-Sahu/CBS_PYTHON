@@ -15,6 +15,11 @@ from core_banking.utils.audit_logger import log_event
 from ...application.interfaces.notification_service_interface import NotificationServiceInterface
 from ...domain.entities.transaction import Transaction
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class DefaultNotificationService(NotificationServiceInterface):
     """Default implementation of notification service"""
     

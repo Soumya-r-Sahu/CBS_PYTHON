@@ -6,6 +6,11 @@ from enum import Enum
 from typing import Dict, Any
 from uuid import UUID
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class NotificationType(Enum):
     """Types of notifications that can be sent."""

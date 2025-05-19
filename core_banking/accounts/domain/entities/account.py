@@ -11,6 +11,11 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AccountType(Enum):
     """Account types"""

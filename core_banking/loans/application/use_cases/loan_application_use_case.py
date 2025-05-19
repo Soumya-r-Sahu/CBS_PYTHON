@@ -13,6 +13,11 @@ from ..interfaces.loan_repository_interface import LoanRepositoryInterface
 from ..interfaces.notification_service_interface import NotificationServiceInterface
 from ..interfaces.document_storage_interface import DocumentStorageInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class LoanApplicationError(Exception):
     """Exception raised for errors in the loan application process."""

@@ -4,6 +4,19 @@ Schema definitions for validating API requests
 This module imports all schema objects from individual schema files
 """
 
+# Use centralized import system first
+import os
+import sys
+from pathlib import Path
+
+# Add project root to path to enable imports
+current_dir = Path(__file__).resolve().parent
+project_root = current_dir.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 # Authentication schemas
 from .auth_schemas import (
     LoginSchema,
@@ -57,8 +70,4 @@ from .customer_schemas import (
     ProfileUpdateRequestSchema,
     ContactDetailsUpdateSchema,
     NotificationPreferencesSchema
-
-# Use centralized import system
-from utils.lib.packages import fix_path
-fix_path()  # Ensures project root is in sys.path
 )

@@ -7,6 +7,11 @@ from decimal import Decimal
 from enum import Enum
 from typing import List, Optional, Dict, Any
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class LoanStatus(Enum):
     """Loan status enum"""

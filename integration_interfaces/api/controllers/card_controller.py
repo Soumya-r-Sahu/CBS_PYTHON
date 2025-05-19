@@ -5,27 +5,27 @@ Handles card-related operations including activation, PIN management, and limits
 """
 
 from flask import Blueprint, request, jsonify
-from app.api.middleware.authentication import token_required
-from app.api.middleware.validation import validate_request_schema
-from app.api.middleware.error_handler import APIException
-from app.api.middleware.rate_limiter import rate_limit
-from app.api.schemas.card_schemas import (
+from integration_interfaces.api.middleware.authentication import token_required
+from integration_interfaces.api.middleware.validation import validate_request_schema
+from integration_interfaces.api.middleware.error_handler import APIException
+from integration_interfaces.api.middleware.rate_limiter import rate_limit
+from integration_interfaces.api.schemas.card_schemas import (
     CardActivationSchema, 
     CardPINSetSchema, 
     CardPINChangeSchema, 
-    CardBlockSchema, 
+    CardBlockSchema,
     CardLimitUpdateSchema
 )
 
 # Import with fallback for backward compatibility
 try:
-    from utils.lib.encryption import hash_password, verify_password
+    from security.authentication.password_manager import hash_password, verify_password
 except ImportError:
     # Fallback to old import path
-    from app.lib.encryption import hash_password, verify_password
+    from security.encryption.encryption import hash_password, verify_password
 
 from database.python.connection import DatabaseConnection
-from app.api.services.notification_service import NotificationService
+from integration_interfaces.api.services.notification_service import NotificationService
 import datetime
 import uuid
 import logging

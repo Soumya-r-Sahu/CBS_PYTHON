@@ -1,0 +1,250 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - CBS Admin{% endblock %}
+
+{% block header_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Modules</h5>
+                <h2 class="text-primary">{{ module_stats.total }}</h2>
+                <div class="mt-3">
+                    <span class="text-success me-2"><i class="fas fa-circle"></i> Active: {{ module_stats.active }}</span>
+                    <span class="text-danger me-2"><i class="fas fa-circle"></i> Failed: {{ module_stats.failed }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">API Endpoints</h5>
+                <h2 class="text-primary">{{ api_stats.total }}</h2>
+                <div class="mt-3">
+                    <span class="text-success me-2"><i class="fas fa-circle"></i> Enabled: {{ api_stats.enabled }}</span>
+                    <span class="text-danger me-2"><i class="fas fa-circle"></i> Disabled: {{ api_stats.disabled }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">System Health</h5>
+                <h2 class="text-primary">
+                    {% if health_summary %}
+                        {% with critical_count=health_summary|dictsort:"status"|first %}
+                            {% if critical_count.status == 'critical' %}
+                                <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Critical</span>
+                            {% elif critical_count.status == 'warning' %}
+                                <span class="text-warning"><i class="fas fa-exclamation-circle"></i> Warning</span>
+                            {% else %}
+                                <span class="text-success"><i class="fas fa-check-circle"></i> Healthy</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <span class="text-secondary"><i class="fas fa-question-circle"></i> Unknown</span>
+                    {% endif %}
+                </h2>
+                <div class="mt-3">
+                    <a href="{% url 'system_health' %}" class="text-decoration-none">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Activity</h5>
+                <h2 class="text-primary">{{ recent_logs|length }}</h2>
+                <div class="mt-3">
+                    <a href="{% url 'audit_logs' %}" class="text-decoration-none">View Logs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card dashboard-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Module Status</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="moduleStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card dashboard-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Resource</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+                                <td>{{ log.user.username|default:"System" }}</td>
+                                <td>
+                                    {% if log.action == 'create' %}
+                                        <span class="badge bg-success">Create</span>
+                                    {% elif log.action == 'update' %}
+                                        <span class="badge bg-primary">Update</span>
+                                    {% elif log.action == 'delete' %}
+                                        <span class="badge bg-danger">Delete</span>
+                                    {% elif log.action == 'enable' %}
+                                        <span class="badge bg-success">Enable</span>
+                                    {% elif log.action == 'disable' %}
+                                        <span class="badge bg-warning">Disable</span>
+                                    {% elif log.action == 'login' %}
+                                        <span class="badge bg-info">Login</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ log.action|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.resource_type|title }}: {{ log.resource_id }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No recent activity</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="mb-0">System Health Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                                <th>Metrics</th>
+                                <th>Alerts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for health in health_summary %}
+                            <tr>
+                                <td>{{ health.component }}</td>
+                                <td>
+                                    {% if health.status == 'healthy' %}
+                                        <span class="badge bg-success">Healthy</span>
+                                    {% elif health.status == 'warning' %}
+                                        <span class="badge bg-warning">Warning</span>
+                                    {% elif health.status == 'critical' %}
+                                        <span class="badge bg-danger">Critical</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Unknown</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ health.timestamp|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    {% if health.metrics %}
+                                        {% for key, value in health.metrics.items %}
+                                            <small>{{ key }}: {{ value }}</small><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <small class="text-muted">No metrics</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if health.alerts %}
+                                        {% for alert in health.alerts %}
+                                            <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'warning' %}bg-warning{% else %}bg-info{% endif %}">
+                                                {{ alert.message }}
+                                            </span><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <small class="text-muted">No alerts</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No health data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Module Status Chart
+    const moduleStatusCtx = document.getElementById('moduleStatusChart').getContext('2d');
+    
+    // Define data from Django context
+    // This prevents JavaScript linter errors while still using template variables
+    const active = "{{ module_stats.active|default:0 }}";
+    const inactive = "{{ module_stats.inactive|default:0 }}";
+    const installed = "{{ module_stats.installed|default:0 }}";
+    const maintenance = "{{ module_stats.maintenance|default:0 }}";
+    const failed = "{{ module_stats.failed|default:0 }}";
+    
+    const moduleStatusChart = new Chart(moduleStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Deactivated', 'Installed', 'Maintenance', 'Failed'],
+            datasets: [{
+                data: [
+                    parseInt(active),
+                    parseInt(inactive),
+                    parseInt(installed),
+                    parseInt(maintenance),
+                    parseInt(failed)
+                ],
+                backgroundColor: [
+                    '#28a745', // Active - Green
+                    '#ffc107', // Deactivated - Yellow
+                    '#6c757d', // Installed - Gray
+                    '#17a2b8', // Maintenance - Blue
+                    '#dc3545'  // Failed - Red
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

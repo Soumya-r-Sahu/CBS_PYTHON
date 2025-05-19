@@ -13,6 +13,11 @@ from sqlalchemy.orm import sessionmaker, relationship
 from ...domain.entities.customer import Customer, CustomerType, CustomerStatus, RiskCategory, Address, ContactInformation
 from ...application.interfaces.customer_repository_interface import CustomerRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 # SQLAlchemy models
 Base = declarative_base()

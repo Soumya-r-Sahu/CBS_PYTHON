@@ -11,6 +11,11 @@ import requests
 from ...application.interfaces.notification_service_interface import NotificationServiceInterface, NotificationType
 from ...application.interfaces.mobile_user_repository_interface import MobileUserRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SMSNotificationService(NotificationServiceInterface):
     """SMS implementation of the notification service."""

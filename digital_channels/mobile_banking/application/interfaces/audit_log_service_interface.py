@@ -7,6 +7,11 @@ from typing import Dict, Any, Optional
 from uuid import UUID
 from datetime import datetime
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AuditEventType(Enum):
     """Types of audit events that can be logged."""

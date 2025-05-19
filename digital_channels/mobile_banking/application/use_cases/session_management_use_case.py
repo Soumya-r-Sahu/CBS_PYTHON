@@ -12,6 +12,11 @@ from ..interfaces.mobile_session_repository_interface import MobileSessionReposi
 from ..interfaces.mobile_user_repository_interface import MobileUserRepositoryInterface
 from ..interfaces.audit_log_service_interface import AuditLogServiceInterface, AuditEventType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 @dataclass
 class SessionValidationResult:

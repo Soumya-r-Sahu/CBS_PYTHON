@@ -2,6 +2,12 @@
 
 This directory contains all external system integration points for the Core Banking System.
 
+## Client Libraries
+Ready-to-use client libraries for various frontend frameworks:
+
+- [Django Client](./django_client) - Client library for Django applications
+- [React Client](./react_client) - Client library with hooks for React applications
+
 ## REST APIs
 Modern RESTful APIs for integration with web and mobile applications.
 

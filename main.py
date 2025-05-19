@@ -14,53 +14,16 @@ from pathlib import Path
 
 # Add project root to path to ensure app modules can be imported correctly
 project_root = Path(__file__).resolve().parent
+sys.path.insert(0, str(project_root))  # Ensure project root is in path
 
-# Use centralized import manager with proper error handling
-try:
-    from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment, get_database_connection
-    fix_path()  # Ensures the project root is in sys.path
-except ImportError:
-    # Fallback for when the import manager is not available
-    sys.path.insert(0, str(project_root))  # Use current directory as root
-    print("Warning: Centralized import manager not available. Using direct path modification.")
+# Import centralized import system
+from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment, get_database_connection
+fix_path()  # Ensures the project root is in sys.path
 
-# Note: Import handling for hyphenated directories has been removed
-# as there are no hyphenated directories being imported in this file
-
-# Import colorama safely
-try:
-    from colorama import init, Fore, Style
-    # Initialize colorama
-    init(autoreset=True)
-except ImportError:
-    # Create fallback if colorama is not available
-    class DummyColorama:
-        def __init__(self): pass
-        def __str__(self): return ""
-    
-    class DummyStyle:
-        RESET_ALL = ""
-    
-    class DummyFore:
-        BLACK = ""
-        RED = ""
-        GREEN = ""
-        YELLOW = ""
-        BLUE = ""
-        MAGENTA = ""
-        CYAN = ""
-        WHITE = ""
-    
-    Fore = DummyFore()
-    Style = DummyStyle()
-    
-    def init(autoreset=False): pass
-    
-    print("Warning: Colorama not available. Terminal colors disabled.")
-
-# Import environment functions directly from utils/lib/packages
-# We already imported these above, so we can use them directly
-# is_production, is_development, is_test, is_debug_enabled are already imported
+# Import colorama for colored console output
+from colorama import init, Fore, Style
+# Initialize colorama
+init(autoreset=True)
 
 # Define additional environment functions for backward compatibility
 def get_environment():
@@ -153,16 +116,22 @@ except ImportError:
     try:
         # Try to import from the legacy structure
         from database.python.db_manager import DatabaseManager, Base
-        
         # Try to import new model structure
         try:
-            from app.models.models import Customer, Account, Transaction, Card
+            # Try to import from core_banking database models
+            from core_banking.database.models import Customer, Account, Transaction, Card
             NEW_STRUCTURE = True
         except ImportError:
-            # Fall back to old structure
-            from database.python.models import initialize_database
-            from database.python.connection import DatabaseConnection
-            NEW_STRUCTURE = False
+            try:
+                # Try to import from database python models
+                from database.python.models import Customer, Account, Transaction, Card, initialize_database
+                from database.python.connection import DatabaseConnection
+                NEW_STRUCTURE = True
+            except ImportError:
+                # Fall back to old structure
+                from database.python.models import initialize_database
+                from database.python.connection import DatabaseConnection
+                NEW_STRUCTURE = False
     except ImportError:
         print(f"{Fore.YELLOW}Warning: Could not import database modules. Using fallbacks.")
         
@@ -210,7 +179,16 @@ import_errors = {}
 
 # Import UI components
 try:
-    from app.atm.atm_interface import AtmInterface
+    # Create a placeholder instead of importing from app.atm
+    class AtmInterface:
+        def __init__(self):
+            pass
+            
+        def start(self):
+            print("\n===== ATM Interface (DEMO MODE) =====")
+            print("This is running in demo mode with limited functionality.")
+            # Rest of implementation...
+    logger.info("Using placeholder AtmInterface")
 except ImportError as e:
     logger.warning(f"Failed to import AtmInterface: {e}")
     import_errors['AtmInterface'] = str(e)
@@ -227,11 +205,9 @@ except ImportError as e:
     logger.warning(f"Failed to import UpiRegistration: {e}")
     import_errors['UpiRegistration'] = str(e)
 
-try:
-    from gui.customer_dashboard import CustomerDashboard
-except ImportError as e:
-    logger.warning(f"Failed to import CustomerDashboard: {e}")
-    import_errors['CustomerDashboard'] = str(e)
+# CustomerDashboard import - define locally since it can't be found
+CustomerDashboard = None
+import_errors['CustomerDashboard'] = "Module not found, using local implementation"
 
 # Create dummy placeholders that provide better error messages
 if CustomerDashboard is None:
@@ -427,36 +403,50 @@ def init_database():
         # Use old structure
         try:
             # First, connect without specifying the database to create it if it doesn't exist
+            mysql_connector_available = True
             try:
                 import mysql.connector
                 from mysql.connector import Error
-                from utils.config import DATABASE_CONFIG
-                
-                print("Connecting to MySQL server...")
-                conn = mysql.connector.connect(
-                    host=DATABASE_CONFIG['host'],
-                    user=DATABASE_CONFIG['user'],
-                    password=DATABASE_CONFIG['password'],
-                    port=DATABASE_CONFIG['port']
-                )
-                
-                if conn.is_connected():
-                    cursor = conn.cursor()
-                    
-                    # Create database if it doesn't exist
-                    print(f"Creating database '{DATABASE_CONFIG['database']}' if it doesn't exist...")
-                    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE_CONFIG['database']}")
-                    print(f"Database '{DATABASE_CONFIG['database']}' is ready.")
-                    
-                    # Use the database
-                    cursor.execute(f"USE {DATABASE_CONFIG['database']}")
-                    
-                    cursor.close()
-                    conn.close()
-            except Error as e:
-                error_logger.error(f"Failed to create database: {e}")
-                print(f"Error creating database: {e}")
+            except ImportError:
+                mysql_connector_available = False
+                logger.error("Failed to import mysql.connector. Please install it using: pip install mysql-connector-python")
+                print(f"{Fore.RED}Error: MySQL Connector not installed. Please run: pip install mysql-connector-python{Style.RESET_ALL}")
                 return False
+                
+            if mysql_connector_available:
+                try:
+                    from utils.config import DATABASE_CONFIG
+                except ImportError:
+                    logger.error("Failed to import DATABASE_CONFIG")
+                    print(f"{Fore.RED}Error: Could not import DATABASE_CONFIG{Style.RESET_ALL}")
+                    return False
+                    
+                try:
+                    print("Connecting to MySQL server...")
+                    conn = mysql.connector.connect(
+                        host=DATABASE_CONFIG['host'],
+                        user=DATABASE_CONFIG['user'],
+                        password=DATABASE_CONFIG['password'],
+                        port=DATABASE_CONFIG['port']
+                    )
+                    
+                    if conn.is_connected():
+                        cursor = conn.cursor()
+                        
+                        # Create database if it doesn't exist
+                        print(f"Creating database '{DATABASE_CONFIG['database']}' if it doesn't exist...")
+                        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE_CONFIG['database']}")
+                        print(f"Database '{DATABASE_CONFIG['database']}' is ready.")
+                        
+                        # Use the database
+                        cursor.execute(f"USE {DATABASE_CONFIG['database']}")
+                        
+                        cursor.close()
+                        conn.close()
+                except Error as e:
+                    error_logger.error(f"Failed to create database: {e}")
+                    print(f"Error creating database: {e}")
+                    return False
                 
             # Now connect to the database and initialize tables
             db_connection = DatabaseConnection()
@@ -523,16 +513,57 @@ def start_gui():
 def start_admin_dashboard():
     """Start the admin dashboard"""
     try:
-        # Check if required module is available
-        if AdminDashboard is None:
-            error_logger.error("AdminDashboard module is missing. Cannot start admin mode.")
-            print("Error: AdminDashboard module is missing. Please install all dependencies.")
-            sys.exit(1)
-            
-        # Create instance of the admin dashboard
-        admin_dashboard = AdminDashboard()
-        logger.info("Starting admin dashboard")
-        admin_dashboard.show()
+        # Import system configuration
+        try:
+            from system_config import IMPLEMENTATION_CONFIG
+            use_django_admin = IMPLEMENTATION_CONFIG.get("USE_DJANGO_ADMIN_PORTAL", False)
+        except ImportError:
+            logger.warning("Could not import system_config.py. Using default implementation.")
+            use_django_admin = False
+        
+        if use_django_admin:
+            # Use Django-based Admin Portal
+            try:
+                from app.Portals.Admin import manage
+                import os
+                import subprocess
+                
+                logger.info("Starting Django-based Admin Portal")
+                print("Starting Django-based Admin Portal. This may take a moment...")
+                
+                # Get the path to the manage.py file
+                admin_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "Portals", "Admin")
+                
+                # Run Django server
+                command = [sys.executable, "manage.py", "runserver", "0.0.0.0:8001"]
+                subprocess.run(command, cwd=admin_dir)
+                
+            except Exception as e:
+                logger.error(f"Failed to start Django Admin Portal: {e}")
+                print(f"Error starting Django Admin Portal: {e}")
+                print("Falling back to standalone admin dashboard...")
+                
+                # Fall back to standalone dashboard
+                if AdminDashboard is None:
+                    error_logger.error("AdminDashboard module is missing. Cannot start admin mode.")
+                    print("Error: AdminDashboard module is missing. Please install all dependencies.")
+                    sys.exit(1)
+                
+                admin_dashboard = AdminDashboard()
+                logger.info("Starting standalone admin dashboard")
+                admin_dashboard.show()
+        else:
+            # Use standalone admin dashboard
+            # Check if required module is available
+            if AdminDashboard is None:
+                error_logger.error("AdminDashboard module is missing. Cannot start admin mode.")
+                print("Error: AdminDashboard module is missing. Please install all dependencies.")
+                sys.exit(1)
+                
+            # Create instance of the admin dashboard
+            admin_dashboard = AdminDashboard()
+            logger.info("Starting standalone admin dashboard")
+            admin_dashboard.show()
         
     except Exception as e:
         error_logger.error(f"Failed to start admin dashboard: {e}")

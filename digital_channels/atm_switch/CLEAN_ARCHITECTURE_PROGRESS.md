@@ -3,7 +3,7 @@
 ## Completed Components
 
 ### Domain Layer
-- **Entities**: 
+- **Entities**:
   - `atm_card.py`: Defines the ATM card entity with validation methods
   - `atm_session.py`: Represents an ATM session with timeout functionality
   - `transaction.py`: Models financial transactions

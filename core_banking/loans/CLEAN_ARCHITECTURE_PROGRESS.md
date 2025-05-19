@@ -3,7 +3,7 @@
 ## Completed Components
 
 ### Domain Layer
-- **Entities**: 
+- **Entities**:
   - `loan.py`: Defines the Loan entity with comprehensive validation and lifecycle methods
   - `PaymentScheduleItem`: Value object for loan payment schedule
   - `LoanTerms`: Value object for loan terms

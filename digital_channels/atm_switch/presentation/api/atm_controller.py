@@ -15,6 +15,11 @@ from ...application.use_cases.change_pin import ChangePinUseCase
 from ...application.use_cases.get_mini_statement import GetMiniStatementUseCase
 from ...application.use_cases.validate_card import ValidateCardUseCase
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AtmController:
     """API controller for ATM operations"""

@@ -15,6 +15,11 @@ from ..interfaces.session_repository_interface import SessionRepositoryInterface
 from ..interfaces.notification_service_interface import NotificationServiceInterface, NotificationType
 from ..interfaces.audit_log_service_interface import AuditLogServiceInterface, AuditEventType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 @dataclass
 class LoginResult:

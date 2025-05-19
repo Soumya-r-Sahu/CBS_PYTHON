@@ -19,8 +19,8 @@ from database.db_manager import get_db_session, DatabaseManager
 from database.python.models import Customer, Account, Transaction
 
 # Import verification utilities
-from tests.integration.db_verification import verify_database_setup
-from tests.integration.db_data_verification import verify_sample_data
+from Tests.integration.db_verification import verify_database_setup
+from Tests.integration.db_data_verification import verify_sample_data
 
 
 class TestCustomerDatabaseOperations(unittest.TestCase):

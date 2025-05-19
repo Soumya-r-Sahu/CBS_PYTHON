@@ -1,0 +1,20 @@
+{
+  "name": "@cbs/vue-banking-api",
+  "version": "1.0.0",
+  "description": "Vue.js client for CBS Banking API",
+  "main": "index.js",
+  "scripts": {
+    "build": "vue-cli-service build --target lib --name cbs-vue-banking-api ./index.js"
+  },
+  "keywords": [
+    "banking",
+    "api",
+    "vue",
+    "client"
+  ],
+  "author": "CBS Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  }
+}

@@ -9,6 +9,11 @@ from ..entities.mobile_user import MobileBankingUser, DeviceStatus
 from ..entities.mobile_session import MobileBankingSession
 from ..entities.mobile_transaction import MobileTransaction, MobileTransactionType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class MobileSecurityPolicyService:
     """Domain service for security policy rules and validations."""

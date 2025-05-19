@@ -11,6 +11,11 @@ from ...domain.services.authentication_service import AuthenticationService
 from ..interfaces.session_repository_interface import SessionRepositoryInterface
 from ..interfaces.audit_log_service_interface import AuditLogServiceInterface, AuditEventType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 @dataclass
 class SessionValidationResult:

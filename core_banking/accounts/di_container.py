@@ -40,6 +40,11 @@ from .infrastructure.services.sms_notification_service import SmsNotificationSer
 # This is an example - you would typically import your database connection from a central place
 from ...database.python.db_connection import get_database_connection
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AccountsContainer(containers.DeclarativeContainer):
     """

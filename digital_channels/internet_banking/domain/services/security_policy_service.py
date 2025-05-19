@@ -8,6 +8,11 @@ from typing import List
 from ..entities.user import InternetBankingUser
 from ..entities.session import InternetBankingSession
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SecurityPolicyService:
     """Domain service for security policy rules and validations."""

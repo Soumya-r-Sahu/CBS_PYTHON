@@ -1,51 +1,121 @@
 """
-ID Utilities Module
+ID Utilities Module for Core Banking System
 
-This module provides common utilities for working with IDs, including generation, validation,
-and conversion functions that are used across the system.
+This module provides comprehensive utilities for working with IDs, including generation, validation,
+and conversion functions that are used across the core banking system.
+
+ID Formats:
+-----------
+1. Customer ID: YYDDD-BBBBB-SSSS
+   - YY: Last 2 digits of creation year
+   - DDD: Day of year (001-366)
+   - BBBBB: Branch code (5 digits)
+   - SSSS: Customer sequence number (4 digits)
+
+2. Account Number: BBBBB-AATT-CCCCCC-CC
+   - BBBBB: Branch code (5 digits)
+   - AA: Account type (01=Savings, 02=Current, etc.)
+   - TT: Account sub-type/product code (2 digits)
+   - CCCCCC: Customer serial number (6 digits)
+   - CC: Checksum (2 digits using Luhn algorithm)
+
+3. Transaction ID: TRX-YYYYMMDD-SSSSSS
+   - TRX: Fixed prefix
+   - YYYYMMDD: Date (year, month, day)
+   - SSSSSS: Sequence number (6 digits)
+
+4. Employee ID: ZZBB-DD-EEEE
+   - ZZ: Zone code (2 digits)
+   - BB: Branch or Department code (2 digits)
+   - DD: Designation code (2 digits)
+   - EEEE: Employee sequence number (4 digits)
+
+Functions:
+----------
+- Generators: Create new IDs in the standard formats
+- Validators: Verify existing IDs against the expected formats
+- Converters: Transform legacy ID formats to new formats
+- Utilities: Handle checksums and other ID-related operations
+
+Examples:
+---------
+>>> from utils.id_utils import generate_customer_id, validate_customer_id
+>>> customer_id = generate_customer_id(branch_code="12345")
+>>> print(customer_id)  # Example: 23142-12345-8765
+>>> validate_customer_id(customer_id)  # Returns: True
 """
 
 import re
 import random
 import string
 import datetime
+import logging
+from typing import Union, Optional, Tuple, Dict, Any
 
-def calculate_checksum(digits):
+# Set up logging
+logger = logging.getLogger(__name__)
+
+def calculate_checksum(digits: str) -> str:
     """
-    Calculate a Luhn algorithm checksum for account validation
+    Calculate a Luhn algorithm checksum for account validation.
+    
+    The Luhn algorithm (also known as the "modulus 10" algorithm) is used to
+    validate various identification numbers like credit card numbers.
     
     Args:
-        digits: String of digits
+        digits: String of digits to calculate checksum for
     
     Returns:
-        Two-digit checksum
+        Two-digit checksum string (00-99)
+        
+    Raises:
+        ValueError: If the input contains non-digit characters
     """
+    if not isinstance(digits, str):
+        digits = str(digits)
+        
+    if not digits.isdigit():
+        raise ValueError("Checksum calculation requires a string of digits")
+        
     # Luhn algorithm implementation
-    def digits_of(n):
+    def digits_of(n: int) -> list:
+        """Convert a number to a list of its digits"""
         return [int(d) for d in str(n)]
     
-    digits = [int(d) for d in digits]
-    odd_digits = digits[-1::-2]
-    even_digits = digits[-2::-2]
-    checksum = sum(odd_digits)
-    for d in even_digits:
-        checksum += sum(digits_of(d * 2))
-    return f"{(10 - (checksum % 10)) % 10:02d}"
+    try:
+        digits_list = [int(d) for d in digits]
+        odd_digits = digits_list[-1::-2]
+        even_digits = digits_list[-2::-2]
+        checksum = sum(odd_digits)
+        
+        for d in even_digits:
+            checksum += sum(digits_of(d * 2))
+            
+        return f"{(10 - (checksum % 10)) % 10:02d}"
+    except Exception as e:
+        logger.error(f"Error calculating checksum: {str(e)}")
+        return "00"  # Return default checksum on error
 
-def validate_customer_id(customer_id):
+def validate_customer_id(customer_id: str) -> bool:
     """
-    Validate a customer ID against the universal format YYDDD-BBBBB-SSSS
+    Validate a customer ID against the universal format YYDDD-BBBBB-SSSS.
     
     Args:
         customer_id: Customer ID to validate
         
     Returns:
         Boolean indicating if the ID is valid
+        
+    Examples:
+        >>> validate_customer_id("23142-12345-8765")
+        True
+        >>> validate_customer_id("invalid-id")
+        False
     """
-    if not customer_id:
+    if not customer_id or not isinstance(customer_id, str):
         return False
     
-    # Check against the new format
+    # Check against the standard format
     pattern = r'^(\d{2})(\d{3})-(\d{5})-(\d{4})$'
     match = re.match(pattern, customer_id)
     
@@ -72,9 +142,9 @@ def validate_customer_id(customer_id):
     
     return True
 
-def validate_account_number(account_number):
+def validate_account_number(account_number: str) -> bool:
     """
-    Validate an account number against the universal format BBBBB-AATT-CCCCCC-CC
+    Validate an account number against the universal format BBBBB-AATT-CCCCCC-CC.
     
     Args:
         account_number: Account number to validate
@@ -82,7 +152,7 @@ def validate_account_number(account_number):
     Returns:
         Boolean indicating if the account number is valid
     """
-    if not account_number:
+    if not account_number or not isinstance(account_number, str):
         return False
     
     # Check against the new format
@@ -103,9 +173,9 @@ def validate_account_number(account_number):
     
     return True
 
-def validate_transaction_id(transaction_id):
+def validate_transaction_id(transaction_id: str) -> bool:
     """
-    Validate a transaction ID against the format TRX-YYYYMMDD-SSSSSS
+    Validate a transaction ID against the format TRX-YYYYMMDD-SSSSSS.
     
     Args:
         transaction_id: Transaction ID to validate
@@ -113,7 +183,7 @@ def validate_transaction_id(transaction_id):
     Returns:
         Boolean indicating if the ID is valid
     """
-    if not transaction_id:
+    if not transaction_id or not isinstance(transaction_id, str):
         return False
     
     # Check against the new format
@@ -137,9 +207,9 @@ def validate_transaction_id(transaction_id):
     
     return True
 
-def validate_employee_id(employee_id):
+def validate_employee_id(employee_id: str) -> bool:
     """
-    Validate an employee ID against the Bank of Baroda format ZZBB-DD-EEEE
+    Validate an employee ID against the Bank of Baroda format ZZBB-DD-EEEE.
     
     Args:
         employee_id: Employee ID to validate
@@ -147,7 +217,7 @@ def validate_employee_id(employee_id):
     Returns:
         Boolean indicating if the ID is valid
     """
-    if not employee_id:
+    if not employee_id or not isinstance(employee_id, str):
         return False
     
     # Check against the new format
@@ -177,13 +247,13 @@ def validate_employee_id(employee_id):
     
     return True
 
-def generate_numeric_id(length=10):
-    """Generate a random numeric ID of specified length"""
+def generate_numeric_id(length: int = 10) -> str:
+    """Generate a random numeric ID of specified length."""
     return ''.join(random.choices(string.digits, k=length))
 
-def generate_customer_id(branch_code="12345"):
+def generate_customer_id(branch_code: str = "12345") -> str:
     """
-    Generate a unique customer ID with universal numeric format YYDDD-BBBBB-SSSS
+    Generate a unique customer ID with universal numeric format YYDDD-BBBBB-SSSS.
     
     Format:
     - YY: Last 2 digits of creation year
@@ -204,9 +274,9 @@ def generate_customer_id(branch_code="12345"):
     # Format with dashes for readability
     return f"{year_part}{day_part}-{branch_code}-{sequence}"
 
-def generate_account_number(branch_code="12345", account_type="01", sub_type="11"):
+def generate_account_number(branch_code: str = "12345", account_type: str = "01", sub_type: str = "11") -> str:
     """
-    Generate a unique account number with universal format BBBBB-AATT-CCCCCC-CC
+    Generate a unique account number with universal format BBBBB-AATT-CCCCCC-CC.
     
     Format:
     - BBBBB: Branch code (5 digits)
@@ -233,9 +303,9 @@ def generate_account_number(branch_code="12345", account_type="01", sub_type="11
     # Format with dashes for readability
     return f"{branch_code}-{account_type}{sub_type}-{customer_serial}-{checksum}"
 
-def generate_transaction_id():
+def generate_transaction_id() -> str:
     """
-    Generate a unique transaction ID with format TRX-YYYYMMDD-SSSSSS
+    Generate a unique transaction ID with format TRX-YYYYMMDD-SSSSSS.
     
     Format:
     - TRX: Fixed prefix
@@ -251,9 +321,9 @@ def generate_transaction_id():
     
     return f"TRX-{date_part}-{seq_part}"
 
-def generate_employee_id(zone_code="01", branch_code="23", designation_code="10"):
+def generate_employee_id(zone_code: str = "01", branch_code: str = "23", designation_code: str = "10") -> str:
     """
-    Generate an employee ID with Bank of Baroda style format ZZBB-DD-EEEE
+    Generate an employee ID with Bank of Baroda style format ZZBB-DD-EEEE.
     
     Format:
     - ZZ: Zone code (2 digits, e.g., North = 01)
@@ -276,9 +346,9 @@ def generate_employee_id(zone_code="01", branch_code="23", designation_code="10"
     # Format with dashes for readability
     return f"{zone_code}{branch_code}-{designation_code}-{sequence}"
 
-def convert_customer_id(old_id):
+def convert_customer_id(old_id: Optional[str]) -> str:
     """
-    Convert old customer ID format to new format YYDDD-BBBBB-SSSS
+    Convert old customer ID format to new format YYDDD-BBBBB-SSSS.
     Old format: CST-YYDDD-NNNNNN
     """
     if not old_id:
@@ -297,9 +367,9 @@ def convert_customer_id(old_id):
     
     return f"{year}{day}-{branch_code}-{new_seq}"
 
-def convert_account_number(old_number):
+def convert_account_number(old_number: Optional[str]) -> str:
     """
-    Convert old account number format to new format BBBBB-AATT-CCCCCC-CC
+    Convert old account number format to new format BBBBB-AATT-CCCCCC-CC.
     Old format: BB-AAAAA-CCCCCCCC
     """
     if not old_number:
@@ -330,9 +400,9 @@ def convert_account_number(old_number):
     
     return f"{branch_part}-{account_type}{sub_type}-{customer_part}-{checksum}"
 
-def convert_transaction_id(old_id):
+def convert_transaction_id(old_id: Optional[str]) -> str:
     """
-    Convert old transaction ID format to new format TRX-YYYYMMDD-SSSSSS
+    Convert old transaction ID format to new format TRX-YYYYMMDD-SSSSSS.
     Old format: TXN-YYMMDD-HHMMSS-NNNNN
     """
     if not old_id:
@@ -353,9 +423,9 @@ def convert_transaction_id(old_id):
     
     return f"TRX-{full_year}{month}{day}-{seq_part}"
 
-def convert_employee_id(old_id):
+def convert_employee_id(old_id: Optional[str]) -> str:
     """
-    Convert old employee ID format to new format ZZBB-DD-EEEE
+    Convert old employee ID format to new format ZZBB-DD-EEEE.
     Old format: EMP-YYYYMM-NNNNN
     """
     if not old_id:

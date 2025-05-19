@@ -14,6 +14,11 @@ from ...domain.value_objects.money import Money
 from ..interfaces.account_repository import AccountRepositoryInterface
 from ..interfaces.notification_service import NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class CreateAccountUseCase:
     """Use case for creating a bank account"""

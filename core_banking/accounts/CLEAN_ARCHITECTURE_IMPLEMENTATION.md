@@ -14,7 +14,7 @@ This document outlines the implementation of Clean Architecture in the Core Bank
 ```
 accounts/
 ├── domain/                # Domain Layer
-│   ├── entities/          # Business entities and value objects 
+│   ├── entities/          # Business entities and value objects
 │   │   ├── account.py
 │   │   ├── transaction.py
 │   │   ├── customer.py
@@ -31,7 +31,7 @@ accounts/
 ├── application/           # Application Layer
 │   ├── use_cases/         # Application use cases
 │   │   ├── create_account.py
-│   │   ├── close_account.py 
+│   │   ├── close_account.py
 │   │   ├── deposit_funds.py
 │   │   ├── withdraw_funds.py
 │   │   ├── transfer_funds.py

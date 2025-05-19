@@ -22,7 +22,7 @@ except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))  # Adjust levels as needed
 
 
-from tests.integration.test_upi_api import (
+from Tests.integration.test_upi_api import (
     get_auth_token, 
     TEST_CUSTOMER_ID,
     TEST_ACCOUNT_NUMBER,

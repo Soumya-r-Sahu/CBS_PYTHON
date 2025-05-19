@@ -5,6 +5,11 @@ from unittest.mock import Mock
 from ..application.use_cases.withdraw_cash import WithdrawCashUseCase
 from ..domain.entities.transaction import Transaction
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class TestWithdrawCashUseCase(unittest.TestCase):
     def setUp(self):

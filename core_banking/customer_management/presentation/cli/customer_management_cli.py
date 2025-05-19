@@ -14,6 +14,11 @@ from ...di_container import get_create_customer_use_case, get_verify_customer_ky
 from ...application.use_cases.create_customer import CreateCustomerRequest
 from ...application.use_cases.verify_customer_kyc import VerifyCustomerKycRequest
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class CustomerManagementCli:
     """Command-line interface for Customer Management module"""

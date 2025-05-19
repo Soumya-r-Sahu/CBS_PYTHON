@@ -1,7 +1,8 @@
 """
 Input Validation Utilities for Core Banking System.
 
-This module provides validators for various data types used in the banking system.
+This module provides validators for various data types used in the banking system,
+including account numbers, customer IDs, transaction details, and more.
 """
 
 import re
@@ -11,24 +12,16 @@ from colorama import init, Fore, Style
 from pathlib import Path
 import sys
 
-# Initialize colorama
+# Initialize colorama for colored terminal output
 init(autoreset=True)
 
-# Use the import manager if available
+# Use the centralized import manager
 try:
-    # Add app/lib to path temporarily to import the import_manager
-    lib_path = str(Path(__file__).parent.parent / "app" / "lib")
-    if lib_path not in sys.path:
-        # Commented out direct sys.path modification
-        # sys.path.insert(0, lib_path)
-        from utils.lib.packages import fix_path
-        fix_path()
-        
-    # Import and use the centralized import manager
     from utils.lib.packages import fix_path
-    fix_path()
+    fix_path()  # Ensures the project root is in sys.path
 except ImportError:
-    # Fallback to direct path manipulation
+    # Fallback to direct path manipulation if import manager is unavailable
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     parent_dir = str(Path(__file__).parent.parent)
     if parent_dir not in sys.path:
         sys.path.append(parent_dir)

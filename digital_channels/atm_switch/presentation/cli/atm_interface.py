@@ -16,6 +16,11 @@ from typing import Dict, Any, List
 from ...application.services.atm_service import AtmService
 from ...di_container import get_atm_service
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AtmCli:
     """Command-line interface for ATM operations"""

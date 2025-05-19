@@ -8,6 +8,11 @@ from typing import Dict, Any, List, Optional
 
 from ..entities.loan import LoanType, Loan
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class LoanRulesService:
     """

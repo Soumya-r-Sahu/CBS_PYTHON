@@ -10,6 +10,11 @@ from datetime import datetime, time
 
 from ..entities.account import Account
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class TransactionRules:
     """Core business rules for ATM transactions"""

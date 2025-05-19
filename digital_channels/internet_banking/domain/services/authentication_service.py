@@ -10,6 +10,11 @@ import os
 from ..entities.user import InternetBankingUser, UserStatus
 from ..entities.session import InternetBankingSession
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AuthenticationService:
     """Domain service for authentication business rules and logic."""

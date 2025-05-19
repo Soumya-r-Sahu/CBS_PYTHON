@@ -7,6 +7,11 @@ This module implements SMS notification services for the loans module.
 from typing import Dict, Any, List, Optional
 from ...application.interfaces.notification_service_interface import NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SmsNotificationService(NotificationServiceInterface):
     """

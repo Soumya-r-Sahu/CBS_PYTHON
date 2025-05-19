@@ -15,23 +15,15 @@ from colorama import init, Fore, Style
 # Initialize colorama
 init(autoreset=True)
 
-# Try to import environment module
-try:
-    # Commented out direct sys.path modification
-    # sys.path.insert(0, str(Path(__file__))
-    from utils.lib.packages import fix_path
-    from app.config.environment import (
-        get_environment_name, is_production, is_development, is_test,
-        is_debug_enabled, Environment
-    )
-except ImportError:
-    # Fallback environment detection
-    env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
-    def is_production(): return env_str == "production"
-    def is_development(): return env_str == "development"
-    def is_test(): return env_str == "test"
-    def get_environment_name(): return env_str.capitalize()
-    def is_debug_enabled(): return os.environ.get("CBS_DEBUG", "false").lower() == "true"
+# Import environment module
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+# Import environment configuration
+from utils.config.environment import (
+    get_environment_name, is_production, is_development, is_test,
+    is_debug_enabled
+)
 
 class TransactionProcessor:
     def __init__(self, inbound_dir="transactions/inbound", outbound_dir="transactions/outbound"):

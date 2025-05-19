@@ -14,12 +14,12 @@ import unittest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from utils.lib.packages import import_module
-            DatabaseConnection = import_module("database.python.connection").DatabaseConnection
+DatabaseConnection = import_module("database.python.connection").DatabaseConnection
 from database.db_manager import get_db_session, DatabaseManager, Base
 
 # Import database verification utilities
-from tests.integration.db_verification import verify_database_setup
-from tests.integration.db_data_verification import verify_sample_data, verify_specific_record
+from Tests.integration.db_verification import verify_database_setup
+from Tests.integration.db_data_verification import verify_sample_data, verify_specific_record
 
 
 class TestDatabaseConnection(unittest.TestCase):

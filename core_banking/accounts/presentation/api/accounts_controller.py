@@ -13,6 +13,11 @@ import json
 
 from ..di_container import container
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 # Configure logger
 logger = logging.getLogger(__name__)

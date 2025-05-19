@@ -10,6 +10,19 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
+# Try to import database type manager for dynamic database selection
+try:
+    from utils.database_type_manager import get_database_type, get_connection_string
+    DYNAMIC_DB_TYPE = True
+except ImportError:
+    # Fallback if database type manager is not available
+    DYNAMIC_DB_TYPE = False
+    
 # Set up logger
 logger = logging.getLogger(__name__)
 
@@ -75,13 +88,25 @@ class DatabaseManager:
         try:
             # Load configuration
             db_config = load_config()
-              # Create connection string
-            connection_string = (
-                f"{db_config.get('driver', 'mysql+mysqlconnector')}://"
-                f"{db_config.get('username')}:{db_config.get('password')}"
-                f"@{db_config.get('host', 'localhost')}:{db_config.get('port', 3307)}"  # Updated default port to 3307
-                f"/{db_config.get('name', 'CBS_PYTHON')}"  # Updated default database name
-            )
+            
+            # If dynamic database type is available, use it to generate the connection string
+            if DYNAMIC_DB_TYPE:
+                connection_string = get_connection_string()
+                # Extract database type from the connection string
+                db_type = 'mysql'  # Default
+                if connection_string.startswith('sqlite'):
+                    db_type = 'sqlite'
+                elif connection_string.startswith('postgresql'):
+                    db_type = 'postgresql'
+                logger.info(f"Using database type from database_type_manager: {db_type}")
+            else:
+                # Create connection string manually
+                connection_string = (
+                    f"{db_config.get('driver', 'mysql+mysqlconnector')}://"
+                    f"{db_config.get('username')}:{db_config.get('password')}"
+                    f"@{db_config.get('host', 'localhost')}:{db_config.get('port', 3307)}"
+                    f"/{db_config.get('name', 'CBS_PYTHON')}"
+                )
             
             # Create engine
             self._engine = create_engine(

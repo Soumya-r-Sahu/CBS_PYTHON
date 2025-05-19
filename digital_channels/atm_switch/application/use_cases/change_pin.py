@@ -10,6 +10,11 @@ from ..interfaces import AtmRepository, NotificationServiceInterface
 from ...domain.validators.transaction_validator import TransactionValidator
 from ...domain.services.card_security import CardSecurityService
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class ChangePinUseCase:
     """Use case for changing ATM card PIN"""

@@ -8,6 +8,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Literal
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 @dataclass
 class AtmCard:

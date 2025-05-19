@@ -8,6 +8,11 @@ from decimal import Decimal
 from typing import Dict, Any, Optional
 from uuid import UUID
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class AccountServiceInterface(ABC):
     """Interface for account services required by transactions"""
     

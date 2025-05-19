@@ -1,0 +1,535 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ module.name }} - Module Details - CBS Admin{% endblock %}
+
+{% block header_title %}Module: {{ module.name }}{% endblock %}
+
+{% block header_buttons %}
+<div class="btn-group">
+    <a href="{% url 'module_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+    <button type="button" class="btn btn-sm btn-outline-{% if module.status == 'active' %}warning{% else %}success{% endif %}" 
+            data-bs-toggle="modal" 
+            data-bs-target="#toggleModal">
+        {% if module.status == 'active' %}
+            <i class="fas fa-power-off"></i> Deactivate
+        {% else %}
+            <i class="fas fa-play"></i> Activate
+        {% endif %}
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-primary" 
+            data-bs-toggle="modal" 
+            data-bs-target="#editModal">
+        <i class="fas fa-edit"></i> Edit
+    </button>
+    {% if module.status == 'failed' or module.status == 'active' %}
+    <button type="button" class="btn btn-sm btn-outline-info" 
+            data-bs-toggle="modal" 
+            data-bs-target="#restartModal">
+        <i class="fas fa-sync"></i> Restart
+    </button>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="mb-0">Module Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-bold">ID:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ module.id }}</p>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-bold">Name:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ module.name }}</p>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-bold">Version:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ module.version }}</p>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-bold">Status:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">
+                            {% if module.status == 'active' %}
+                                <span class="status-badge status-active">Active</span>
+                            {% elif module.status == 'installed' %}
+                                <span class="status-badge status-installed">Installed</span>
+                            {% elif module.status == 'deactivated' %}
+                                <span class="status-badge status-deactivated">Deactivated</span>
+                            {% elif module.status == 'maintenance' %}
+                                <span class="status-badge status-maintenance">Maintenance</span>
+                            {% elif module.status == 'failed' %}
+                                <span class="status-badge status-failed">Failed</span>
+                            {% else %}
+                                <span class="status-badge">{{ module.status|title }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-bold">Description:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ module.description|default:"No description provided" }}</p>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-bold">Last Modified:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ module.last_modified|date:"Y-m-d H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="mb-0">Dependencies</h5>
+            </div>
+            <div class="card-body">
+                {% if module.dependencies %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Module ID</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dep_id, status in dependency_status.items %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'module_detail' module_id=dep_id %}">{{ dep_id }}</a>
+                                    </td>
+                                    <td>
+                                        {% if status %}
+                                            <span class="badge bg-success">Satisfied</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Not satisfied</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No dependencies</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <ul class="nav nav-tabs" id="moduleDetailsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="endpoints-tab" data-bs-toggle="tab" data-bs-target="#endpoints" type="button" role="tab" aria-controls="endpoints" aria-selected="true">
+                    API Endpoints
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab" aria-controls="config" aria-selected="false">
+                    Configuration
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab" aria-controls="features" aria-selected="false">
+                    Feature Flags
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content p-3 border border-top-0 rounded-bottom" id="moduleDetailsTabsContent">
+            <div class="tab-pane fade show active" id="endpoints" role="tabpanel" aria-labelledby="endpoints-tab">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>API Endpoints</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newEndpointModal">
+                        <i class="fas fa-plus"></i> New Endpoint
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Path</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Auth Required</th>
+                                <th>Rate Limit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for endpoint in endpoints %}
+                            <tr>
+                                <td>{{ endpoint.path }}</td>
+                                <td>
+                                    <span class="badge {% if endpoint.method == 'GET' %}bg-success{% elif endpoint.method == 'POST' %}bg-primary{% elif endpoint.method == 'PUT' %}bg-warning{% elif endpoint.method == 'DELETE' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {{ endpoint.method }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if endpoint.enabled %}
+                                        <span class="badge bg-success">Enabled</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if endpoint.auth_required %}
+                                        <i class="fas fa-lock text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-unlock text-warning"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if endpoint.rate_limit %}
+                                        {{ endpoint.rate_limit }} req/min
+                                    {% else %}
+                                        <span class="text-muted">No limit</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editEndpointModal{{ endpoint.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-{% if endpoint.enabled %}warning{% else %}success{% endif %}" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#toggleEndpointModal{{ endpoint.id }}">
+                                            {% if endpoint.enabled %}
+                                                <i class="fas fa-power-off"></i>
+                                            {% else %}
+                                                <i class="fas fa-play"></i>
+                                            {% endif %}
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Toggle Endpoint Modal -->
+                                    <div class="modal fade" id="toggleEndpointModal{{ endpoint.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        {% if endpoint.enabled %}
+                                                            Disable Endpoint
+                                                        {% else %}
+                                                            Enable Endpoint
+                                                        {% endif %}
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>
+                                                        {% if endpoint.enabled %}
+                                                            Are you sure you want to disable the endpoint "{{ endpoint.method }} {{ endpoint.path }}"?
+                                                        {% else %}
+                                                            Are you sure you want to enable the endpoint "{{ endpoint.method }} {{ endpoint.path }}"?
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{% url 'toggle_endpoint' endpoint_id=endpoint.id %}" method="post">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="enabled" value="{% if endpoint.enabled %}false{% else %}true{% endif %}">
+                                                        <button type="submit" class="btn btn-{% if endpoint.enabled %}warning{% else %}success{% endif %}">
+                                                            {% if endpoint.enabled %}
+                                                                Disable
+                                                            {% else %}
+                                                                Enable
+                                                            {% endif %}
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No endpoints found for this module</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>Module Configuration</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newConfigModal">
+                        <i class="fas fa-plus"></i> New Config
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                                <th>Type</th>
+                                <th>Sensitive</th>
+                                <th>Last Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for config in configs %}
+                            <tr>
+                                <td>{{ config.key }}</td>
+                                <td>
+                                    {% if config.is_sensitive %}
+                                        <span class="text-muted">*****</span>
+                                    {% else %}
+                                        <span class="text-monospace">{{ config.value|truncatechars:50 }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ config.type|title }}</td>
+                                <td>
+                                    {% if config.is_sensitive %}
+                                        <i class="fas fa-lock text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-unlock text-success"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ config.last_modified|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editConfigModal{{ config.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No configuration found for this module</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="features" role="tabpanel" aria-labelledby="features-tab">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>Feature Flags</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newFeatureModal">
+                        <i class="fas fa-plus"></i> New Feature Flag
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for feature in module.features.all %}
+                            <tr>
+                                <td>{{ feature.name }}</td>
+                                <td>{{ feature.description|truncatechars:100 }}</td>
+                                <td>
+                                    {% if feature.enabled %}
+                                        <span class="badge bg-success">Enabled</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editFeatureModal{{ feature.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-{% if feature.enabled %}warning{% else %}success{% endif %}" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#toggleFeatureModal{{ feature.id }}">
+                                            {% if feature.enabled %}
+                                                <i class="fas fa-power-off"></i>
+                                            {% else %}
+                                                <i class="fas fa-play"></i>
+                                            {% endif %}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No feature flags found for this module</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Modal -->
+<div class="modal fade" id="toggleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% if module.status == 'active' %}
+                        Deactivate Module
+                    {% else %}
+                        Activate Module
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    {% if module.status == 'active' %}
+                        Are you sure you want to deactivate the module "{{ module.name }}"?
+                    {% else %}
+                        Are you sure you want to activate the module "{{ module.name }}"?
+                    {% endif %}
+                </p>
+                
+                {% if not module.status == 'active' and dependency_status %}
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">Dependency Check</h6>
+                        <ul class="mb-0">
+                            {% for dep_id, status in dependency_status.items %}
+                                <li>
+                                    {{ dep_id }}: 
+                                    {% if status %}
+                                        <span class="text-success">OK</span>
+                                    {% else %}
+                                        <span class="text-danger">Not satisfied</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'toggle_module' module_id=module.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="enabled" value="{% if module.status == 'active' %}false{% else %}true{% endif %}">
+                    <button type="submit" class="btn btn-{% if module.status == 'active' %}warning{% else %}success{% endif %}">
+                        {% if module.status == 'active' %}
+                            Deactivate
+                        {% else %}
+                            Activate
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restart Modal -->
+<div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Restart Module</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to restart the module "{{ module.name }}"?</p>
+                <p>This will temporarily interrupt any operations the module is performing.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="#" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">Restart</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Endpoint Modal -->
+<div class="modal fade" id="newEndpointModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New API Endpoint</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="#" method="post" id="newEndpointForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="endpointId" class="form-label">Endpoint ID</label>
+                        <input type="text" class="form-control" id="endpointId" name="id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="endpointPath" class="form-label">Path</label>
+                        <input type="text" class="form-control" id="endpointPath" name="path" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="endpointMethod" class="form-label">Method</label>
+                        <select class="form-select" id="endpointMethod" name="method" required>
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="PATCH">PATCH</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="endpointEnabled" name="enabled" checked>
+                        <label class="form-check-label" for="endpointEnabled">Enabled</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="endpointAuthRequired" name="auth_required" checked>
+                        <label class="form-check-label" for="endpointAuthRequired">Authentication Required</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="endpointRateLimit" class="form-label">Rate Limit (requests per minute)</label>
+                        <input type="number" class="form-control" id="endpointRateLimit" name="rate_limit" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="endpointDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="endpointDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="newEndpointForm" class="btn btn-primary">Add Endpoint</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

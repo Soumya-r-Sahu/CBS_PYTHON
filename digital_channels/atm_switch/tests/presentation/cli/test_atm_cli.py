@@ -13,6 +13,11 @@ from decimal import Decimal
 
 from ....presentation.cli.atm_interface import AtmCli
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AtmCliTests(unittest.TestCase):
     """Test cases for ATM CLI interface"""

@@ -10,6 +10,11 @@ import sqlite3
 from ...domain.entities.mobile_transaction import MobileTransaction, TransactionStatus, TransactionType
 from ...application.interfaces.mobile_transaction_repository_interface import MobileTransactionRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SQLMobileTransactionRepository(MobileTransactionRepositoryInterface):
     """SQLite implementation of the mobile transaction repository."""

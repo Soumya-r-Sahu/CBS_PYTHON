@@ -13,6 +13,11 @@ from uuid import UUID
 from ....domain.entities.account import Account, AccountType, AccountStatus
 from ...interfaces.account_repository import AccountRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SqlAccountRepository(AccountRepositoryInterface):
     """SQL implementation of account repository"""

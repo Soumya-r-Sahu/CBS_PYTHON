@@ -1,0 +1,1746 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Core Banking System API",
+    "description": "API for CBS_PYTHON Core Banking System providing comprehensive banking services including account management, transactions, card management, and UPI payments.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "CBS Banking Support",
+      "email": "support@cbs-banking.example.com",
+      "url": "https://www.cbs-banking.example.com/support"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://www.cbs-banking.example.com/license"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.bank.example.com/api/v1",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication operations"
+    },
+    {
+      "name": "accounts",
+      "description": "Account management operations"
+    },
+    {
+      "name": "customers",
+      "description": "Customer profile and management"
+    },
+    {
+      "name": "transactions",
+      "description": "Transaction and payment operations"
+    },
+    {
+      "name": "cards",
+      "description": "Card management operations"
+    },
+    {
+      "name": "upi",
+      "description": "UPI payment operations"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Authenticate a user",
+        "description": "Authenticates a user and returns a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many login attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Logout current user",
+        "description": "Invalidates the user's JWT token.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully logged out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully logged out"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts": {
+      "get": {
+        "tags": ["accounts"],
+        "summary": "Get all accounts",
+        "description": "Returns a list of accounts for the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of accounts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}": {
+      "get": {
+        "tags": ["accounts"],
+        "summary": "Get account details",
+        "description": "Returns details for a specific account.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/balance": {
+      "get": {
+        "tags": ["accounts"],
+        "summary": "Get account balance",
+        "description": "Returns the current balance for a specific account.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountBalance"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/transactions": {
+      "get": {
+        "tags": ["accounts", "transactions"],
+        "summary": "Get account transactions",
+        "description": "Returns a list of transactions for a specific account.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account ID"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter by start date (YYYY-MM-DD)"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter by end date (YYYY-MM-DD)"
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Filter by minimum amount"
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Filter by maximum amount"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["debit", "credit", "all"]
+            },
+            "description": "Filter by transaction type"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of transactions per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of transactions",
+            "headers": {
+              "X-Pagination": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Pagination information in JSON format"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Transaction"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions/transfer": {
+      "post": {
+        "tags": ["transactions"],
+        "summary": "Create a new transfer",
+        "description": "Creates a new transfer between accounts.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transfer created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid transfer data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions/{transactionId}/status": {
+      "get": {
+        "tags": ["transactions"],
+        "summary": "Get transaction status",
+        "description": "Returns the status of a specific transaction.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "transactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Transaction ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/profile": {
+      "get": {
+        "tags": ["customers"],
+        "summary": "Get customer profile",
+        "description": "Returns the profile of the authenticated customer.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["customers"],
+        "summary": "Update customer profile",
+        "description": "Updates the profile of the authenticated customer.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerProfileUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid profile data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards": {
+      "get": {
+        "tags": ["cards"],
+        "summary": "Get all cards",
+        "description": "Returns a list of cards for the authenticated customer.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cards",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Card"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards/{cardId}": {
+      "get": {
+        "tags": ["cards"],
+        "summary": "Get card details",
+        "description": "Returns details for a specific card.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Card ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Card details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards/{cardId}/status": {
+      "put": {
+        "tags": ["cards"],
+        "summary": "Update card status",
+        "description": "Updates the status of a specific card (activate, deactivate, block).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Card ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CardStatusUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Card status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upi/accounts": {
+      "get": {
+        "tags": ["upi"],
+        "summary": "Get UPI-linked accounts",
+        "description": "Returns a list of accounts linked to UPI for the authenticated customer.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of UPI-linked accounts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UpiAccount"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upi/pay": {
+      "post": {
+        "tags": ["upi"],
+        "summary": "Create UPI payment",
+        "description": "Creates a new UPI payment.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpiPaymentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "UPI payment initiated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpiPaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upi/verify/{upiId}": {
+      "get": {
+        "tags": ["upi"],
+        "summary": "Verify UPI ID",
+        "description": "Verifies if a UPI ID exists and is active.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "upiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "UPI ID to verify"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "UPI ID verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpiVerificationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "API health check",
+        "description": "Returns the health status of the API.",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "Banking API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "securePassword123"
+          }
+        },
+        "required": ["username", "password"]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "cust_12345"
+              },
+              "username": {
+                "type": "string",
+                "example": "johndoe"
+              },
+              "name": {
+                "type": "string",
+                "example": "John Doe"
+              },
+              "email": {
+                "type": "string",
+                "example": "john.doe@example.com"
+              }
+            }
+          },
+          "expiresIn": {
+            "type": "integer",
+            "example": 3600
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "INVALID_CREDENTIALS"
+          },
+          "message": {
+            "type": "string",
+            "example": "Invalid username or password"
+          },
+          "status": {
+            "type": "integer",
+            "example": 401
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-18T12:00:00Z"
+          }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "cust_12345"
+          },
+          "accountNumber": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "accountType": {
+            "type": "string",
+            "enum": ["savings", "current", "fixed_deposit", "recurring_deposit", "loan"],
+            "example": "savings"
+          },
+          "balance": {
+            "type": "number",
+            "format": "double",
+            "example": 5000.75
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "frozen", "closed"],
+            "example": "active"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-01-15T10:30:00Z"
+          }
+        }
+      },
+      "AccountDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Account"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "branch": {
+                "type": "string",
+                "example": "Main Branch"
+              },
+              "ifscCode": {
+                "type": "string",
+                "example": "CBSB0001234"
+              },
+              "interestRate": {
+                "type": "number",
+                "format": "double",
+                "example": 3.5
+              },
+              "nomineeDetails": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Jane Doe"
+                  },
+                  "relationship": {
+                    "type": "string",
+                    "example": "Spouse"
+                  }
+                }
+              },
+              "availableBalance": {
+                "type": "number",
+                "format": "double",
+                "example": 4800.50
+              },
+              "holdAmount": {
+                "type": "number",
+                "format": "double",
+                "example": 200.25
+              }
+            }
+          }
+        ]
+      },
+      "AccountBalance": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "accountNumber": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "currentBalance": {
+            "type": "number",
+            "format": "double",
+            "example": 5000.75
+          },
+          "availableBalance": {
+            "type": "number",
+            "format": "double",
+            "example": 4800.50
+          },
+          "holdAmount": {
+            "type": "number",
+            "format": "double",
+            "example": 200.25
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-18T12:05:30Z"
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "txn_12345"
+          },
+          "accountId": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["debit", "credit"],
+            "example": "debit"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 500.00
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
+          },
+          "description": {
+            "type": "string",
+            "example": "Payment to Grocery Store"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed", "failed", "reversed"],
+            "example": "completed"
+          },
+          "reference": {
+            "type": "string",
+            "example": "REF123456"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-17T15:30:00Z"
+          },
+          "balanceAfter": {
+            "type": "number",
+            "format": "double",
+            "example": 4500.75
+          },
+          "category": {
+            "type": "string",
+            "example": "Shopping"
+          },
+          "counterparty": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "City Grocers"
+              },
+              "accountNumber": {
+                "type": "string",
+                "example": "9876543210"
+              },
+              "ifscCode": {
+                "type": "string",
+                "example": "CITY0001234"
+              }
+            }
+          }
+        }
+      },
+      "TransferRequest": {
+        "type": "object",
+        "properties": {
+          "fromAccount": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "toAccount": {
+            "type": "string",
+            "example": "acc_67890"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 1000.00
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
+          },
+          "description": {
+            "type": "string",
+            "example": "Rent payment"
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2023-05-20"
+          }
+        },
+        "required": ["fromAccount", "toAccount", "amount"]
+      },
+      "TransferResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "example": "txn_12345"
+          },
+          "fromAccount": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "toAccount": {
+            "type": "string",
+            "example": "acc_67890"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 1000.00
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed", "failed"],
+            "example": "pending"
+          },
+          "reference": {
+            "type": "string",
+            "example": "REF123456"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-18T12:10:00Z"
+          },
+          "fees": {
+            "type": "number",
+            "format": "double",
+            "example": 5.00
+          }
+        }
+      },
+      "TransactionStatus": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "example": "txn_12345"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed", "reversed"],
+            "example": "completed"
+          },
+          "message": {
+            "type": "string",
+            "example": "Transaction successful"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-18T12:15:30Z"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "processed_at": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2023-05-18T12:12:45Z"
+              },
+              "settlement_status": {
+                "type": "string",
+                "example": "settled"
+              }
+            }
+          }
+        }
+      },
+      "CustomerProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cust_12345"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 9876543210"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date",
+            "example": "1985-05-15"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "line1": {
+                "type": "string",
+                "example": "123 Main St"
+              },
+              "line2": {
+                "type": "string",
+                "example": "Apt 4B"
+              },
+              "city": {
+                "type": "string",
+                "example": "Mumbai"
+              },
+              "state": {
+                "type": "string",
+                "example": "Maharashtra"
+              },
+              "postalCode": {
+                "type": "string",
+                "example": "400001"
+              },
+              "country": {
+                "type": "string",
+                "example": "India"
+              }
+            }
+          },
+          "kycStatus": {
+            "type": "string",
+            "enum": ["pending", "verified", "rejected"],
+            "example": "verified"
+          },
+          "customerSince": {
+            "type": "string",
+            "format": "date",
+            "example": "2020-01-10"
+          }
+        }
+      },
+      "CustomerProfileUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.new@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 9876543210"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "line1": {
+                "type": "string",
+                "example": "456 New St"
+              },
+              "line2": {
+                "type": "string",
+                "example": "Apt 7C"
+              },
+              "city": {
+                "type": "string",
+                "example": "Mumbai"
+              },
+              "state": {
+                "type": "string",
+                "example": "Maharashtra"
+              },
+              "postalCode": {
+                "type": "string",
+                "example": "400002"
+              },
+              "country": {
+                "type": "string",
+                "example": "India"
+              }
+            }
+          }
+        }
+      },
+      "Card": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "card_12345"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "cust_12345"
+          },
+          "accountId": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "cardType": {
+            "type": "string",
+            "enum": ["debit", "credit", "prepaid"],
+            "example": "debit"
+          },
+          "cardNetwork": {
+            "type": "string",
+            "enum": ["visa", "mastercard", "rupay", "amex"],
+            "example": "visa"
+          },
+          "nameOnCard": {
+            "type": "string",
+            "example": "JOHN DOE"
+          },
+          "maskedCardNumber": {
+            "type": "string",
+            "example": "4XXX XXXX XXXX 1234"
+          },
+          "expiryMonth": {
+            "type": "integer",
+            "example": 5
+          },
+          "expiryYear": {
+            "type": "integer",
+            "example": 2027
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "blocked", "expired"],
+            "example": "active"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2022-05-10"
+          }
+        }
+      },
+      "CardDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Card"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cardLimit": {
+                "type": "number",
+                "format": "double",
+                "example": 50000
+              },
+              "availableLimit": {
+                "type": "number",
+                "format": "double",
+                "example": 45000
+              },
+              "atmLimit": {
+                "type": "number",
+                "format": "double",
+                "example": 25000
+              },
+              "onlineLimit": {
+                "type": "number",
+                "format": "double",
+                "example": 20000
+              },
+              "contactlessLimit": {
+                "type": "number",
+                "format": "double",
+                "example": 5000
+              },
+              "recentTransactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "txn_67890"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 1500.00
+                    },
+                    "merchant": {
+                      "type": "string",
+                      "example": "Amazon.in"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2023-05-16T14:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CardStatusUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "blocked"],
+            "example": "blocked"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Card lost"
+          }
+        },
+        "required": ["status"]
+      },
+      "UpiAccount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "upi_12345"
+          },
+          "accountId": {
+            "type": "string",
+            "example": "acc_12345"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "cust_12345"
+          },
+          "upiId": {
+            "type": "string",
+            "example": "johndoe@cbs"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive"],
+            "example": "active"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-10-15T12:00:00Z"
+          },
+          "linkedAccount": {
+            "type": "object",
+            "properties": {
+              "accountNumber": {
+                "type": "string",
+                "example": "1234567890"
+              },
+              "accountType": {
+                "type": "string",
+                "example": "savings"
+              },
+              "bankName": {
+                "type": "string",
+                "example": "CBS Banking"
+              }
+            }
+          }
+        }
+      },
+      "UpiPaymentRequest": {
+        "type": "object",
+        "properties": {
+          "fromUpiId": {
+            "type": "string",
+            "example": "johndoe@cbs"
+          },
+          "toUpiId": {
+            "type": "string",
+            "example": "merchant@otherbank"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 2500.00
+          },
+          "note": {
+            "type": "string",
+            "example": "Payment for groceries"
+          },
+          "mpin": {
+            "type": "string",
+            "format": "password",
+            "example": "1234"
+          }
+        },
+        "required": ["fromUpiId", "toUpiId", "amount", "mpin"]
+      },
+      "UpiPaymentResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "example": "upi_txn_12345"
+          },
+          "fromUpiId": {
+            "type": "string",
+            "example": "johndoe@cbs"
+          },
+          "toUpiId": {
+            "type": "string",
+            "example": "merchant@otherbank"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 2500.00
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "success", "failed"],
+            "example": "success"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-18T13:45:30Z"
+          },
+          "referenceId": {
+            "type": "string",
+            "example": "UPI123456789"
+          }
+        }
+      },
+      "UpiVerificationResponse": {
+        "type": "object",
+        "properties": {
+          "upiId": {
+            "type": "string",
+            "example": "merchant@otherbank"
+          },
+          "exists": {
+            "type": "boolean",
+            "example": true
+          },
+          "name": {
+            "type": "string",
+            "example": "City Grocers"
+          },
+          "verified": {
+            "type": "boolean",
+            "example": true
+          },
+          "bank": {
+            "type": "string",
+            "example": "Other Bank"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-18T13:50:00Z"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

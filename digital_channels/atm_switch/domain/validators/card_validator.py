@@ -8,6 +8,11 @@ import re
 from typing import Dict, Any
 from datetime import datetime
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class CardValidator:
     """Validator for ATM cards"""
     

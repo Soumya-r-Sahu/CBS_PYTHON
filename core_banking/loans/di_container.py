@@ -33,6 +33,11 @@ from .infrastructure.services.file_system_document_storage import FileSystemDocu
 # Database Connection
 from ..database.python.db_connection import get_database_connection
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class LoansContainer(containers.DeclarativeContainer):
     """

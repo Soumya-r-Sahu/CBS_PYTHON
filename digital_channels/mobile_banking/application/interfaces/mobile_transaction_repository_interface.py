@@ -9,6 +9,11 @@ from datetime import datetime
 
 from ...domain.entities.mobile_transaction import MobileTransaction
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class MobileTransactionRepositoryInterface(ABC):
     """Interface for mobile transaction repository operations."""

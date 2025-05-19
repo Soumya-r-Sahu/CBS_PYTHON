@@ -10,6 +10,11 @@ import sqlite3
 from ...domain.entities.mobile_session import MobileBankingSession
 from ...application.interfaces.mobile_session_repository_interface import MobileSessionRepositoryInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SQLMobileSessionRepository(MobileSessionRepositoryInterface):
     """SQLite implementation of the mobile session repository."""

@@ -13,11 +13,11 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from utils.lib.packages import import_module
-            DatabaseConnection = import_module("database.python.connection").DatabaseConnection
+DatabaseConnection = import_module("database.python.connection").DatabaseConnection
 from database.db_manager import get_db_session
 
 # Import workflow utilities
-from tests.e2e.db_workflow_utils import (
+from Tests.e2e.db_workflow_utils import (
     setup_complete_test_workflow, 
     cleanup_test_workflow,
     create_test_customer,

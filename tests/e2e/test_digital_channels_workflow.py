@@ -28,7 +28,7 @@ from digital_channels.atm_switch.card_manager import register_card, activate_car
 from digital_channels.atm_switch.transaction_processor import process_atm_transaction
 
 # Import from utils
-from tests.e2e.db_workflow_utils import (
+from Tests.e2e.db_workflow_utils import (
     create_test_customer,
     create_test_account,
     clean_up_test_data

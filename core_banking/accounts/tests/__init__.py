@@ -1,3 +1,7 @@
 """
-Accounts module tests package.
+tests module
+
+Part of the CBS_PYTHON Core Banking System.
 """
+
+# Package initialization

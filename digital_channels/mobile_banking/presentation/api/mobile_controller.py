@@ -13,6 +13,11 @@ from ...application.use_cases.transaction_management_use_case import Transaction
 from ...application.use_cases.user_management_use_case import UserManagementUseCase
 from ...domain.entities.mobile_transaction import TransactionType
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 logger = logging.getLogger(__name__)
 

@@ -7,6 +7,11 @@ Handles sending notifications to customers through various channels.
 import logging
 from typing import Optional, Dict, Any, List
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 logger = logging.getLogger(__name__)
 
 class NotificationService:

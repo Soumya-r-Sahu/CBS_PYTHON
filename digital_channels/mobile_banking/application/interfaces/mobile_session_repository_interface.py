@@ -8,6 +8,11 @@ from uuid import UUID
 
 from ...domain.entities.mobile_session import MobileBankingSession
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class MobileSessionRepositoryInterface(ABC):
     """Interface for mobile session repository operations."""

@@ -8,6 +8,11 @@ from typing import Dict, Any
 
 from ..interfaces import AtmRepository, NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class CheckBalanceUseCase:
     """Use case for checking account balance via ATM"""

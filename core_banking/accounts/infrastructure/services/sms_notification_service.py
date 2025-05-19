@@ -11,6 +11,11 @@ from typing import Dict, Any, Optional
 
 from ...interfaces.notification_service import NotificationServiceInterface
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SmsNotificationService(NotificationServiceInterface):
     """SMS implementation of notification service"""

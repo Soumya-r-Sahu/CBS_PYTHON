@@ -21,6 +21,11 @@ sys.path.append(project_root)
 
 from core_banking.customer_management.presentation.cli.customer_management_cli import CustomerManagementCli
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 # Session timeout in seconds (5 minutes)
 SESSION_TIMEOUT = 300
 

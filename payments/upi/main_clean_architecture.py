@@ -36,7 +36,11 @@ def get_config():
         'PORT': 5000,
         'DEBUG': False,
         'ENVIRONMENT': 'development',
-        'USE_MOCK': True
+        'USE_MOCK': True,
+        'MONITORING_ENABLED': True,
+        'NPCI_GATEWAY_URL': 'https://npci-mock.bank.local/upi',
+        'NPCI_MERCHANT_ID': 'BANK001',
+        'TRANSACTION_TIMEOUT_SECONDS': 30
     }
 
 
@@ -96,16 +100,40 @@ def initialize_module() -> Dict[str, Any]:
     # Get configuration
     config = get_config()
     
-    # Check configuration
-    env_name = config.get('ENVIRONMENT', 'development')
-    is_mock = config.get('USE_MOCK', True)
+    # Initialize container and services
+    container = UpiDiContainer(config)
     
-    logger.info(f"UPI Module - Environment: {env_name}, Mock Mode: {is_mock}")
+    # Initialize transaction repository (creates DB tables if needed)
+    repository = container.get_transaction_repository()
+    
+    # Initialize reconciliation service and run initial reconciliation
+    if config.get('MONITORING_ENABLED', True):
+        try:
+            reconciliation_service = container.get_reconciliation_service()
+            reconciliation_stats = reconciliation_service.reconcile_pending_transactions()
+            logger.info(f"Initial reconciliation complete: {reconciliation_stats}")
+        except Exception as e:
+            logger.error(f"Error during initial reconciliation: {str(e)}")
+    
+    # Initialize gateway service
+    gateway_service = container.get_gateway_service()
+    logger.info(f"NPCI Gateway service initialized with URL: {config.get('NPCI_GATEWAY_URL')}")
+    
+    # Initialize fraud detection
+    fraud_detection_service = container.get_fraud_detection_service()
+    logger.info("Fraud detection service initialized")
     
     return {
-        "status": "initialized",
-        "environment": env_name,
-        "mock_mode": is_mock
+        "status": "success",
+        "module": "UPI",
+        "environment": config.get('ENVIRONMENT', 'development'),
+        "features": {
+            "send_money": True,
+            "receive_money": True,
+            "transaction_history": True,
+            "fraud_detection": True,
+            "reconciliation": True
+        }
     }
 
 

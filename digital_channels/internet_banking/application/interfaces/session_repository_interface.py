@@ -8,6 +8,11 @@ from uuid import UUID
 
 from ...domain.entities.session import InternetBankingSession
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class SessionRepositoryInterface(ABC):
     """Interface for session repository operations."""

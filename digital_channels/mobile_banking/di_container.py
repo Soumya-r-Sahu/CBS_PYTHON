@@ -22,6 +22,11 @@ from .infrastructure.repositories.sql_mobile_transaction_repository import SQLMo
 from .infrastructure.services.sql_audit_log_service import SQLAuditLogService
 from .infrastructure.services.sms_notification_service import SMSNotificationService
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 # Presentation layer (will be added later)
 
 

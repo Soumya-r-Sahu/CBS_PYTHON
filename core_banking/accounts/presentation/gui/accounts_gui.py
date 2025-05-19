@@ -21,6 +21,11 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QObject
 
 from ..di_container import container
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class AccountsMainWindow(QMainWindow):
     """Main window for the accounts GUI application"""

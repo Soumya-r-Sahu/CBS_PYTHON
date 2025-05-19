@@ -1,6 +1,49 @@
 """
-UPI Payment Service - Core functionality for UPI transactions
-With thread-safety improvements and race condition fixes
+UPI Payment Service Module for Core Banking System
+
+This module provides comprehensive UPI (Unified Payments Interface) payment processing
+functionality with thread-safety and cross-process synchronization. It implements the
+core services required for UPI transactions including registration, verification, 
+processing, and transaction history.
+
+Key Features:
+-------------
+1. Thread-safe singleton implementation for consistent access
+2. File-based locking for cross-process synchronization
+3. Environment-specific behavior (production, development, test)
+4. Comprehensive transaction lifecycle management
+5. Race condition prevention through multiple locking mechanisms
+6. Daily transaction aggregation for reporting
+7. Fault-tolerant file operations with retry logic
+
+Transaction Flow:
+----------------
+1. User Registration: Register a user with UPI service
+2. Transaction Initiation: Begin a new payment
+3. Verification: Confirm PIN and authenticate
+4. Processing: Process the payment through backend systems
+5. Completion: Finalize the transaction with success/failure status
+6. Reporting: Record transaction in daily ledger
+
+Environment Handling:
+--------------------
+- Production: Strict validation, higher limits, minimal logging
+- Development: Mock mode enabled, medium limits, detailed logging
+- Test: Mock mode enabled, lower limits, detailed logging
+
+Thread Safety:
+-------------
+This implementation uses a combination of Python threading locks and
+file-based locks to ensure thread safety both within a single process
+and across multiple processes.
+
+Usage Examples:
+--------------
+>>> service = UpiPaymentService()
+>>> user = service.register_user("123456789", "9876543210", "user@upi", "Test User")
+>>> tx = service.initiate_transaction("user@upi", "merchant@upi", 500.00, "Payment")
+>>> verified_tx = service.verify_transaction(tx['transaction_id'], True)
+>>> result = service.complete_transaction(tx['transaction_id'], "success")
 """
 import json
 import os
@@ -10,7 +53,7 @@ import threading
 import fcntl
 import time
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union, Tuple
 from colorama import init, Fore, Style
 from pathlib import Path
 

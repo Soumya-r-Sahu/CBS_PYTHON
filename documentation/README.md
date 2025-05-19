@@ -2,40 +2,55 @@
 
 <div align="center">
 
-![Documentation Status](https://img.shields.io/badge/Documentation-85%25%20Complete-green)
-[![GitHub license](https://img.shields.io/github/license/Soumya-r-Sahu/CBS_PYTHON?color=blue)](https://github.com/Soumya-r-Sahu/CBS_PYTHON/blob/main/LICENSE)
-[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/Soumya-r-Sahu/CBS_PYTHON/blob/main/CONTRIBUTING.md)
+![Documentation Status](https://img.shields.io/badge/Documentation-100%25%20Complete-green)
 
 </div>
 
-This directory contains all the documentation for the Core Banking System, organized by type:
+Welcome to the Core Banking System (CBS_PYTHON) documentation. This directory contains all essential documentation organized in a simplified structure.
 
 ## 📂 Directory Structure
 
 ```
-documentation/
-├── api/                       # API interface documentation
-├── architecture_diagrams/     # System architecture diagrams
-├── clean_architecture/        # Clean Architecture implementation guides
-├── cli/                       # Command Line Interface documentation
-├── developer_guides/          # Technical guides for developers
-├── system_configuration/      # System configuration details
-├── technical_standards/       # Technical specifications and standards
-└── user_guides/               # End-user documentation
+Documentation/
+├── technical/              # Technical documentation for developers
+│   ├── standards/         # Technical specifications and standards
+│   ├── guides/            # Implementation and development guides
+│   └── development/       # Development-specific documentation
+│
+├── user/                   # User manuals and guides
+│   ├── manuals/           # Detailed user manuals by role
+│   ├── tutorials/         # Step-by-step tutorials
+│   └── faq/               # Frequently asked questions
+│
+├── architecture/           # System architecture and design documents
+│   ├── diagrams/          # Architecture diagrams and visuals
+│   ├── design/            # Design specifications
+│   └── patterns/          # Design patterns and implementations
+│
+└── api/                    # API documentation and integration guides
+    ├── reference/         # API reference documentation
+    ├── integration/       # Integration guides
+    └── versioning/        # API versioning information
 ```
+
+## Overview
+
+The Core Banking System (CBS_PYTHON) is a comprehensive banking solution that provides all essential banking functions including account management, transactions, loans, and digital banking channels.
+
+## Getting Started
+
+For installation and setup instructions, please refer to the main README.md file in the project root directory.
+
+Last updated: May 19, 2025
 
 ## 🔍 Documentation Categories
 
-| Category | Description | Primary Audience | Formats |
-|----------|-------------|-----------------|---------|
-| **📘 API** | OpenAPI specifications, endpoint documentation | Developers, Integrators | Markdown, YAML |
-| **🏗️ Architecture Diagrams** | System architecture and component diagrams | Architects, Developers | PNG, Draw.io |
-| **🧩 Clean Architecture** | Implementation guides and principles | Developers | Markdown |
-| **💻 CLI** | Command-line interface documentation | Operators, Developers | Markdown |
-| **👨‍💻 Developer Guides** | Implementation instructions, coding standards | Developers | Markdown |
-| **⚙️ System Configuration** | Configuration files, environment setup | DevOps, Operators | Markdown, YAML |
-| **📊 Technical Standards** | Specifications, protocols, standards | Developers, Architects | Markdown |
-| **🔰 User Guides** | Quick-start guides for different user roles | End Users | Markdown |
+| Category | Description | Primary Audience |
+|----------|-------------|-----------------|
+| **🧪 Technical** | Development standards, implementation guides | Developers |
+| **👥 User** | User manuals, tutorials, FAQ | End Users, Administrators |
+| **🏗️ Architecture** | System design, patterns, diagrams | Architects, Developers |
+| **🔌 API** | API references, integration guides | Integrators, Developers |
 
 ## 📋 Documentation Standards
 
@@ -62,7 +77,7 @@ flowchart TD
     D & E & F & G --> H[Review Documentation]
     H --> I[Publish Documentation]
     I --> J[Notify Stakeholders]
-    
+
     style A fill:#f9d5e5,stroke:#333,stroke-width:2px
     style B fill:#eeeeee,stroke:#333,stroke-width:2px
     style C fill:#d3e5ef,stroke:#333,stroke-width:2px
@@ -77,7 +92,7 @@ flowchart TD
 ```mermaid
 graph LR
     A[Identify Need] --> B[Research] --> C[Draft] --> D[Review] --> E[Publish] --> F[Maintain]
-    
+
     style A fill:#ffcce6,stroke:#333,stroke-width:2px
     style B fill:#ccf5ff,stroke:#333,stroke-width:2px
     style C fill:#ecffcc,stroke:#333,stroke-width:2px
@@ -121,10 +136,23 @@ Before considering documentation complete, ensure:
 
 - [Clean Architecture Implementation Progress](../CLEAN_ARCHITECTURE_PROGRESS.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)
-- [CLI User Guide](cli/cli_user_guide.md)
-- [API Documentation](api/api_overview.md)
-- [Developer Setup Guide](developer_guides/getting_started.md)
-- [System Configuration](system_configuration/README.md)
+- [CLI User Guide](user/manuals/CLI_USER_GUIDE.md)
+- [API Documentation](api/README.md)
+- [Developer Setup Guide](technical/guides/GETTING_STARTED.md)
+- [Migration Summary](MIGRATION_SUMMARY.md)
+
+## 🛠️ Documentation Tools
+
+The following tools are available for maintaining the documentation:
+
+1. `maintain_documentation.py` - Utility for creating and managing documentation
+   - Create new documents: `python maintain_documentation.py create <type> <name>`
+   - Validate structure: `python maintain_documentation.py validate`
+   - List documents: `python maintain_documentation.py list [type]`
+
+2. `fix_broken_links.py` - Scan and fix broken links
+
+3. `validate_content.py` - Analyze content quality and completeness
 
 ## 🌟 Contributors
 
@@ -139,9 +167,9 @@ Before considering documentation complete, ensure:
 ---
 
 <div align="center">
-  
+
   [![Profile Views](https://komarev.com/ghpvc/?username=Soumya-r-Sahu&label=Documentation%20views&color=0e75b6&style=flat)](https://github.com/Soumya-r-Sahu/CBS_PYTHON)
-  
+
   **Made with ❤️ by the CBS Python Team**
-  
+
 </div>

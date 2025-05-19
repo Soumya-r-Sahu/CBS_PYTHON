@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     from config import DATABASE_CONFIG
     from utils.lib.packages import import_module
-            DatabaseConnection = import_module("database.python.connection").DatabaseConnection
+    DatabaseConnection = import_module("database.python.connection").DatabaseConnection
 except ImportError:
     print("Warning: Could not import DatabaseConnection")
     # Create a placeholder class

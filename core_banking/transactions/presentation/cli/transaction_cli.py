@@ -29,6 +29,11 @@ from ...infrastructure.services.default_notification_service import DefaultNotif
 # Import from other modules
 from core_banking.utils.config import get_environment_name
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 class TransactionCLI:
     """Command-line interface for transaction processing"""
     

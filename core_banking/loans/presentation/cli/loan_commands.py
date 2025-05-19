@@ -13,6 +13,11 @@ from ...application.use_cases.loan_application_use_case import LoanApplicationUs
 from ...application.use_cases.loan_approval_use_case import LoanApprovalUseCase, LoanApprovalError
 from ...application.use_cases.loan_disbursement_use_case import LoanDisbursementUseCase, LoanDisbursementError
 from ...application.services.loan_calculator_service import LoanCalculatorService
+
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 from ...di_container import (
     get_loan_application_use_case,
     get_loan_approval_use_case,

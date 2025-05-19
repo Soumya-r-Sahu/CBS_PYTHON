@@ -1,3 +1,31 @@
+"""
+Core Banking System Logging Module
+
+This module provides a centralized, thread-safe logging configuration for all
+components of the Core Banking System. It sets up properly configured loggers
+with appropriate handlers based on the environment.
+
+Features:
+- Asynchronous logging using queue handlers for better performance
+- Automatic log rotation with compression of old logs
+- Environment-specific log levels and formatting
+- Console and file-based logging
+- Error tracking and alerting options
+
+Usage:
+    from utils.logging import get_logger
+    
+    # Get a logger for your module
+    logger = get_logger(__name__)
+    
+    # Use standard logging levels
+    logger.debug("Detailed debugging information")
+    logger.info("Normal operation information")
+    logger.warning("Warning message")
+    logger.error("Error message")
+    logger.critical("Critical error message")
+"""
+
 import os
 import sys
 import queue
@@ -8,17 +36,19 @@ from pathlib import Path
 from logging.handlers import TimedRotatingFileHandler, QueueHandler, QueueListener
 
 # Add parent directory to path if needed for importing from config
-parent_dir = str(Path(__file__).parent.parent)
-if parent_dir not in sys.path:
-    # Commented out direct sys.path modification
-    # sys.path.insert(0, parent_dir)
+try:
     from utils.lib.packages import fix_path
-fix_path()
+    fix_path()  # Ensures the project root is in sys.path
+except ImportError:
+    # Fallback if the import manager is not available
+    parent_dir = str(Path(__file__).parent.parent)
+    if parent_dir not in sys.path:
+        sys.path.insert(0, parent_dir)
 
 try:
-    from app.config.environment import is_production, is_development, is_test, is_debug_enabled
+    from utils.config.environment import is_production, is_development, is_test, is_debug_enabled
 except ImportError:
-    # Fallback environment detection
+    # Fallback environment detection if module import fails
     env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
     def is_production(): return env_str == "production"
     def is_development(): return env_str == "development"

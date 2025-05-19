@@ -2,12 +2,19 @@
 NEFT Payment Utilities - Core Banking System
 
 This module provides utility functions for NEFT payments.
+It now uses the consolidated utilities from the utils.common module.
 """
 import logging
 from typing import Dict, Any, List
-import hashlib
-from datetime import datetime
 import json
+
+# Import common utilities
+from utils.payment_utils import generate_neft_reference as common_generate_neft_reference
+from utils.common import (
+    format_ifsc_code as common_format_ifsc_code,
+    sanitize_account_number as common_sanitize_account_number,
+    mask_account_number as common_mask_account_number
+)
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -25,17 +32,8 @@ def generate_neft_reference(account_number: str, amount: float, timestamp: str =
     Returns:
         str: Unique payment reference
     """
-    if timestamp is None:
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        
-    # Combine inputs and create a hash
-    data = f"{account_number}:{amount}:{timestamp}"
-    hash_value = hashlib.sha256(data.encode()).hexdigest()[:10]
-    
-    # Format: REFyymmddHHMMSS-HASH
-    reference = f"REF{timestamp[-14:]}-{hash_value.upper()}"
-    
-    return reference
+    # Use the common implementation
+    return common_generate_neft_reference(account_number, amount, timestamp)
 
 
 def format_ifsc_code(ifsc_code: str) -> str:
@@ -48,10 +46,8 @@ def format_ifsc_code(ifsc_code: str) -> str:
     Returns:
         str: Formatted IFSC code
     """
-    # Remove spaces and convert to uppercase
-    formatted = ifsc_code.replace(" ", "").upper()
-    
-    return formatted
+    # Use the common implementation
+    return common_format_ifsc_code(ifsc_code)
 
 
 def sanitize_account_number(account_number: str) -> str:
@@ -64,10 +60,8 @@ def sanitize_account_number(account_number: str) -> str:
     Returns:
         str: Sanitized account number
     """
-    # Remove spaces and special characters
-    sanitized = ''.join(c for c in account_number if c.isalnum())
-    
-    return sanitized
+    # Use the common implementation
+    return common_sanitize_account_number(account_number)
 
 
 def mask_account_number(account_number: str) -> str:
@@ -80,11 +74,5 @@ def mask_account_number(account_number: str) -> str:
     Returns:
         str: Masked account number
     """
-    # Keep first 2 and last 4 digits visible
-    if len(account_number) > 6:
-        masked = account_number[:2] + '*' * (len(account_number) - 6) + account_number[-4:]
-    else:
-        # If account number is too short, just show last 4
-        masked = '*' * (len(account_number) - 4) + account_number[-4:]
-    
-    return masked
+    # Use the common implementation
+    return common_mask_account_number(account_number)

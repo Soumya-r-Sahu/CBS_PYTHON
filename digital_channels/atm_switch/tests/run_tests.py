@@ -9,8 +9,9 @@ import sys
 import os
 from pathlib import Path
 
-# Ensure the project root is in the path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
 
 # Import test modules
 from tests.presentation.cli.test_atm_cli import AtmCliTests

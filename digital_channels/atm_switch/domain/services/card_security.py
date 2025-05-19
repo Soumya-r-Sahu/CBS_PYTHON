@@ -11,6 +11,11 @@ from typing import Dict, Any, Optional
 
 from ..entities import AtmCard
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class CardSecurityService:
     """Core security logic for ATM cards"""

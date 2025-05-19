@@ -1,26 +1,43 @@
-# database/__init__.py
+# database/python/__init__.py
+"""
+Core Banking System - Database Module
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from utils.config import DATABASE_CONFIG
+This module provides database connectivity, ORM models, and utilities 
+for interacting with the Core Banking System database.
+"""
 
-# Create SQLAlchemy base class
-Base = declarative_base()
+# Import connection components
+from database.python.connection.connection_manager import (
+    engine, Base, SessionLocal, get_db
+)
+from database.python.connection.db_connection import DatabaseConnection
 
-# Create MySQL connection URL from config
-DB_URL = f"mysql+mysqlconnector://{DATABASE_CONFIG['user']}:{DATABASE_CONFIG['password']}@{DATABASE_CONFIG['host']}:{DATABASE_CONFIG['port']}/{DATABASE_CONFIG['database']}"
+# Import models
+from database.python.models import (
+    # Banking models
+    Customer, Account, Transaction, CardDetails, Loan,
+    # International models
+    IBAN, SWIFT, ISOCountry, BankIdentifier, TransactionCorrespondent,
+    # Enum types
+    CustomerStatus, KYCStatus, CustomerSegment, RiskCategory, Gender
+)
 
-# Create engine
-engine = create_engine(DB_URL)
+# Import utilities
+from database.python.utilities import (
+    compare_databases, generate_schema_report,
+    create_backup, restore_backup, migrate_schema
+)
 
-# Create session factory
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Function to get a database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+__all__ = [
+    # Connection components
+    'engine', 'Base', 'SessionLocal', 'get_db', 'DatabaseConnection',
+    
+    # Models
+    'Customer', 'Account', 'Transaction', 'CardDetails', 'Loan',
+    'IBAN', 'SWIFT', 'ISOCountry', 'BankIdentifier', 'TransactionCorrespondent',
+    'CustomerStatus', 'KYCStatus', 'CustomerSegment', 'RiskCategory', 'Gender',
+    
+    # Utilities
+    'compare_databases', 'generate_schema_report',
+    'create_backup', 'restore_backup', 'migrate_schema'
+]

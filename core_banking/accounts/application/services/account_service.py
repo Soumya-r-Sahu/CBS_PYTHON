@@ -16,6 +16,11 @@ from ..use_cases.transfer_funds import TransferFundsUseCase
 from ..use_cases.get_account_details import GetAccountDetailsUseCase
 from ..use_cases.close_account import CloseAccountUseCase
 from ..use_cases.get_account_statement import GetAccountStatementUseCase
+
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 # Import other use cases as needed
 
 

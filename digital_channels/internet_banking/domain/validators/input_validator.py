@@ -5,6 +5,11 @@ Contains validation logic for user inputs.
 import re
 from typing import List, Optional, Tuple
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class InputValidator:
     """Validator for user inputs in the Internet Banking domain."""

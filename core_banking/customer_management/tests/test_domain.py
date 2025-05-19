@@ -9,6 +9,11 @@ from datetime import date, timedelta
 from ...domain.entities.customer import Customer, CustomerType, CustomerStatus, RiskCategory, Address, ContactInformation
 from ...domain.services.kyc_rules_service import KycRulesService
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class TestCustomerEntity(unittest.TestCase):
     """Test cases for the Customer entity"""

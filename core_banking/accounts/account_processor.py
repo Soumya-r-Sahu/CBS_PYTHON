@@ -90,6 +90,11 @@ except ImportError:
         return f"{state_code}{branch_code}{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
 import logging
+
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
 logger = logging.getLogger(__name__)
 
 class AccountProcessor:

@@ -13,12 +13,13 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Import system configuration
+from system_config import IMPLEMENTATION_CONFIG, FEATURE_FLAGS
+USE_SYSTEM_CONFIG = True
+
 # Use centralized import manager
-try:
-    from utils.lib.packages import fix_path, Environment
-    fix_path()  # Ensures the project root is in sys.path
-except ImportError:
-    pass  # No fallback sys.path modification as per new guidelines
+from utils.lib.packages import fix_path, Environment
+fix_path()  # Ensures the project root is in sys.path
 
 # Load environment variables from .env file if it exists
 env_path = Path(__file__).parent / '.env'
@@ -27,32 +28,11 @@ load_dotenv(dotenv_path=env_path)
 # ======================================================================
 # ENVIRONMENT SETTINGS
 # ======================================================================
-# Import environment module with proper fallback for new path structure
-try:
-    from utils.config.environment import (
-        Environment, current_env, debug_mode,
-        is_production, is_development, is_test, is_debug_enabled
-    )
-except ImportError:
-    try:
-        from app.config.environment import (
-            Environment, current_env, debug_mode,
-            is_production, is_development, is_test, is_debug_enabled
-        )
-    except ImportError:
-        class Environment:
-            DEVELOPMENT = "development"
-            TEST = "test"
-            PRODUCTION = "production"
-        env_str = os.environ.get("CBS_ENVIRONMENT", "development").lower()
-        current_env = env_str
-        debug_mode = os.environ.get("CBS_DEBUG", "true").lower() in ("true", "1", "yes")
-        if env_str == "production":
-            debug_mode = False
-        def is_production(): return current_env == Environment.PRODUCTION
-        def is_development(): return current_env == Environment.DEVELOPMENT
-        def is_test(): return current_env == Environment.TEST
-        def is_debug_enabled(): return debug_mode
+# Import environment module
+from utils.config.environment import (
+    Environment, current_env, debug_mode,
+    is_production, is_development, is_test, is_debug_enabled
+)
 
 # For backward compatibility
 ENVIRONMENT = current_env if isinstance(current_env, str) else current_env.value
@@ -72,14 +52,20 @@ DATABASE_CONFIG = {
     'timeout': int(os.environ.get('CBS_DB_TIMEOUT', 30)),
 }
 
-# Legacy database URL format (keeping for reference and backward compatibility)
-DATABASE_URL = os.environ.get('CBS_DATABASE_URL', "sqlite:///database/cbs.db") 
-
 # ======================================================================
 # SECURITY CONFIGURATION
 # ======================================================================
 # Core security settings
-SECRET_KEY = os.environ.get('CBS_SECRET_KEY', "development-insecure-key")
+# Generate a secure random key if none is provided in environment
+if 'CBS_SECRET_KEY' not in os.environ:
+    import secrets
+    print("WARNING: Using auto-generated secret key. Set CBS_SECRET_KEY environment variable in production.")
+    # Generate a secure 32-byte key and convert to hex string
+    auto_generated_key = secrets.token_hex(32)
+else:
+    auto_generated_key = None
+
+SECRET_KEY = os.environ.get('CBS_SECRET_KEY', auto_generated_key)
 ALLOWED_HOSTS = os.environ.get('CBS_ALLOWED_HOSTS', "localhost,127.0.0.1").split(',')
 
 # JWT Authentication settings

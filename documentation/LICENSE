@@ -1,0 +1,54 @@
+                          CBS_PYTHON SOFTWARE LICENSE
+                           Version 1.0, May 18, 2025
+                        Based on Apache License, Version 2.0
+
+Copyright (c) 2025 Soumya Ranjan Sahu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "CBS_PYTHON"), to deal in the Software 
+without restriction, including without limitation the rights to use, copy, modify, merge, 
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons 
+to whom the Software is furnished to do so, subject to the following conditions:
+
+1. The above copyright notice and this permission notice shall be included in all copies 
+   or substantial portions of the Software.
+
+2. Any modifications to the Software must carry prominent notices stating that the files 
+   have been changed, including the nature of the changes.
+
+3. The Software is provided "AS IS", WITHOUT WARRANTY OF ANY KIND, express or implied, 
+   including but not limited to the warranties of merchantability, fitness for a particular 
+   purpose and noninfringement. In no event shall the authors or copyright holders be liable 
+   for any claim, damages or other liability, whether in an action of contract, tort or 
+   otherwise, arising from, out of or in connection with the Software or the use or other 
+   dealings in the Software.
+
+4. This License does not grant permission to use the trade names, trademarks, service marks, 
+   or product names of the Licensor, except as required for reasonable and customary use in 
+   describing the origin of the Work.
+
+5. For attribution, the following text should be included in any derivative works:
+   "Based on CBS_PYTHON by Soumya Ranjan Sahu (https://github.com/Soumya-r-Sahu/CBS_PYTHON)"
+
+For more information on the original Apache License 2.0:
+http://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+ADDITIONAL TERMS FOR ACADEMIC AND EDUCATIONAL USE:
+
+This software was developed as part of academic coursework and is intended to serve as an 
+educational resource. As such:
+
+1. Users are encouraged to study, modify, and learn from the code structure.
+
+2. When using this software for academic or educational purposes, proper citation is 
+   appreciated:
+   
+   "CBS_PYTHON: Core Banking System by Soumya Ranjan Sahu (2025)"
+
+3. Feedback and suggested improvements are welcome and may be submitted through the 
+   project's issue tracker or via direct contact.
+
+END OF TERMS AND CONDITIONS
+

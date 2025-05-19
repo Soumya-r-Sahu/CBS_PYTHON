@@ -11,6 +11,11 @@ from ...domain.entities import AtmSession
 from ...domain.validators import CardValidator
 from ...domain.services import CardSecurityService
 
+# Use centralized import system
+from utils.lib.packages import fix_path
+fix_path()  # Ensures project root is in sys.path
+
+
 
 class ValidateCardUseCase:
     """Use case for validating ATM cards"""
