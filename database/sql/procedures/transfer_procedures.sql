@@ -14,7 +14,7 @@ CREATE PROCEDURE process_fund_transfer(
     IN p_remarks VARCHAR(255),
     IN p_channel VARCHAR(20),
     IN p_user_id VARCHAR(50),
-    OUT p_transaction_id VARCHAR(36),
+    OUT p_transaction_id VARCHAR(30),
     OUT p_status VARCHAR(10),
     OUT p_message VARCHAR(255)
 )
@@ -25,9 +25,8 @@ BEGIN
     DECLARE v_dest_status VARCHAR(20);
     DECLARE v_transaction_date DATETIME;
     DECLARE v_reference_number VARCHAR(20);
-    
     -- Initialize outputs
-    SET p_transaction_id = UUID();
+    SET p_transaction_id = CONCAT('TRX', DATE_FORMAT(NOW(), '%Y%m%d'), LPAD(FLOOR(RAND() * 1000000), 6, '0'));
     SET p_status = 'FAILED';
     SET p_message = 'Transfer failed';
     SET v_transaction_date = NOW();
@@ -76,32 +75,80 @@ BEGIN
         SET balance = balance + p_amount, 
             last_transaction = v_transaction_date
         WHERE account_number = p_destination_account;
-        
         -- Insert into transactions table
         INSERT INTO cbs_transactions (
             transaction_id, 
             transaction_type, 
+            account_number, 
+            counter_account, 
             amount, 
+            currency,
             transaction_date, 
-            source_account, 
-            destination_account, 
-            remarks, 
-            channel, 
+            description, 
             reference_number, 
-            initiated_by, 
-            status
+            transaction_status, 
+            transaction_mode, 
+            remarks, 
+            initiated_by,
+            branch_code,
+            created_at
         ) VALUES (
             p_transaction_id, 
-            p_transfer_type, 
-            p_amount, 
-            v_transaction_date, 
+            'TRANSFER', 
             p_source_account, 
             p_destination_account, 
-            p_remarks, 
-            p_channel, 
+            p_amount, 
+            'INR',
+            v_transaction_date, 
+            CONCAT('Fund transfer to account ', p_destination_account), 
             v_reference_number, 
-            p_user_id, 
-            'SUCCESS'
+            'COMPLETED', 
+            p_channel, 
+            p_remarks, 
+            p_user_id,
+            (SELECT branch_code FROM cbs_accounts WHERE account_number = p_source_account),
+            v_transaction_date
+        );
+        -- Create notification for transfer
+        INSERT INTO cbs_notifications (
+            notification_id,
+            user_id,
+            user_type,
+            title,
+            message,
+            notification_type,
+            status,
+            created_at
+        ) VALUES (
+            UUID(),
+            (SELECT customer_id FROM cbs_accounts WHERE account_number = p_source_account),
+            'CUSTOMER',
+            CONCAT('Fund transfer of ₹', FORMAT(p_amount, 2), ' completed'),
+            CONCAT('Your fund transfer of ₹', FORMAT(p_amount, 2), ' to account ', p_destination_account, ' was successful. Ref: ', v_reference_number),
+            'INFO',
+            'UNREAD',
+            v_transaction_date
+        );
+        
+        -- Notification for recipient
+        INSERT INTO cbs_notifications (
+            notification_id,
+            user_id,
+            user_type,
+            title,
+            message,
+            notification_type,
+            status,
+            created_at
+        ) VALUES (
+            UUID(),
+            (SELECT customer_id FROM cbs_accounts WHERE account_number = p_destination_account),
+            'CUSTOMER',
+            CONCAT('₹', FORMAT(p_amount, 2), ' credited to your account'),
+            CONCAT('Your account has been credited with ₹', FORMAT(p_amount, 2), '. Ref: ', v_reference_number),
+            'INFO',
+            'UNREAD',
+            v_transaction_date
         );
         
         -- Set success response

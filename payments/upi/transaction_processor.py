@@ -17,8 +17,8 @@ from datetime import datetime
 from app.config.config_loader import config
 from app.lib.notification_service import notification_service
 from app.models.models import Transaction, Account, UPITransaction
-from database.python.connection import db_session_scope
-from security.encryption import encrypt_data, decrypt_data
+from database.python.common.database_operations import db_session_scope
+from security.common.encryption import encrypt_data, decrypt_data
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,7 @@ from typing import Dict, Any, List
 import json
 
 # Import common utilities
-from utils.payment_utils import generate_neft_reference as common_generate_neft_reference
+from utils.lib.payment_utils import generate_neft_reference as common_generate_neft_reference
 from utils.common import (
     format_ifsc_code as common_format_ifsc_code,
     sanitize_account_number as common_sanitize_account_number,

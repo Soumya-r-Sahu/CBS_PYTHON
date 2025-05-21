@@ -9,7 +9,7 @@ from typing import Dict, Any, List
 import json
 
 # Import common utilities
-from utils.payment_utils import (
+from utils.lib.payment_utils import (
     generate_rtgs_reference as common_generate_rtgs_reference,
     generate_purpose_code_description as common_generate_purpose_code_description
 )

@@ -11,7 +11,7 @@ from datetime import datetime
 import re
 
 # Import common utilities
-from utils.payment_utils import generate_imps_reference as common_generate_imps_reference
+from utils.lib.payment_utils import generate_imps_reference as common_generate_imps_reference
 from utils.common import (
     format_ifsc_code as common_format_ifsc_code,
     sanitize_account_number as common_sanitize_account_number,

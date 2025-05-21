@@ -14,9 +14,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 # Import database modules
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 from database.db_manager import get_db_session, DatabaseManager
-from database.python.models import Customer, Account, Transaction
+from database.python.common.database_operations import Customer, Account, Transaction
 
 # Import verification utilities
 from Tests.integration.db_verification import verify_database_setup

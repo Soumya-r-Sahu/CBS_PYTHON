@@ -3,7 +3,7 @@ import datetime
 import random
 import string
 try:
-    from database.python.connection import DatabaseConnection
+    from database.python.common.database_operations import DatabaseConnection
 except ImportError:
     # Fallback implementation
     class DatabaseConnection:

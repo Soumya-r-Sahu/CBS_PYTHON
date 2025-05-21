@@ -3,6 +3,16 @@
 ## Overview
 The Human Resources and Enterprise Resource Planning (HR-ERP) module provides comprehensive functionality for managing employees, payroll, recruitment, performance evaluations, and other HR-related processes within the Core Banking System.
 
+## Architecture
+This module is implemented using Clean Architecture principles, with clear separation of concerns across the following layers:
+
+- **Domain Layer**: Core business entities and rules
+- **Application Layer**: Use cases and orchestration
+- **Infrastructure Layer**: Data persistence and external services
+- **Presentation Layer**: User interfaces (API, CLI)
+
+For detailed guidance on the architecture, see [CLEAN_ARCHITECTURE_GUIDE.md](./CLEAN_ARCHITECTURE_GUIDE.md) and [CLEAN_ARCHITECTURE_PROGRESS.md](./CLEAN_ARCHITECTURE_PROGRESS.md).
+
 ## Key Components
 
 ### Employee Management

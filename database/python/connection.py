@@ -14,11 +14,11 @@ from utils.config.environment import get_environment_name, is_production, is_tes
 fix_path()  # Ensures the project root is in sys.path
 
 # Import database type manager
-from utils.database_type_manager import get_database_type, get_connection_string
+from utils.config.database_type_manager import get_database_type, get_connection_string
 DYNAMIC_DB_TYPE = True
 
 # Import database configuration
-from utils.config import DATABASE_CONFIG
+from utils.config.config import DATABASE_CONFIG
 
 # Initialize colorama
 init(autoreset=True)

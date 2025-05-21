@@ -15,7 +15,7 @@ from pathlib import Path
 
 # Try to import from the new location
 try:
-    from utils.config import *
+    from utils.config.config import *
     
     # Issue a deprecation warning
     warnings.warn(

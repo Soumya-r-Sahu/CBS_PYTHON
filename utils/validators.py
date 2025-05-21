@@ -1,13 +1,23 @@
 """
-Input Validation Utilities for Core Banking System.
+Centralized Validation Utilities for Core Banking System.
 
-This module provides validators for various data types used in the banking system,
-including account numbers, customer IDs, transaction details, and more.
+This module provides standardized validation utilities for all CBS modules.
+It implements reusable validation functions for common data types and banking-specific data.
+
+Tags: validation, data_verification
+AI-Metadata:
+    component_type: validator
+    criticality: high
+    purpose: data_validation
+    impact_on_failure: data_integrity_errors
 """
 
 import re
 import logging
-from datetime import datetime
+from datetime import datetime, date
+from typing import Dict, List, Any, Optional, Union, Callable, Tuple
+from decimal import Decimal
+import json
 from colorama import init, Fore, Style
 from pathlib import Path
 import sys
@@ -30,261 +40,443 @@ except ImportError:
 # Configure logger
 logger = logging.getLogger(__name__)
 
-def is_valid_account_number(account_number):
+# Common validation patterns
+ACCOUNT_NUMBER_PATTERN = r'^[0-9]{10,16}$'
+CARD_NUMBER_PATTERN = r'^[0-9]{16}$'
+PAYMENT_REFERENCE_PATTERN = r'^[A-Za-z0-9-]{6,30}$'
+IFSC_CODE_PATTERN = r'^[A-Z]{4}0[A-Z0-9]{6}$'
+UPI_ID_PATTERN = r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$'
+MOBILE_NUMBER_PATTERN = r'^[6-9][0-9]{9}$'  # Indian mobile number pattern
+EMAIL_PATTERN = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+PAN_PATTERN = r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'  # Indian PAN card pattern
+AADHAAR_PATTERN = r'^[2-9][0-9]{11}$'  # Indian Aadhaar number pattern
+
+def validate_account_number(account_number: str) -> Tuple[bool, Optional[str]]:
     """
-    Validate account number format.
+    Validate a bank account number.
     
     Args:
         account_number: The account number to validate
         
     Returns:
-        bool: True if valid, False otherwise
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: pattern
+        business_context: account_identification
+        criticality: high
     """
     if not account_number:
-        return False
-        
-    # Account number should be 8-16 characters, alphanumeric
-    pattern = r'^[A-Z0-9]{8,16}$'
-    return bool(re.match(pattern, str(account_number)))
+        return False, "Account number cannot be empty"
+    
+    # Remove spaces and hyphens
+    account_number = account_number.replace(' ', '').replace('-', '')
+    
+    if not re.match(ACCOUNT_NUMBER_PATTERN, account_number):
+        return False, "Invalid account number format"
+    
+    return True, None
 
-def is_valid_email(email):
+def validate_amount(amount: Union[float, str, Decimal], 
+                   min_limit: float = 0.01, 
+                   max_limit: float = 10000000.0) -> Tuple[bool, Optional[str], float]:
     """
-    Validate email format.
+    Validate a monetary amount.
     
     Args:
-        email: The email to validate
+        amount: The amount to validate
+        min_limit: The minimum allowed amount
+        max_limit: The maximum allowed amount
         
     Returns:
-        bool: True if valid, False otherwise
-    """
-    if not email:
-        return False
+        Tuple of (is_valid, error_message, normalized_amount)
         
-    # Simple email pattern
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return bool(re.match(pattern, str(email)))
-
-def is_valid_phone(phone):
+    AI-Metadata:
+        validation_type: numeric
+        business_context: financial_transaction
+        criticality: high
     """
-    Validate phone number format.
-    
-    Args:
-        phone: The phone number to validate
-        
-    Returns:
-        bool: True if valid, False otherwise
-    """
-    if not phone:
-        return False
-        
-    # Remove any spaces, dashes, or parentheses
-    phone = re.sub(r'[\s\-()]', '', str(phone))
-    
-    # Check for 10-15 digit phone number
-    pattern = r'^[0-9]{10,15}$'
-    return bool(re.match(pattern, phone))
-
-def is_valid_name(name):
-    """
-    Validate name format.
-    
-    Args:
-        name: The name to validate
-        
-    Returns:
-        bool: True if valid, False otherwise
-    """
-    if not name:
-        return False
-        
-    # Name should be 2-50 characters, letters, spaces, hyphens, and apostrophes
-    pattern = r'^[A-Za-z\s\-\']{2,50}$'
-    return bool(re.match(pattern, str(name)))
-
-def is_valid_date(date_str, format="%Y-%m-%d"):
-    """
-    Validate date format.
-    
-    Args:
-        date_str: The date string to validate
-        format: The expected date format
-        
-    Returns:
-        bool: True if valid, False otherwise
-    """
-    if not date_str:
-        return False
-        
     try:
-        datetime.strptime(str(date_str), format)
-        return True
-    except ValueError:
-        return False
+        # Convert to float if it's a string or Decimal
+        if isinstance(amount, str):
+            # Remove commas and other formatting
+            clean_amount = amount.replace(',', '')
+            normalized_amount = float(clean_amount)
+        elif isinstance(amount, Decimal):
+            normalized_amount = float(amount)
+        else:
+            normalized_amount = float(amount)
+        
+        # Check if amount is within allowed range
+        if normalized_amount < min_limit:
+            return False, f"Amount must be at least {min_limit}", normalized_amount
+        
+        if normalized_amount > max_limit:
+            return False, f"Amount exceeds maximum limit of {max_limit}", normalized_amount
+        
+        return True, None, normalized_amount
+    
+    except (ValueError, TypeError):
+        return False, "Invalid amount format", 0.0
 
-def is_valid_card_number(card_number):
+def validate_ifsc_code(ifsc_code: str) -> Tuple[bool, Optional[str]]:
     """
-    Validate credit/debit card number using Luhn algorithm.
+    Validate an IFSC (Indian Financial System Code).
+    
+    Args:
+        ifsc_code: The IFSC code to validate
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: pattern
+        business_context: bank_branch_identification
+        criticality: high
+    """
+    if not ifsc_code:
+        return False, "IFSC code cannot be empty"
+    
+    # Convert to uppercase and remove spaces
+    ifsc_code = ifsc_code.upper().replace(' ', '')
+    
+    if not re.match(IFSC_CODE_PATTERN, ifsc_code):
+        return False, "Invalid IFSC code format"
+    
+    return True, None
+
+def validate_card_number(card_number: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate a credit/debit card number using Luhn algorithm.
     
     Args:
         card_number: The card number to validate
         
     Returns:
-        bool: True if valid, False otherwise
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: algorithm
+        business_context: payment_card
+        criticality: high
     """
     if not card_number:
-        return False
-        
-    # Remove spaces and dashes
-    card_number = re.sub(r'[\s\-]', '', str(card_number))
+        return False, "Card number cannot be empty"
     
-    # Check if all digits and proper length (13-19 digits)
-    if not re.match(r'^[0-9]{13,19}$', card_number):
-        return False
+    # Remove spaces and hyphens
+    card_number = card_number.replace(' ', '').replace('-', '')
     
-    # Luhn algorithm
+    if not re.match(CARD_NUMBER_PATTERN, card_number):
+        return False, "Invalid card number format"
+    
+    # Apply Luhn algorithm (mod 10)
     digits = [int(d) for d in card_number]
     checksum = 0
-    odd_even = len(digits) % 2
     
-    for i, digit in enumerate(digits):
-        if ((i + odd_even) % 2) == 0:
-            doubled = digit * 2
-            checksum += doubled if doubled < 10 else doubled - 9
-        else:
-            checksum += digit
+    for i, digit in enumerate(reversed(digits)):
+        if i % 2 == 1:  # Odd position (0-indexed from right)
+            digit *= 2
+            if digit > 9:
+                digit -= 9
+        checksum += digit
     
-    return checksum % 10 == 0
+    if checksum % 10 != 0:
+        return False, "Invalid card number (checksum failed)"
+    
+    return True, None
 
-def is_valid_cvv(cvv):
+def validate_payment_reference(reference: str) -> Tuple[bool, Optional[str]]:
     """
-    Validate CVV code.
+    Validate a payment reference number.
     
     Args:
-        cvv: The CVV to validate
+        reference: The payment reference to validate
         
     Returns:
-        bool: True if valid, False otherwise
-    """
-    if not cvv:
-        return False
+        Tuple of (is_valid, error_message)
         
-    # CVV should be 3-4 digits
-    pattern = r'^[0-9]{3,4}$'
-    return bool(re.match(pattern, str(cvv)))
-
-def is_valid_pin(pin):
+    AI-Metadata:
+        validation_type: pattern
+        business_context: transaction_identification
+        criticality: medium
     """
-    Validate PIN code.
+    if not reference:
+        return False, "Payment reference cannot be empty"
+    
+    if not re.match(PAYMENT_REFERENCE_PATTERN, reference):
+        return False, "Invalid payment reference format"
+    
+    return True, None
+
+def validate_date(date_str: str, 
+                 format_str: str = "%Y-%m-%d", 
+                 min_date: Optional[date] = None,
+                 max_date: Optional[date] = None) -> Tuple[bool, Optional[str], Optional[date]]:
+    """
+    Validate a date string.
     
     Args:
-        pin: The PIN to validate
+        date_str: The date string to validate
+        format_str: The expected date format
+        min_date: The minimum allowed date (optional)
+        max_date: The maximum allowed date (optional)
         
     Returns:
-        bool: True if valid, False otherwise
-    """
-    if not pin:
-        return False
+        Tuple of (is_valid, error_message, parsed_date)
         
-    # PIN should be 4-6 digits
-    pattern = r'^[0-9]{4,6}$'
-    return bool(re.match(pattern, str(pin)))
-
-def is_valid_amount_range(amount, min_amount=0.01, max_amount=None):
+    AI-Metadata:
+        validation_type: date
+        business_context: schedule_validation
+        criticality: medium
     """
-    Validate that the amount is within the specified range.
+    if not date_str:
+        return False, "Date cannot be empty", None
     
-    Args:
-        amount: The amount to validate
-        min_amount: Minimum allowed amount (default: 0.01)
-        max_amount: Maximum allowed amount (default: None, no upper limit)
-        
-    Returns:
-        bool: True if valid, False otherwise
-        
-    Raises:
-        ValueError: If the amount is not a valid number or outside the range
-        TypeError: If the amount cannot be converted to float
-    """
     try:
-        amount = float(amount)
+        parsed_date = datetime.strptime(date_str, format_str).date()
         
-        if amount < min_amount:
-            raise ValueError(f"Amount must be at least {min_amount}")
+        if min_date and parsed_date < min_date:
+            return False, f"Date must not be earlier than {min_date}", parsed_date
         
-        if max_amount is not None and amount > max_amount:
-            raise ValueError(f"Amount must not exceed {max_amount}")
+        if max_date and parsed_date > max_date:
+            return False, f"Date must not be later than {max_date}", parsed_date
         
-        return True
-    except ValueError as e:
-        logger.warning(f"Invalid amount value: {e}")
-        raise
-    except TypeError as e:
-        logger.warning(f"Invalid amount type: {e}")
-        raise TypeError(f"Amount must be a number, got {type(amount).__name__}")
+        return True, None, parsed_date
+    
+    except ValueError:
+        return False, f"Invalid date format, expected {format_str}", None
 
-def validate_amount(amount):
+def validate_mobile_number(mobile_number: str, country_code: str = "+91") -> Tuple[bool, Optional[str]]:
     """
-    Validate that the amount is a positive number.
+    Validate a mobile number.
     
     Args:
-        amount: The amount to validate
+        mobile_number: The mobile number to validate
+        country_code: The country code to use (default: India +91)
         
     Returns:
-        bool: True if valid, False otherwise
+        Tuple of (is_valid, error_message)
         
-    Raises:
-        ValueError: If the amount is not positive
-        TypeError: If the amount cannot be converted to float
+    AI-Metadata:
+        validation_type: pattern
+        business_context: customer_contact
+        criticality: medium
     """
-    try:
-        amount = float(amount)
-        if amount <= 0:
-            raise ValueError("Amount must be greater than zero.")
-        return True
-    except ValueError as e:
-        logger.warning(f"Validation error: {e}")
-        raise
-    except TypeError as e:
-        logger.warning(f"Type error in validation: {e}")
-        raise TypeError(f"Amount must be a number, got {type(amount).__name__}")
+    if not mobile_number:
+        return False, "Mobile number cannot be empty"
+    
+    # Remove spaces, hyphens, and country code
+    mobile_number = mobile_number.replace(' ', '').replace('-', '')
+    if mobile_number.startswith('+'):
+        mobile_number = mobile_number[1:]  # Remove leading +
+    if country_code.startswith('+'):
+        country_code = country_code[1:]  # Remove leading +
+    
+    if mobile_number.startswith(country_code):
+        mobile_number = mobile_number[len(country_code):]
+    
+    if not re.match(MOBILE_NUMBER_PATTERN, mobile_number):
+        return False, "Invalid mobile number format"
+    
+    return True, None
 
-def is_valid_user_input(user_input, input_type):
+def validate_email(email: str) -> Tuple[bool, Optional[str]]:
     """
-    Validates user input based on input type.
+    Validate an email address.
     
     Args:
-        user_input: The user input to validate
-        input_type: Type of input to validate ('email', 'phone', 'name', etc.)
+        email: The email address to validate
         
     Returns:
-        bool: True if input is valid, False otherwise
+        Tuple of (is_valid, error_message)
         
-    Raises:
-        ValueError: If the input_type is unrecognized or the validation fails with specific details
-        TypeError: If the input is of incorrect type for the validation
+    AI-Metadata:
+        validation_type: pattern
+        business_context: customer_contact
+        criticality: medium
     """
+    if not email:
+        return False, "Email cannot be empty"
+    
+    if not re.match(EMAIL_PATTERN, email):
+        return False, "Invalid email format"
+    
+    return True, None
+
+def validate_pan(pan: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate a PAN (Permanent Account Number - India).
+    
+    Args:
+        pan: The PAN to validate
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: pattern
+        business_context: customer_kyc
+        criticality: high
+    """
+    if not pan:
+        return False, "PAN cannot be empty"
+    
+    # Convert to uppercase and remove spaces
+    pan = pan.upper().replace(' ', '')
+    
+    if not re.match(PAN_PATTERN, pan):
+        return False, "Invalid PAN format"
+    
+    return True, None
+
+def validate_aadhaar(aadhaar: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate an Aadhaar number (India).
+    
+    Args:
+        aadhaar: The Aadhaar number to validate
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: pattern
+        business_context: customer_kyc
+        criticality: high
+    """
+    if not aadhaar:
+        return False, "Aadhaar number cannot be empty"
+    
+    # Remove spaces and hyphens
+    aadhaar = aadhaar.replace(' ', '').replace('-', '')
+    
+    if not re.match(AADHAAR_PATTERN, aadhaar):
+        return False, "Invalid Aadhaar number format"
+    
+    return True, None
+
+def validate_upi_id(upi_id: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate a UPI ID.
+    
+    Args:
+        upi_id: The UPI ID to validate
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: pattern
+        business_context: payment_identification
+        criticality: high
+    """
+    if not upi_id:
+        return False, "UPI ID cannot be empty"
+    
+    if not re.match(UPI_ID_PATTERN, upi_id):
+        return False, "Invalid UPI ID format"
+    
+    return True, None
+
+def validate_input_length(input_str: str, 
+                         min_length: int = 1, 
+                         max_length: int = 255) -> Tuple[bool, Optional[str]]:
+    """
+    Validate the length of an input string.
+    
+    Args:
+        input_str: The string to validate
+        min_length: The minimum allowed length
+        max_length: The maximum allowed length
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: string
+        business_context: general_input
+        criticality: low
+    """
+    if input_str is None:
+        return False, "Input cannot be None"
+    
+    if len(input_str) < min_length:
+        return False, f"Input must be at least {min_length} characters"
+    
+    if len(input_str) > max_length:
+        return False, f"Input cannot exceed {max_length} characters"
+    
+    return True, None
+
+def validate_dictionary(data: Dict[str, Any], 
+                       required_fields: List[str]) -> Tuple[bool, Optional[str]]:
+    """
+    Validate a dictionary has all required fields.
+    
+    Args:
+        data: The dictionary to validate
+        required_fields: List of required field names
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        
+    AI-Metadata:
+        validation_type: structure
+        business_context: api_request
+        criticality: medium
+    """
+    if not data:
+        return False, "Data cannot be empty"
+    
+    missing_fields = [field for field in required_fields if field not in data]
+    
+    if missing_fields:
+        return False, f"Missing required fields: {', '.join(missing_fields)}"
+    
+    return True, None
+
+def validate_json_string(json_str: str) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+    """
+    Validate a JSON string.
+    
+    Args:
+        json_str: The JSON string to validate
+        
+    Returns:
+        Tuple of (is_valid, error_message, parsed_json)
+        
+    AI-Metadata:
+        validation_type: format
+        business_context: api_payload
+        criticality: medium
+    """
+    if not json_str:
+        return False, "JSON string cannot be empty", None
+    
     try:
-        if input_type == 'email':
-            return is_valid_email(user_input)
-        elif input_type == 'phone':
-            return is_valid_phone(user_input)
-        elif input_type == 'account_number':
-            return is_valid_account_number(user_input)
-        elif input_type == 'amount':
-            return validate_amount(user_input)
-        elif input_type == 'pin':
-            return is_valid_pin(user_input)
-        else:
-            raise ValueError(f"Unrecognized input type: '{input_type}'")
-    except ValueError as e:
-        # Handle validation-specific errors
-        logger.error(f"Validation error ({input_type}): {str(e)}")
-        raise
-    except TypeError as e:
-        # Handle type errors
-        logger.error(f"Type error in validation ({input_type}): {str(e)}")
-        raise TypeError(f"Invalid type for {input_type} validation: {str(e)}")
-    except Exception as e:
-        # Handle any other unexpected errors
-        logger.error(f"Unexpected error in validation ({input_type}): {str(e)}")
-        raise ValueError(f"Validation failed for {input_type}: {str(e)}")
+        parsed_json = json.loads(json_str)
+        return True, None, parsed_json
+    
+    except json.JSONDecodeError as e:
+        return False, f"Invalid JSON format: {str(e)}", None
+
+# Legacy compatibility functions
+def is_valid_account_number(account_number):
+    """Legacy compatibility function for validate_account_number"""
+    result, _ = validate_account_number(str(account_number))
+    return result
+
+def is_valid_email(email):
+    """Legacy compatibility function for validate_email"""
+    result, _ = validate_email(email)
+    return result
+
+def is_valid_mobile(mobile):
+    """Legacy compatibility function for validate_mobile_number"""
+    result, _ = validate_mobile_number(mobile)
+    return result
+
+def is_valid_amount(amount):
+    """Legacy compatibility function for validate_amount"""
+    result, _, _ = validate_amount(amount)
+    return result

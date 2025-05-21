@@ -12,7 +12,7 @@ from decimal import Decimal
 from typing import Dict, Any, Optional, List, Tuple
 import random
 
-from database.python.connection import db_session_scope
+from database.python.common.database_operations import db_session_scope
 from app.models.models import Card, Account, Customer, Transaction
 
 # Import with fallback for backward compatibility
@@ -30,7 +30,7 @@ except ImportError:
     # Fallback to old import path
     from app.lib.id_generator import generate_card_number, CardType
 
-from security.encryption import encrypt_data, decrypt_data
+from security.common.encryption import encrypt_data, decrypt_data
 from security.password_manager import hash_password, verify_password
 
 

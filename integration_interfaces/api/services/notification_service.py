@@ -6,7 +6,7 @@ Handles sending various types of notifications to customers
 
 import logging
 from typing import Dict, Any, Optional, List
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 import datetime
 import json
 

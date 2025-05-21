@@ -22,7 +22,7 @@ from risk_compliance.regulatory_reporting.generator import generate_regulatory_r
 from risk_compliance.audit_trail.logger import log_audit_event
 
 # Import database modules
-from database.python.models import Account, Transaction, Customer
+from database.python.common.database_operations import Account, Transaction, Customer
 from database.db_manager import get_db_session
 
 

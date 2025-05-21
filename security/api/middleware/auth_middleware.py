@@ -8,7 +8,7 @@ validating JWT tokens and attaching user information to the request.
 import logging
 from functools import wraps
 from flask import request, jsonify, g
-from security.auth import verify_auth_token
+from security.common.auth import verify_auth_token
 
 # Configure logger
 logger = logging.getLogger(__name__)

@@ -7,7 +7,7 @@ from utils.lib.packages import fix_path
 fix_path()  # Ensures project root is in sys.path
 
 # Import database connection after path is fixed
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 from utils.lib.encryption import hash_password, verify_password
 
 # Initialize colorama

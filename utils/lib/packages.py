@@ -123,7 +123,7 @@ def get_database_connection():
     """
     try:
         # Try to import from the new structure
-        from database.python.connection import get_connection
+        from database.python.common.database_operations import get_connection
     except ImportError:
         try:
             # Try to import from the old structure

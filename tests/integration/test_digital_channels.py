@@ -22,7 +22,7 @@ from digital_channels.mobile_banking.auth import verify_mobile_credentials
 from digital_channels.mobile_banking.transaction import process_mobile_transaction
 
 # Import database modules
-from database.python.models import Account, Transaction, Customer
+from database.python.common.database_operations import Account, Transaction, Customer
 from database.db_manager import get_db_session
 
 

@@ -28,7 +28,7 @@ except ImportError:
     # Fallback to old import path
     from app.lib.encryption import hash_password, verify_password
 
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 from app.api.services.notification_service import NotificationService
 import uuid
 import datetime

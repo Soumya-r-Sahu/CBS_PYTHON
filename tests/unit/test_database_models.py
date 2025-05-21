@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 # Import models
-from database.python.models import Customer, Account, Transaction, Loan
+from database.python.common.database_operations import Customer, Account, Transaction, Loan
 
 
 class TestCustomerModel(unittest.TestCase):

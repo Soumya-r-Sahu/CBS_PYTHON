@@ -20,7 +20,7 @@ from payments.neft.processor import process_neft_payment
 from payments.imps.processor import process_imps_payment
 
 # Import account and transaction modules
-from database.python.models import Account, Transaction
+from database.python.common.database_operations import Account, Transaction
 from database.db_manager import get_db_session
 
 

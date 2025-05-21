@@ -25,7 +25,7 @@ except ImportError:
 
 
 try:
-    from utils.config import DATABASE_CONFIG
+    from utils.config.config import DATABASE_CONFIG
 except ImportError:
     print("Could not import database config, using default values")
     DATABASE_CONFIG = {

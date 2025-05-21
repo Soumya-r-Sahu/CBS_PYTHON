@@ -10,8 +10,6 @@ It checks for required dependencies, database connectivity, and configuration is
 import os
 import sys
 import platform
-import subprocess
-import importlib.util
 from pathlib import Path
 import importlib
 import platform
@@ -73,7 +71,7 @@ def check_database_connection():
     
     # Try to import database configuration
     try:
-        from utils.config import DATABASE_CONFIG
+        from utils.config.config import DATABASE_CONFIG
         
         # Display database configuration (but hide password)
         db_config = DATABASE_CONFIG.copy()

@@ -15,7 +15,7 @@ The API ensures secure access to customer financial information.
 from flask import Blueprint, request, jsonify
 from app.api.middleware.authentication import token_required
 from app.api.middleware.error_handler import APIException
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 import datetime
 
 

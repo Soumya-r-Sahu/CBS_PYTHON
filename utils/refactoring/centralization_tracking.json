@@ -1,0 +1,79 @@
+{
+  "last_updated": "2025-05-19T22:18:10.256606",
+  "centralized_functions": [
+    {
+      "function_name": "hash_password",
+      "original_location": "security/password_utils.py",
+      "new_location": "security/common/security_operations.py",
+      "description": "Password hashing using bcrypt or PBKDF2",
+      "module": "security",
+      "centralized_on": "2025-05-19T22:18:10.256127"
+    },
+    {
+      "function_name": "execute_query",
+      "original_location": "database/python/query_executor.py",
+      "new_location": "database/python/common/database_operations.py",
+      "description": "Database query execution with parameter binding",
+      "module": "database",
+      "centralized_on": "2025-05-19T22:18:10.256596"
+    }
+  ],
+  "pending_functions": [
+    {
+      "function_name": "calculate_interest_rate",
+      "original_location": "loans/interest_calculator.py",
+      "suggested_location": "utils/common/financial.py",
+      "description": "Common interest calculation used in multiple modules",
+      "module": "loans",
+      "registered_on": "2025-05-19T22:18:10.254303"
+    },
+    {
+      "function_name": "format_account_number",
+      "original_location": "accounts/formatting.py",
+      "suggested_location": "utils/common/formatters.py",
+      "description": "Account number formatting with masking",
+      "module": "accounts",
+      "registered_on": "2025-05-19T22:18:10.254984"
+    },
+    {
+      "function_name": "validate_transaction",
+      "original_location": "transactions/validation.py",
+      "suggested_location": "utils/validators.py",
+      "description": "Transaction validation logic used in multiple places",
+      "module": "transactions",
+      "registered_on": "2025-05-19T22:18:10.255615"
+    }
+  ],
+  "module_progress": {
+    "loans": {
+      "total_identified": 1,
+      "centralized": 0,
+      "percentage": 0.0
+    },
+    "accounts": {
+      "total_identified": 1,
+      "centralized": 0,
+      "percentage": 0.0
+    },
+    "transactions": {
+      "total_identified": 1,
+      "centralized": 0,
+      "percentage": 0.0
+    },
+    "security": {
+      "total_identified": 1,
+      "centralized": 1,
+      "percentage": 100.0
+    },
+    "database": {
+      "total_identified": 1,
+      "centralized": 1,
+      "percentage": 100.0
+    }
+  },
+  "summary": {
+    "total_identified": 5,
+    "total_centralized": 2,
+    "percentage_complete": 40.0
+  }
+}

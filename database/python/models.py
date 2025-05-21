@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, create_engine, Boolean, Date, Enum, Text, DECIMAL
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from utils.config import DATABASE_CONFIG
+from utils.config.config import DATABASE_CONFIG
 import enum
 import datetime
 
@@ -504,7 +504,7 @@ def initialize_database():
         
         if not admin_exists:
             # Create default admin account
-            from utils.encryption import hash_password
+            from utils.lib.encryption import hash_password
             import uuid
             import hashlib
             

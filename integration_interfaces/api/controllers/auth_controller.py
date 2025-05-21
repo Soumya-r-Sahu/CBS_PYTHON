@@ -112,7 +112,7 @@ try:
     from core_banking.database.connection import DatabaseConnection
 except ImportError:
     try:
-        from database.python.connection import DatabaseConnection
+        from database.python.common.database_operations import DatabaseConnection
     except ImportError:
         # Simple mock database connection
         class DatabaseConnection:

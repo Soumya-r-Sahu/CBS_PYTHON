@@ -17,7 +17,7 @@ fix_path()  # Ensures project root is in sys.path
 
 # Try to import database type manager for dynamic database selection
 try:
-    from utils.database_type_manager import get_database_type, get_connection_string
+    from utils.config.database_type_manager import get_database_type, get_connection_string
     DYNAMIC_DB_TYPE = True
 except ImportError:
     # Fallback if database type manager is not available
@@ -56,7 +56,7 @@ def load_config():
     logger.error("Could not find or load settings.yaml file")
     # Fall back to values from utils/config.py
     try:
-        from utils.config import DATABASE_CONFIG
+        from utils.config.config import DATABASE_CONFIG
         logger.info("Falling back to DATABASE_CONFIG from utils/config.py")
         return {            'driver': 'mysql+mysqlconnector',
             'host': DATABASE_CONFIG.get('host', 'localhost'),

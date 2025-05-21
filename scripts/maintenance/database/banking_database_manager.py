@@ -25,7 +25,7 @@ sys.path.insert(0, str(project_root))
 
 # Import database modules
 try:
-    from database.python.models import Base, engine, initialize_database
+    from database.python.common.database_operations import Base, engine, initialize_database
 except ImportError:
     print("❌ Error: Could not import database models")
     print("   Please check that database/python/models.py exists and is properly configured")
@@ -99,7 +99,7 @@ def run_maintenance(backup=True, optimize=True, verbose=False):
 def _backup_database():
     """Create a backup of the database"""
     try:
-        from database.python.connection import DatabaseConnection
+        from database.python.common.database_operations import DatabaseConnection
         db = DatabaseConnection()
         conn = db.get_connection()
         
@@ -124,7 +124,7 @@ def _backup_database():
 def _optimize_database():
     """Optimize database tables"""
     try:
-        from database.python.connection import DatabaseConnection
+        from database.python.common.database_operations import DatabaseConnection
         db = DatabaseConnection()
         conn = db.get_connection()
         cursor = conn.cursor()

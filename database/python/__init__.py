@@ -13,7 +13,7 @@ from database.python.connection.connection_manager import (
 from database.python.connection.db_connection import DatabaseConnection
 
 # Import models
-from database.python.models import (
+from database.python.common.database_operations import (
     # Banking models
     Customer, Account, Transaction, CardDetails, Loan,
     # International models

@@ -1,0 +1,14 @@
+Dump Directory Summary
+====================
+Generated on: 2025-05-20 08:01:03
+Number of active dump sessions: 3
+
+utils_reorganize_20250520_030004: 39 files, 6 directories
+utils_reorganize_execution_20250520_030753: 43 files, 7 directories
+utils_structure_20250520_025845: 1 files, 0 directories
+
+Total: 130 files, 38 directories
+
+Archived dump sessions: 4
+
+You can review these files and delete them manually if they are no longer needed.

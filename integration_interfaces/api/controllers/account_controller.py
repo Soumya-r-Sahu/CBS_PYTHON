@@ -8,7 +8,7 @@ statements, and transfers
 from flask import Blueprint, request, jsonify
 from integration_interfaces.api.middleware.authentication import token_required
 from integration_interfaces.api.middleware.error_handler import APIException
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 import datetime
 
 

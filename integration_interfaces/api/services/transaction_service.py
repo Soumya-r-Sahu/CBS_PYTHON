@@ -11,7 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Any, Optional, List, Tuple
 
-from database.python.connection import db_session_scope
+from database.python.common.database_operations import db_session_scope
 from app.models.models import Account, Transaction, TransferRequest
 
 # Import with fallback for backward compatibility

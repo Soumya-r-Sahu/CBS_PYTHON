@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 # Import utility modules
-from database.python.models import Customer, Account, Transaction
+from database.python.common.database_operations import Customer, Account, Transaction
 from database.db_manager import get_db_session
 
 # Import risk compliance modules

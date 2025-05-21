@@ -231,7 +231,7 @@ class AdminDashboard:
         
         # Try to import database type manager
         try:
-            from utils.database_type_manager import get_database_type
+            from utils.config.database_type_manager import get_database_type
             
             # Get current database type
             db_type = get_database_type()
@@ -329,7 +329,7 @@ class AdminDashboard:
         
         # Try to import database type manager
         try:
-            from utils.database_type_manager import get_database_type, set_database_type, VALID_DB_TYPES
+            from utils.config.database_type_manager import get_database_type, set_database_type, VALID_DB_TYPES
             
             # Get current database type
             current_db_type = get_database_type()

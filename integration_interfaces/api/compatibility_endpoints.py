@@ -61,7 +61,7 @@ except ImportError:
 
 # Try to import enhanced framework compatibility utilities
 try:
-    from utils.framework_compatibility import (
+    from utils.lib.framework_compatibility import (
         detect_framework_from_headers,
         get_framework_specific_config,
         get_framework_compatibility_issues,

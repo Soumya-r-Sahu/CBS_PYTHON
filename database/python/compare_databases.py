@@ -8,7 +8,7 @@ import os
 from sqlalchemy import create_engine, text
 import urllib.parse
 import sys
-from utils.config import DATABASE_CONFIG
+from utils.config.config import DATABASE_CONFIG
 
 # Use centralized import system
 from utils.lib.packages import fix_path

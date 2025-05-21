@@ -15,7 +15,7 @@ Features:
 
 Usage:
 ------
-from utils.config.config_manager import config_manager
+from utils.config_manager import config_manager
 
 # Get a configuration value with a default
 db_url = config_manager.get("database.url", "sqlite:///database/cbs.db")
@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Union
 
 # Import singleton decorator
-from utils.common.design_patterns import singleton
+from utils.design_patterns import singleton
 
 # Initialize logger
 logger = logging.getLogger(__name__)

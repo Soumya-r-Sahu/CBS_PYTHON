@@ -14,8 +14,6 @@ import socket
 import platform
 import argparse
 from pathlib import Path
-import importlib.util
-import traceback
 from colorama import init, Fore, Style
 
 # Initialize colorama

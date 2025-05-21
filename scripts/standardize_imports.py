@@ -83,7 +83,7 @@ def standardize_imports(file_path):
     # Fix 2: Remove duplicate DatabaseConnection fallbacks
     fallback_pattern = r'try:[\s\n]+from database\.python\.connection import DatabaseConnection[\s\n]+except ImportError:[\s\n]+# Fallback implementation[\s\n]+class DatabaseConnection:[\s\n]+.*?pass'
     if re.search(fallback_pattern, content, re.DOTALL):
-        content = re.sub(fallback_pattern, 'from database.python.connection import DatabaseConnection', content, flags=re.DOTALL)
+        content = re.sub(fallback_pattern, 'from database.python.common.database_operations import DatabaseConnection', content, flags=re.DOTALL)
         print(f"{Fore.GREEN}✅ Removed duplicate DatabaseConnection fallback")
         modified = True
     

@@ -23,7 +23,7 @@ try:
     logger.info("Using core_banking.utils.config")
 except ImportError:
     try:
-        from utils.config import DATABASE_CONFIG
+        from utils.config.config import DATABASE_CONFIG
         logger.info("Using utils.config")
     except ImportError:
         # Fallback configuration

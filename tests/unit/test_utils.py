@@ -14,9 +14,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 # Import utilities
 from utils.id_utils import generate_id
-from utils.encryption import encrypt_data, decrypt_data
+from utils.lib.encryption import encrypt_data, decrypt_data
 from utils.validators import validate_email, validate_phone, validate_date
-from utils.date_format import format_date, parse_date
+from utils.common.date_format import format_date, parse_date
 
 
 class TestIdUtils(unittest.TestCase):

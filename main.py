@@ -124,13 +124,13 @@ except ImportError:
         except ImportError:
             try:
                 # Try to import from database python models
-                from database.python.models import Customer, Account, Transaction, Card, initialize_database
-                from database.python.connection import DatabaseConnection
+                from database.python.common.database_operations import Customer, Account, Transaction, Card, initialize_database
+                from database.python.common.database_operations import DatabaseConnection
                 NEW_STRUCTURE = True
             except ImportError:
                 # Fall back to old structure
-                from database.python.models import initialize_database
-                from database.python.connection import DatabaseConnection
+                from database.python.common.database_operations import initialize_database
+                from database.python.common.database_operations import DatabaseConnection
                 NEW_STRUCTURE = False
     except ImportError:
         print(f"{Fore.YELLOW}Warning: Could not import database modules. Using fallbacks.")
@@ -138,8 +138,8 @@ except ImportError:
 except ImportError:
     # Fall back to old structure completely
     try:
-        from database.python.models import initialize_database
-        from database.python.connection import DatabaseConnection
+        from database.python.common.database_operations import initialize_database
+        from database.python.common.database_operations import DatabaseConnection
     except ImportError:
         # Create placeholder functions if modules cannot be found
         print("WARNING: Database modules not found. Using placeholder implementations.")
@@ -415,7 +415,7 @@ def init_database():
                 
             if mysql_connector_available:
                 try:
-                    from utils.config import DATABASE_CONFIG
+                    from utils.config.config import DATABASE_CONFIG
                 except ImportError:
                     logger.error("Failed to import DATABASE_CONFIG")
                     print(f"{Fore.RED}Error: Could not import DATABASE_CONFIG{Style.RESET_ALL}")

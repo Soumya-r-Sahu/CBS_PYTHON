@@ -22,9 +22,9 @@ try:
     from security.authentication.password_manager import hash_password, verify_password
 except ImportError:
     # Fallback to old import path
-    from security.encryption.encryption import hash_password, verify_password
+    from security.common.encryption.encryption import hash_password, verify_password
 
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 from integration_interfaces.api.services.notification_service import NotificationService
 import datetime
 import uuid

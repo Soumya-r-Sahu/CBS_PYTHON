@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 
-from database.python.connection import db_session_scope
+from database.python.common.database_operations import db_session_scope
 from app.models.models import Customer
 
 # Import with fallback for backward compatibility

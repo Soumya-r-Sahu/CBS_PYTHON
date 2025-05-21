@@ -2,6 +2,20 @@
 
 This directory contains modules for risk management, fraud detection, regulatory reporting, and compliance.
 
+## Overview
+
+The Risk Compliance module is a critical component of the CBS_PYTHON banking system responsible for ensuring regulatory compliance, assessing risk, monitoring for financial crimes, and generating required regulatory reports. It provides a comprehensive framework for risk assessment, compliance checks, anti-money laundering (AML), and fraud detection.
+
+## Features
+
+- **Risk Assessment**: Comprehensive risk scoring for customers, accounts, and transactions
+- **Compliance Validation**: Verification of regulatory compliance for banking operations
+- **AML Screening**: Anti-Money Laundering checks including PEP screening and transaction monitoring
+- **Regulatory Reporting**: Generation of regulatory reports for various compliance requirements
+- **Fraud Detection**: Identification of potentially fraudulent activities
+- **Risk Alerting**: Automated alerting for high-risk scenarios
+- **Audit Trail**: Detailed logging of compliance-related activities for audit purposes
+
 ## Clean Architecture Checklist for Risk & Compliance
 
 - [ ] README explains module architecture

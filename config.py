@@ -45,7 +45,7 @@ DATABASE_CONFIG = {
     'host': os.environ.get('CBS_DB_HOST', 'localhost'),
     'database': os.environ.get('CBS_DB_NAME', 'CBS_PYTHON'),
     'user': os.environ.get('CBS_DB_USER', 'root'),
-    'password': os.environ.get('CBS_DB_PASSWORD', ''),
+    'password': os.environ.get('CBS_DB_PASSWORD', 'Admin.root@123'),
     'port': int(os.environ.get('CBS_DB_PORT', 3307)),
     'pool_size': int(os.environ.get('CBS_DB_POOL_SIZE', 5)),
     'max_overflow': int(os.environ.get('CBS_DB_MAX_OVERFLOW', 10)),

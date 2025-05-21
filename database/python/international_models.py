@@ -17,7 +17,7 @@ fix_path()  # Ensures project root is in sys.path
 
 # Import base class from existing models
 try:
-    from database.python.models import Base
+    from database.python.common.database_operations import Base
 except ImportError:
     from sqlalchemy.ext.declarative import declarative_base
     Base = declarative_base()

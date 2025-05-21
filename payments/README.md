@@ -2,6 +2,10 @@
 
 This directory contains implementations of various payment systems following Clean Architecture principles.
 
+## Overview
+
+The Payments module is a core component of the CBS_PYTHON banking system, responsible for processing and managing all payment transactions across multiple channels and payment methods. It provides a robust, secure, and extensible framework for handling various payment types including bank transfers, card payments, mobile payments, and cash transactions.
+
 ## Implemented Payment Modules
 
 ### 1. NEFT (National Electronic Funds Transfer) ✅

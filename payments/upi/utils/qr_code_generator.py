@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional
 import qrcode
 
 # Import common utilities
-from utils.payment_utils import generate_upi_reference
+from utils.lib.payment_utils import generate_upi_reference
 from utils.common import mask_account_number, mask_mobile_number
 
 # Set up logging

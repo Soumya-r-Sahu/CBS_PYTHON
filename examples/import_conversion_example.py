@@ -21,7 +21,7 @@ project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
 sys.path.insert(0, project_root)
 
 # Import modules directly
-import database.python.connection
+import database.python.common.database_operations
 from app.config import environment
 from utils.logging import setup_logging
 
@@ -82,7 +82,7 @@ except ImportError:
         sys.path.insert(0, str(project_root))
     
     # Import modules directly
-    import database.python.connection
+    import database.python.common.database_operations
     from app.config import environment
     
     # Check the environment

@@ -10,7 +10,7 @@ from integration_interfaces.api.middleware.authentication import token_required
 from integration_interfaces.api.middleware.validation import validate_schema
 from integration_interfaces.api.middleware.error_handler import APIException
 from integration_interfaces.api.middleware.rate_limiter import rate_limit
-from database.python.connection import DatabaseConnection
+from database.python.common.database_operations import DatabaseConnection
 
 # Import with fallback for backward compatibility
 try:

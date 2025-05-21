@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 # Updated imports for the new directory structure
 try:
-    from utils.config import config
+    from utils.config.config import config
 except ImportError:
     # Mock config if not available
     config = {}
@@ -57,7 +57,7 @@ except ImportError:
         pass
 
 try:
-    from security.encryption import encrypt_data, decrypt_data
+    from security.common.encryption import encrypt_data, decrypt_data
     from security.access_control import check_access
 except ImportError:
     # Mock security functions if not available

@@ -9,11 +9,11 @@ from typing import Optional, List, Dict, Any, Union
 from decimal import Decimal
 from datetime import datetime, date, timedelta
 
-from ....domain.entities.atm_card import AtmCard
-from ....domain.entities.atm_session import AtmSession
-from ....domain.entities.transaction import Transaction
-from ....domain.entities.account import Account
-from ...application.interfaces.atm_repository import AtmRepository
+from digital_channels.atm_switch.domain.entities.atm_card import AtmCard
+from digital_channels.atm_switch.domain.entities.atm_session import AtmSession
+from digital_channels.atm_switch.domain.entities.transaction import Transaction
+from digital_channels.atm_switch.domain.entities.account import Account
+from digital_channels.atm_switch.application.interfaces.atm_repository import AtmRepository
 
 # Use centralized import system
 from utils.lib.packages import fix_path

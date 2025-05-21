@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from utils.lib.packages import import_module
 DatabaseConnection = import_module("database.python.connection").DatabaseConnection
-from utils.config import DATABASE_CONFIG
+from utils.config.config import DATABASE_CONFIG
 
 class TestDatabaseConnection:
     """Unit tests for the DatabaseConnection class using mocks."""
