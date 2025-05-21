@@ -1,0 +1,162 @@
+# Linting configuration for CBS_PYTHON
+# This .pylintrc file provides a standardized set of linting rules to maintain code quality
+
+[MASTER]
+# Specify a configuration file
+#rcfile=
+
+# Python code to execute, usually for sys.path manipulation such as adding dependencies
+init-hook="""
+import sys
+from pathlib import Path
+project_root = str(Path(__file__).parent)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+"""
+
+# Add files or directories to the blacklist. They should be base names, not paths.
+ignore=.git,__pycache__,docs,dist,build,migrations,tests,venv,env
+
+# Add files or directories matching the regex patterns to the blacklist
+ignore-patterns=
+
+# Python version: Python 3.8+
+py-version = 3.8
+
+# Pickle collected data for later comparisons
+persistent=yes
+
+# List of plugins
+load-plugins=pylint.extensions.docparams,pylint.extensions.mccabe
+
+# Use multiple processes to speed up checks
+jobs=8
+
+# Allow loading of arbitrary C extensions
+unsafe-load-any-extension=no
+
+# Allow optimization of some AST trees
+optimize-ast=no
+
+
+[MESSAGES CONTROL]
+# Only show certain warnings/errors
+# C convention, R refactor, W warning, E error, F fatal
+#enable=
+
+# Disable the messages
+disable=raw-checker-failed,
+        bad-inline-option,
+        locally-disabled,
+        file-ignored,
+        suppressed-message,
+        useless-suppression,
+        deprecated-pragma,
+        use-symbolic-message-instead,
+        too-many-arguments,
+        too-many-locals,
+        too-many-branches,
+        too-many-statements,
+        too-many-instance-attributes,
+        missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        fixme
+
+
+[REPORTS]
+# Set the output format
+output-format=text
+
+# Tells whether to display a full report
+reports=no
+
+# Python expression which should return a score less than or equal to 10
+evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+
+# Template used to display messages
+msg-template={path}:{line}:{column}: {msg_id}: {msg} ({symbol})
+
+
+[BASIC]
+# Good variable names which should always be accepted
+good-names=i,j,k,ex,_,id,to,db
+
+# Bad variable names which should always be refused
+bad-names=foo,bar,baz,toto,tutu,tata
+
+# Include a hint for names with a name too short
+include-naming-hint=yes
+
+# Regular expression matching correct variable names
+variable-rgx=[a-z_][a-z0-9_]{2,30}$
+
+# Regular expression matching correct class names
+class-rgx=[A-Z_][a-zA-Z0-9]+$
+
+# Regular expression matching correct method names
+method-rgx=[a-z_][a-z0-9_]{2,30}$
+
+# Regular expression matching correct function names
+function-rgx=[a-z_][a-z0-9_]{2,30}$
+
+# Regular expression matching correct attribute names
+attr-rgx=[a-z_][a-z0-9_]{2,30}$
+
+# Regular expression matching correct module names
+module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+
+
+[FORMAT]
+# Maximum number of characters on a single line
+max-line-length=100
+
+# Allow validation of string formatting with f-strings
+check-str-concat-over-line-jumps=no
+
+# Regular expression for lines to be ignored
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+
+# Number of spaces of indent required inside a hanging or continued line
+indent-after-paren=4
+
+# String used as indentation unit (tabs or spaces)
+indent-string='    '
+
+
+[DESIGN]
+# Maximum number of arguments for function / method
+max-args=8
+
+# Maximum number of locals for function / method body
+max-locals=15
+
+# Maximum number of return / yield for function / method body
+max-returns=6
+
+# Maximum number of branch for function / method body
+max-branches=12
+
+# Maximum number of statements in function / method body
+max-statements=50
+
+# Maximum number of parents for a class (prevents too much inheritance)
+max-parents=7
+
+# Maximum number of attributes for a class 
+max-attributes=12
+
+# Minimum number of public methods for a class
+min-public-methods=1
+
+# Maximum number of public methods for a class 
+max-public-methods=20
+
+# Maximum number of boolean expressions in an if statement
+max-bool-expr=5
+
+
+[EXCEPTIONS]
+# Exceptions that are allowed with "except"
+overgeneral-exceptions=Exception,
+                       BaseException
