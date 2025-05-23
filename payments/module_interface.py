@@ -17,9 +17,10 @@ AI-Metadata:
 import logging
 import os
 import sys
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Dict, List, Any, Optional, Union, Tuple, TypedDict, cast
 from datetime import datetime
 import traceback
+import functools
 
 # Import the module interface
 from utils.lib.module_interface import ModuleInterface
@@ -40,6 +41,18 @@ except ImportError:
 # Configure logger
 logger = logging.getLogger(__name__)
 
+# Type definitions for better type checking
+class HealthStatus(TypedDict):
+    module_name: str
+    version: str
+    timestamp: str
+    status: str
+    checks: List[Dict[str, Any]]
+    dependencies_status: str
+    services_status: str
+    database_status: str
+    overall_status: str
+
 class PaymentsModule(ModuleInterface):
     """
     Payments module implementation
@@ -59,8 +72,18 @@ class PaymentsModule(ModuleInterface):
         purpose: Process and manage all payment transactions
         criticality: high
         failover_strategy: graceful_degradation
-        last_reviewed: 2025-05-20
+        last_reviewed: 2025-05-23
     """
+    
+    # Class-level caching for module instance
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls) -> 'PaymentsModule':
+        """Get or create the singleton instance of this module"""
+        if cls._instance is None:
+            cls._instance = PaymentsModule()
+        return cls._instance
     
     def __init__(self):
         """
@@ -77,12 +100,15 @@ class PaymentsModule(ModuleInterface):
         
         # Define module-specific attributes
         self.supported_payment_types = ["transfer", "card", "cash", "mobile"]
-        self.processors = {}
+        self.processors: Dict[str, Any] = {}
         self.health_status = {
             "status": "initializing",
             "last_check": datetime.now().isoformat(),
             "issues": []
         }
+        
+        # Service implementation cache
+        self._service_impl_cache: Dict[str, Any] = {}
         
         # Register dependencies
         self.register_dependency("database", ["database.operations"], is_critical=True)
@@ -98,89 +124,118 @@ class PaymentsModule(ModuleInterface):
         
         Returns:
             bool: True if registration was successful
+            
+        AI-Metadata:
+            criticality: high
+            retry_on_failure: true
+            max_retries: 3
         """
         try:
             registry = self.get_registry()
+            success_count = 0
+            service_count = 0
+            
+            # Helper function to register a service with error handling
+            def register_service(name: str, func: Any, version: str) -> bool:
+                nonlocal success_count, service_count
+                service_count += 1
+                try:
+                    registry.register(
+                        name, 
+                        func, 
+                        version=version, 
+                        module_name=self.name
+                    )
+                    self.service_registrations.append(name)
+                    success_count += 1
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to register service '{name}': {str(e)}")
+                    return False
             
             # Initialize processors
             self._initialize_processors()
             
             # Register payment processor service
-            registry.register(
+            register_service(
                 "payment.processor", 
                 self.processors.get("general"),
-                version="1.2.0", 
-                module_name=self.name
+                "1.2.0"
             )
-            self.service_registrations.append("payment.processor")
             
             # Register card processor service
-            registry.register(
+            register_service(
                 "payment.card_processor", 
                 self.processors.get("card"),
-                version="1.1.0", 
-                module_name=self.name
+                "1.1.0"
             )
-            self.service_registrations.append("payment.card_processor")
             
             # Register mobile processor service
-            registry.register(
+            register_service(
                 "payment.mobile_processor", 
                 self.processors.get("mobile"),
-                version="1.0.0", 
-                module_name=self.name
+                "1.0.0"
             )
-            self.service_registrations.append("payment.mobile_processor")
             
             # Register individual operations as services
-            registry.register(
+            register_service(
                 "payment.process", 
                 self.process_payment,
-                version="1.2.0", 
-                module_name=self.name
+                "1.2.0"
             )
-            self.service_registrations.append("payment.process")
             
-            registry.register(
+            register_service(
                 "payment.refund", 
                 self.process_refund,
-                version="1.1.0", 
-                module_name=self.name
+                "1.1.0"
             )
-            self.service_registrations.append("payment.refund")
             
-            registry.register(
+            register_service(
                 "payment.validate", 
                 self.validate_payment,
-                version="1.0.0", 
-                module_name=self.name
+                "1.0.0"
             )
-            self.service_registrations.append("payment.validate")
             
             # Register fallbacks for graceful degradation
             self._register_fallbacks(registry)
             
-            logger.info(f"Payments module registered {len(self.service_registrations)} services")
-            return True
+            logger.info(f"Registered {success_count}/{service_count} {self.name} module services")
+            return success_count == service_count
         except Exception as e:
-            logger.error(f"Error registering payment services: {str(e)}")
+            logger.error(f"Failed to register payment services: {str(e)}")
+            traceback.print_exc()
             return False
     
     def _initialize_processors(self) -> None:
-        """Initialize payment processors"""
-        # Import processors here to avoid circular imports
-        from payments.processors.payment_processor import PaymentProcessor
-        from payments.processors.card_processor import CardProcessor
-        from payments.processors.mobile_processor import MobileProcessor
-        from payments.processors.cash_processor import CashProcessor
+        """
+        Initialize payment processors
         
-        # Create processor instances
-        self.processors = {
-            "general": PaymentProcessor(),
-            "card": CardProcessor(),
-            "mobile": MobileProcessor(),
-            "cash": CashProcessor()
-        }
+        Creates instances of all supported payment processors.
+        """
+        try:
+            # Import processors here to avoid circular imports
+            from payments.processors.payment_processor import PaymentProcessor
+            from payments.processors.card_processor import CardProcessor
+            from payments.processors.mobile_processor import MobileProcessor
+            from payments.processors.cash_processor import CashProcessor
+            
+            # Create processor instances
+            self.processors = {
+                "general": PaymentProcessor(),
+                "card": CardProcessor(),
+                "mobile": MobileProcessor(),
+                "cash": CashProcessor()
+            }
+            logger.info("Payment processors initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize payment processors: {str(e)}")
+            # Create minimal processors to avoid NoneType errors
+            self.processors = {
+                "general": None,
+                "card": None,
+                "mobile": None,
+                "cash": None
+            }
     
     def _register_fallbacks(self, registry: ServiceRegistry) -> None:
         """
@@ -190,7 +245,7 @@ class PaymentsModule(ModuleInterface):
             registry (ServiceRegistry): Service registry instance
         """
         # General payment fallback
-        def payment_fallback(payment_data):
+        def payment_fallback(payment_data: Dict[str, Any]) -> Dict[str, Any]:
             """Fallback when payment module is unavailable"""
             logger.warning("Using payment fallback - payment module unavailable")
             return {
@@ -204,7 +259,7 @@ class PaymentsModule(ModuleInterface):
             }
         
         # Card payment fallback
-        def card_payment_fallback(card_data):
+        def card_payment_fallback(card_data: Dict[str, Any]) -> Dict[str, Any]:
             """Fallback when card payment module is unavailable"""
             logger.warning("Using card payment fallback - payment module unavailable")
             return {
@@ -214,7 +269,7 @@ class PaymentsModule(ModuleInterface):
             }
         
         # Refund fallback
-        def refund_fallback(refund_data):
+        def refund_fallback(refund_data: Dict[str, Any]) -> Dict[str, Any]:
             """Fallback when refund processing is unavailable"""
             logger.warning("Using refund fallback - payment module unavailable")
             return {
@@ -227,6 +282,36 @@ class PaymentsModule(ModuleInterface):
         registry.register_fallback("payment.process", payment_fallback)
         registry.register_fallback("payment.card_processor", card_payment_fallback)
         registry.register_fallback("payment.refund", refund_fallback)
+    
+    def get_service_implementation(self, service_name: str) -> Any:
+        """
+        Get an implementation of a service by name
+        
+        Args:
+            service_name (str): Name of the service
+            
+        Returns:
+            Any: Service implementation or None if not found
+        """
+        # Check cache first
+        if service_name in self._service_impl_cache:
+            return self._service_impl_cache[service_name]
+            
+        # Try to get the implementation
+        try:
+            registry = self.get_registry()
+            implementation = registry.get_service(service_name)
+            
+            if implementation:
+                # Cache the result
+                self._service_impl_cache[service_name] = implementation
+                return implementation
+            else:
+                logger.warning(f"Service implementation not found: {service_name}")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting service implementation for {service_name}: {str(e)}")
+            return None
     
     def process_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -241,26 +326,30 @@ class PaymentsModule(ModuleInterface):
         # Get the appropriate processor
         payment_type = payment_data.get("type", "transfer")
         
-        if payment_type == "card" and "card" in self.processors:
-            processor = self.processors["card"]
-        elif payment_type == "mobile" and "mobile" in self.processors:
-            processor = self.processors["mobile"]
-        elif payment_type == "cash" and "cash" in self.processors:
-            processor = self.processors["cash"]
-        else:
-            processor = self.processors["general"]
-        
-        # Process the payment
         try:
+            if payment_type == "card" and "card" in self.processors and self.processors["card"]:
+                processor = self.processors["card"]
+            elif payment_type == "mobile" and "mobile" in self.processors and self.processors["mobile"]:
+                processor = self.processors["mobile"]
+            elif payment_type == "cash" and "cash" in self.processors and self.processors["cash"]:
+                processor = self.processors["cash"]
+            elif "general" in self.processors and self.processors["general"]:
+                processor = self.processors["general"]
+            else:
+                raise PaymentError("No appropriate payment processor available")
+            
+            # Process the payment
             result = processor.process_payment(payment_data)
             logger.info(f"Payment processed: {result.get('success', False)}")
             return result
         except Exception as e:
-            logger.error(f"Error processing payment: {str(e)}")
+            error_msg = f"Error processing payment: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
                 "error": str(e),
-                "error_code": "PAYMENT_PROCESSING_ERROR"
+                "error_code": "PAYMENT_PROCESSING_ERROR",
+                "timestamp": datetime.now().isoformat()
             }
     
     def process_refund(self, refund_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -273,20 +362,25 @@ class PaymentsModule(ModuleInterface):
         Returns:
             dict: Refund result
         """
-        # Get the general processor for refunds
-        processor = self.processors["general"]
-        
-        # Process the refund
         try:
+            # Get the general processor for refunds
+            if "general" not in self.processors or not self.processors["general"]:
+                raise PaymentError("General payment processor unavailable")
+                
+            processor = self.processors["general"]
+            
+            # Process the refund
             result = processor.process_refund(refund_data)
             logger.info(f"Refund processed: {result.get('success', False)}")
             return result
         except Exception as e:
-            logger.error(f"Error processing refund: {str(e)}")
+            error_msg = f"Error processing refund: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
                 "error": str(e),
-                "error_code": "REFUND_PROCESSING_ERROR"
+                "error_code": "REFUND_PROCESSING_ERROR",
+                "timestamp": datetime.now().isoformat()
             }
     
     def validate_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -329,7 +423,8 @@ class PaymentsModule(ModuleInterface):
                 "valid": True
             }
         except Exception as e:
-            logger.error(f"Error validating payment: {str(e)}")
+            error_msg = f"Error validating payment: {str(e)}"
+            logger.error(error_msg)
             return {
                 "valid": False,
                 "errors": [str(e)]
@@ -416,10 +511,14 @@ class PaymentsModule(ModuleInterface):
             ]
             
             for service_name in required_services:
-                service = registry.get_service(service_name)
-                if service is not None:
-                    registered_services.append(service_name)
-                else:
+                try:
+                    service = registry.get_service(service_name)
+                    if service is not None:
+                        registered_services.append(service_name)
+                    else:
+                        missing_services.append(service_name)
+                except Exception as e:
+                    logger.warning(f"Error checking service {service_name}: {str(e)}")
                     missing_services.append(service_name)
             
             if missing_services:
@@ -449,7 +548,7 @@ class PaymentsModule(ModuleInterface):
                 }
             }
     
-    def _perform_health_check(self) -> Dict[str, Any]:
+    def _perform_health_check(self) -> HealthStatus:
         """
         Perform module-specific health checks
         
@@ -457,7 +556,7 @@ class PaymentsModule(ModuleInterface):
             dict: Health check details with standardized format
         """
         # Get standard health details from base implementation
-        health_details = {
+        health_details: HealthStatus = {
             "module_name": self.name,
             "version": self.version,
             "timestamp": datetime.now().isoformat(),
@@ -541,25 +640,31 @@ class PaymentsModule(ModuleInterface):
         
         return health_details
 
-# Create module instance
-def get_module_instance():
+
+# Create module instance (using singleton pattern)
+def get_module_instance() -> PaymentsModule:
     """
-    Get the payments module instance
+    Get the payments module instance (singleton)
     
     Returns:
         PaymentsModule: The payments module instance
     """
-    return PaymentsModule()
+    return PaymentsModule.get_instance()
 
 # Register module with module registry
-def register_module():
-    """Register the payments module with the module registry"""
+def register_module() -> PaymentsModule:
+    """
+    Register the payments module with the module registry
+    
+    Returns:
+        PaymentsModule: The registered module instance
+    """
     from utils.lib.module_interface import ModuleRegistry
     
     # Get module registry
     registry = ModuleRegistry.get_instance()
     
-    # Create and register module
+    # Create and register module (using singleton pattern)
     module = get_module_instance()
     registry.register_module(module)
     

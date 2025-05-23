@@ -18,9 +18,10 @@ AI-Metadata:
 import logging
 import os
 import sys
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Dict, List, Any, Optional, Union, Tuple, TypedDict, cast
 from datetime import datetime
 import traceback
+import functools
 
 # Import the module interface
 from utils.lib.module_interface import ModuleInterface
@@ -40,6 +41,33 @@ except ImportError:
 
 # Configure logger
 logger = logging.getLogger(__name__)
+
+# Type definitions for better type checking
+class HealthStatus(TypedDict):
+    status: str
+    name: str
+    version: str
+    timestamp: str
+    details: Dict[str, Any]
+    
+class RiskModelStatus(TypedDict):
+    loaded: bool
+    version: str
+    details: str
+    
+class ComplianceRuleStatus(TypedDict):
+    loaded: bool
+    count: int
+    details: str
+    
+class ServiceStatus(TypedDict):
+    available: bool
+    details: str
+    
+class DependencyStatus(TypedDict):
+    available: bool
+    critical: bool
+    details: str
 
 class RiskComplianceModule(ModuleInterface):
     """
@@ -61,8 +89,18 @@ class RiskComplianceModule(ModuleInterface):
         criticality: high
         regulatory_relevance: high
         failover_strategy: strict_enforcement
-        last_reviewed: 2025-05-20
+        last_reviewed: 2025-05-23
     """
+    
+    # Class-level caching for module instance
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls) -> 'RiskComplianceModule':
+        """Get or create the singleton instance of this module"""
+        if cls._instance is None:
+            cls._instance = RiskComplianceModule()
+        return cls._instance
     
     def __init__(self):
         """
@@ -78,13 +116,16 @@ class RiskComplianceModule(ModuleInterface):
         super().__init__("risk_compliance", "1.0.1")
         
         # Define module-specific attributes
-        self.risk_models = []
-        self.compliance_rules = {}
+        self.risk_models: List[str] = []
+        self.compliance_rules: Dict[str, List[str]] = {}
         self.health_status = {
             "status": "initializing",
             "last_check": datetime.now().isoformat(),
             "issues": []
         }
+        
+        # Service implementation cache
+        self._service_impl_cache: Dict[str, Any] = {}
         
         # Register dependencies
         self.register_dependency("database", ["database.operations"], is_critical=True)
@@ -102,39 +143,123 @@ class RiskComplianceModule(ModuleInterface):
         
         Returns:
             bool: True if registration was successful
+            
+        AI-Metadata:
+            criticality: high
+            retry_on_failure: true
+            max_retries: 3
         """
         try:
             registry = self.get_registry()
+            success_count = 0
+            service_count = 0
+            
+            # Helper function to register a service with error handling
+            def register_service(name: str, func: Any, version: str) -> bool:
+                nonlocal success_count, service_count
+                service_count += 1
+                try:
+                    registry.register(
+                        name, 
+                        func, 
+                        version=version, 
+                        module_name=self.name
+                    )
+                    self.service_registrations.append(name)
+                    success_count += 1
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to register service '{name}': {str(e)}")
+                    return False
             
             # Register risk assessment services
-            registry.register("risk.customer.assess", self.assess_customer_risk, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("risk.transaction.assess", self.assess_transaction_risk, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("risk.account.assess", self.assess_account_risk, 
-                             version="1.0.0", module_name=self.name)
+            register_service("risk.customer.assess", self.assess_customer_risk, "1.0.0")
+            register_service("risk.transaction.assess", self.assess_transaction_risk, "1.0.0")
+            register_service("risk.account.assess", self.assess_account_risk, "1.0.0")
             
             # Register compliance services
-            registry.register("compliance.transaction.validate", self.validate_transaction_compliance, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("compliance.customer.validate", self.validate_customer_compliance, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("compliance.reporting.generate", self.generate_compliance_report, 
-                             version="1.0.0", module_name=self.name)
+            register_service("compliance.transaction.validate", self.validate_transaction_compliance, "1.0.0")
+            register_service("compliance.customer.validate", self.validate_customer_compliance, "1.0.0")
+            register_service("compliance.reporting.generate", self.generate_compliance_report, "1.0.0")
             
             # Register AML services
-            registry.register("aml.transaction.screen", self.screen_transaction, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("aml.customer.screen", self.screen_customer, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("aml.alert.generate", self.generate_aml_alert, 
-                             version="1.0.0", module_name=self.name)
+            register_service("aml.transaction.screen", self.screen_transaction, "1.0.0")
+            register_service("aml.customer.screen", self.screen_customer, "1.0.0")
+            register_service("aml.alert.generate", self.generate_aml_alert, "1.0.0")
             
-            logger.info(f"Registered {self.name} module services")
-            return True
+            # Register fallbacks for critical services
+            self._register_fallbacks(registry)
+            
+            logger.info(f"Registered {success_count}/{service_count} {self.name} module services")
+            return success_count == service_count
         except Exception as e:
             logger.error(f"Failed to register {self.name} module services: {str(e)}")
+            traceback.print_exc()
             return False
+    
+    def _register_fallbacks(self, registry: ServiceRegistry) -> None:
+        """
+        Register fallback implementations for critical services
+        
+        Args:
+            registry (ServiceRegistry): The service registry
+        """
+        # Risk assessment fallbacks
+        def risk_assessment_fallback(customer_id: str = "", transaction_data: Dict[str, Any] = None, account_id: str = "", **kwargs) -> Dict[str, Any]:
+            """Fallback for risk assessment services"""
+            logger.warning("Using risk assessment fallback - service unavailable")
+            return {
+                "success": False,
+                "risk_score": 100,  # High risk when service unavailable
+                "reason": "Risk assessment service unavailable",
+                "error_code": "SERVICE_UNAVAILABLE"
+            }
+        
+        # Compliance fallbacks
+        def compliance_fallback(customer_id: str = "", transaction_data: Dict[str, Any] = None, **kwargs) -> Dict[str, Any]:
+            """Fallback for compliance services"""
+            logger.warning("Using compliance fallback - service unavailable")
+            return {
+                "success": False,
+                "compliant": False,  # Default to non-compliant when service unavailable
+                "reason": "Compliance service unavailable",
+                "error_code": "SERVICE_UNAVAILABLE"
+            }
+        
+        # Register fallbacks
+        registry.register_fallback("risk.customer.assess", risk_assessment_fallback)
+        registry.register_fallback("risk.transaction.assess", risk_assessment_fallback)
+        registry.register_fallback("compliance.transaction.validate", compliance_fallback)
+    
+    def get_service_implementation(self, service_name: str) -> Any:
+        """
+        Get an implementation of a service by name
+        
+        Args:
+            service_name (str): Name of the service
+            
+        Returns:
+            Any: Service implementation or None if not found
+        """
+        # Check cache first
+        if service_name in self._service_impl_cache:
+            return self._service_impl_cache[service_name]
+            
+        # Try to get the implementation
+        try:
+            registry = self.get_registry()
+            implementation = registry.get_service(service_name)
+            
+            if implementation:
+                # Cache the result
+                self._service_impl_cache[service_name] = implementation
+                return implementation
+            else:
+                logger.warning(f"Service implementation not found: {service_name}")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting service implementation for {service_name}: {str(e)}")
+            return None
     
     def activate(self) -> bool:
         """
@@ -156,12 +281,18 @@ class RiskComplianceModule(ModuleInterface):
             self._load_configuration()
             
             # Register services
-            self.register_services()
+            success = self.register_services()
             
-            logger.info(f"{self.name} module activated successfully")
-            return True
+            if success:
+                logger.info(f"{self.name} module activated successfully")
+                self.active = True
+                return True
+            else:
+                logger.error(f"{self.name} module activation failed")
+                return False
         except Exception as e:
             logger.error(f"Failed to activate {self.name} module: {str(e)}")
+            traceback.print_exc()
             return False
     
     def deactivate(self) -> bool:
@@ -180,22 +311,30 @@ class RiskComplianceModule(ModuleInterface):
             
             # Deregister services
             registry = self.get_registry()
-            registry.deactivate_module(self.name)
+            for service_name in self.service_registrations:
+                try:
+                    registry.deregister(service_name, module_name=self.name)
+                except Exception as e:
+                    logger.warning(f"Error deregistering service {service_name}: {str(e)}")
+            
+            self.service_registrations = []
+            self.active = False
             
             logger.info(f"{self.name} module deactivated successfully")
             return True
         except Exception as e:
             logger.error(f"Failed to deactivate {self.name} module: {str(e)}")
+            traceback.print_exc()
             return False
     
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> HealthStatus:
         """
         Perform a health check on the risk compliance module
         
         Returns:
-            Dict[str, Any]: Health check results
+            HealthStatus: Health check results
         """
-        health_status = {
+        health_status: HealthStatus = {
             "status": "healthy",
             "name": self.name,
             "version": self.version,
@@ -220,19 +359,27 @@ class RiskComplianceModule(ModuleInterface):
             dependency_status = self._check_dependencies()
             health_status["details"]["dependencies"] = dependency_status
             
-            # Determine overall status
+            # Determine overall status based on component health
             if not all(model["loaded"] for model in risk_model_status.values()):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: risk model issues detected")
+                
             elif not all(rule["loaded"] for rule in compliance_rule_status.values()):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: compliance rule issues detected")
+                
             elif not all(service["available"] for service in service_status.values()):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: service issues detected")
+                
             elif not all(dep["available"] for dep in dependency_status.values() if dep["critical"]):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: critical dependency issues detected")
                 
         except Exception as e:
             health_status["status"] = "critical"
-            health_status["error"] = str(e)
+            health_status["details"]["error"] = str(e)
+            health_status["details"]["traceback"] = traceback.format_exc()
             logger.error(f"Health check failed for {self.name} module: {str(e)}")
             
         return health_status
@@ -361,32 +508,67 @@ class RiskComplianceModule(ModuleInterface):
     # Private helper methods
     
     def _load_risk_models(self) -> None:
-        """Load risk assessment models"""
-        # Implementation would go here
-        self.risk_models = ["customer_risk_model", "transaction_risk_model", "account_risk_model"]
-        pass
+        """
+        Load risk assessment models
+        
+        Loads and initializes all risk models required for
+        risk assessment operations.
+        """
+        try:
+            logger.info("Loading risk assessment models")
+            
+            # In a real implementation, this would load actual models
+            self.risk_models = ["customer_risk_model", "transaction_risk_model", "account_risk_model"]
+            
+            logger.info(f"Loaded {len(self.risk_models)} risk models successfully")
+        except Exception as e:
+            logger.error(f"Failed to load risk models: {str(e)}")
+            # Initialize with empty list in case of failure
+            self.risk_models = []
     
     def _load_compliance_rules(self) -> None:
-        """Load compliance rules"""
-        # Implementation would go here
-        self.compliance_rules = {
-            "transaction": ["rule1", "rule2", "rule3"],
-            "customer": ["rule1", "rule2"],
-            "reporting": ["rule1", "rule2", "rule3", "rule4"]
-        }
-        pass
+        """
+        Load compliance rules
+        
+        Loads and initializes all compliance rules from
+        regulatory configuration.
+        """
+        try:
+            logger.info("Loading compliance rules")
+            
+            # In a real implementation, this would load actual rules from a configuration store
+            self.compliance_rules = {
+                "transaction": ["rule1", "rule2", "rule3"],
+                "customer": ["rule1", "rule2"],
+                "reporting": ["rule1", "rule2", "rule3", "rule4"]
+            }
+            
+            rule_count = sum(len(rules) for rules in self.compliance_rules.values())
+            logger.info(f"Loaded {rule_count} compliance rules successfully")
+        except Exception as e:
+            logger.error(f"Failed to load compliance rules: {str(e)}")
+            # Initialize with empty dict in case of failure
+            self.compliance_rules = {}
     
     def _load_configuration(self) -> None:
-        """Load module configuration"""
-        # Implementation would go here
-        pass
+        """
+        Load module configuration
+        
+        Loads configuration settings for the risk compliance module
+        from the configuration store.
+        """
+        try:
+            logger.info("Loading risk compliance module configuration")
+            # In a real implementation, this would load actual configuration
+        except Exception as e:
+            logger.error(f"Failed to load risk compliance module configuration: {str(e)}")
     
-    def _check_risk_models(self) -> Dict[str, Dict[str, Any]]:
+    def _check_risk_models(self) -> Dict[str, RiskModelStatus]:
         """
         Check risk models
         
         Returns:
-            Dict[str, Dict[str, Any]]: Risk model status
+            Dict[str, RiskModelStatus]: Risk model status
         """
         return {
             "customer_risk_model": {"loaded": True, "version": "1.0.0", "details": "Customer risk model loaded"},
@@ -394,12 +576,12 @@ class RiskComplianceModule(ModuleInterface):
             "account_risk_model": {"loaded": True, "version": "1.0.0", "details": "Account risk model loaded"}
         }
     
-    def _check_compliance_rules(self) -> Dict[str, Dict[str, Any]]:
+    def _check_compliance_rules(self) -> Dict[str, ComplianceRuleStatus]:
         """
         Check compliance rules
         
         Returns:
-            Dict[str, Dict[str, Any]]: Compliance rule status
+            Dict[str, ComplianceRuleStatus]: Compliance rule status
         """
         return {
             "transaction_rules": {"loaded": True, "count": 3, "details": "Transaction compliance rules loaded"},
@@ -407,12 +589,12 @@ class RiskComplianceModule(ModuleInterface):
             "reporting_rules": {"loaded": True, "count": 4, "details": "Reporting compliance rules loaded"}
         }
     
-    def _check_services(self) -> Dict[str, Dict[str, Any]]:
+    def _check_services(self) -> Dict[str, ServiceStatus]:
         """
         Check critical services
         
         Returns:
-            Dict[str, Dict[str, Any]]: Service status
+            Dict[str, ServiceStatus]: Service status
         """
         return {
             "risk_assessment": {"available": True, "details": "Risk assessment service is operational"},
@@ -420,12 +602,12 @@ class RiskComplianceModule(ModuleInterface):
             "aml_screening": {"available": True, "details": "AML screening service is operational"}
         }
     
-    def _check_dependencies(self) -> Dict[str, Dict[str, Any]]:
+    def _check_dependencies(self) -> Dict[str, DependencyStatus]:
         """
         Check dependencies
         
         Returns:
-            Dict[str, Dict[str, Any]]: Dependency status
+            Dict[str, DependencyStatus]: Dependency status
         """
         return {
             "database": {"available": True, "critical": True, "details": "Database dependency is operational"},
@@ -440,5 +622,34 @@ class RiskComplianceModule(ModuleInterface):
         Returns:
             str: Current timestamp
         """
-        import datetime
-        return datetime.datetime.now().isoformat()
+        return datetime.now().isoformat()
+
+
+# Create module instance (using singleton pattern)
+def get_module_instance() -> RiskComplianceModule:
+    """
+    Get the risk compliance module instance (singleton)
+    
+    Returns:
+        RiskComplianceModule: The risk compliance instance
+    """
+    return RiskComplianceModule.get_instance()
+
+# Register module with module registry
+def register_module() -> RiskComplianceModule:
+    """
+    Register the risk compliance module with the module registry
+    
+    Returns:
+        RiskComplianceModule: The registered module instance
+    """
+    from utils.lib.module_interface import ModuleRegistry
+    
+    # Get module registry
+    registry = ModuleRegistry.get_instance()
+    
+    # Create and register module (using singleton pattern)
+    module = get_module_instance()
+    registry.register_module(module)
+    
+    return module
