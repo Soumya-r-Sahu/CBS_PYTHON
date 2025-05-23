@@ -1,3 +1,15 @@
+# ID Format Standards 📜
+
+This document outlines the standards for formatting IDs in CBS_PYTHON.
+
+## Guidelines 📋
+
+1. **Unique Identifiers**: Ensure all IDs are unique.
+2. **Consistent Format**: Use UUIDs or a predefined pattern.
+3. **Validation**: Implement validation for all IDs.
+
+_Last updated: May 23, 2025_
+
 # Banking ID Format Standards
 
 This document outlines the standardized ID formats used throughout the Core Banking System in accordance with Indian and international banking standards.

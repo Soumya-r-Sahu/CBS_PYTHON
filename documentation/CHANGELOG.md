@@ -1,9 +1,62 @@
-# CBS_PYTHON Changelog
+# CBS_PYTHON Changelog 📜
 
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.1.2] - 2025-05-23
+
+### Added
+- **Unified Error Handling Framework**: Implemented a centralized error handling system to standardize error responses across all modules.
+- **Dependency Injection Container**: Introduced a robust DI container to manage dependencies and improve modularity.
+- **Refactored Validators**: Enhanced validation logic with reusable and extensible validators.
+- **Design Patterns Documentation**: Added comprehensive documentation for implemented design patterns.
+
+### Changed
+- **Codebase Refactoring**: Improved code structure to align with clean architecture principles.
+- **Documentation Updates**: Revised all documentation to reflect the latest changes and ensure consistency.
+
+### Fixed
+- **Bug Fixes**: Resolved minor bugs in the transaction processing and reporting modules.
+- **Documentation Links**: Fixed broken links in the user and technical documentation.
+
+---
+
+## [1.1.2] - 2025-05-23
+
+### Added
+- **Unified Error Handling**: Implemented comprehensive exception framework in `utils/unified_error_handling.py`
+  - Base `CBSException` class from which all domain-specific exceptions inherit
+  - Consistent error formatting across the system
+  - Centralized error codes in the `ErrorCodes` class
+  - Support for detailed error context information
+- **Design Patterns Framework**: Created reusable design pattern implementations in `utils/common/design_patterns.py`
+  - Implemented Singleton, Factory, Builder, Adapter, Proxy, Observer, Strategy patterns
+  - Added utility decorators for Memoization, Retry, and Method Timing
+- **Dependency Injection Container**: Built comprehensive DI system in `utils/common/dependency_injection.py`
+  - Registration of interface implementations
+  - Singleton and factory pattern support
+  - Automatic dependency resolution
+- **Refactored Validators**: Created composable validation system in `utils/common/refactored_validators.py`
+  - Abstract base `Validator` class
+  - Composable validators with AND/OR operators
+  - Banking-specific validators for common use cases
+- **UPI Module Refactoring**: Refactored UPI payment components to use new frameworks
+- **Migration Tools**: Added tools for migrating existing code to use new frameworks
+- **Documentation**: Created comprehensive migration plan and codebase improvement guides
+
+### Changed
+- **Module Restructuring**: Standardized subdirectory structure across all modules
+- **Service Registry**: Enhanced with AI metadata, improved error handling, and health checking
+- **Module Interfaces**: Enhanced with better error handling and health status tracking
+- **Centralized Utilities**: Consolidated common utilities to reduce code duplication
+- **Improved Admin Console**: Added interactive command line admin console with comprehensive features
+
+### Fixed
+- **Code Duplication**: Reduced duplication by centralizing common utilities
+- **Error Handling**: Standardized error handling across all modules
+- **Validation Logic**: Created consistent validation approach across the system
 
 ## [1.1.1] - 2025-05-19
 

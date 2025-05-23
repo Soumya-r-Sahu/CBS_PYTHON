@@ -1,6 +1,6 @@
-# CBS_PYTHON Requirements Management
+# Requirements Management Guide 📋
 
-This document explains how dependencies are managed in the CBS_PYTHON project.
+This guide provides best practices for managing requirements in CBS_PYTHON.
 
 ## Requirements Files
 
@@ -15,6 +15,12 @@ The following legacy requirements files have been removed to avoid duplication:
 - `database/requirements.txt` (replaced with README.requirements.md)
 - `app/Portals/Admin/requirements.txt` (replaced with README.requirements.md)
 - `consolidated_requirements.txt` (merged into main requirements.txt)
+
+## Key Areas 📌
+
+1. **Dependency Management**: Use a centralized requirements file.
+2. **Versioning**: Specify version ranges for dependencies.
+3. **Validation**: Regularly validate and update dependencies.
 
 ## How to Install Dependencies
 
@@ -42,6 +48,4 @@ When adding new dependencies:
 2. Include a comment if the dependency is for a specific use case
 3. Run `pip install -r requirements.txt` to update your environment
 
-## Last Updated
-
-May 18, 2025
+_Last updated: May 23, 2025_

@@ -1,4 +1,16 @@
-# Admin Module Integration Guide
+# Admin Module Integration Guide 🛠️
+
+This guide provides instructions for integrating a new module with the Admin module in CBS_PYTHON.
+
+## Key Steps 📋
+
+1. **Implement Module Registry Interface**: Define module-specific information.
+2. **Extend Base Module Registry**: Use the base implementation for common methods.
+3. **Register with Admin Module**: Use the Admin Integration Client.
+4. **Monitor Health**: Implement health checks for your module.
+5. **Handle Config Updates**: Apply configuration changes dynamically.
+
+_Last updated: May 23, 2025_
 
 ## Overview
 

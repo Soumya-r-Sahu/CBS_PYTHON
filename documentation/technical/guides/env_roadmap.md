@@ -1,4 +1,15 @@
-# Environment Awareness Roadmap
+# Environment Implementation Roadmap 🗺️
+
+This document outlines the roadmap for implementing environments in CBS_PYTHON.
+
+## Phases 📋
+
+1. **Planning**: Define environment requirements.
+2. **Setup**: Configure development, staging, and production environments.
+3. **Testing**: Validate environment configurations.
+4. **Deployment**: Roll out environments incrementally.
+
+_Last updated: May 23, 2025_
 
 ## Implementation Plan for Core Banking System
 

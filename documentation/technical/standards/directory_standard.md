@@ -1,4 +1,14 @@
-# Directory Structure Standardization
+# Directory Standardization Guide 🗂️
+
+This guide provides best practices for organizing directories in CBS_PYTHON.
+
+## Key Principles 📋
+
+1. **Modularity**: Group files by feature or module.
+2. **Consistency**: Use a consistent naming convention.
+3. **Scalability**: Design directories to accommodate growth.
+
+_Last updated: May 23, 2025_
 
 ## Overview
 

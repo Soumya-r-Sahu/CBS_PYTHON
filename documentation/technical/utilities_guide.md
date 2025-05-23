@@ -1,4 +1,14 @@
-# Centralized Utilities Implementation Guide
+# Utilities Guide 🛠️
+
+This guide provides an overview of centralized utilities in CBS_PYTHON.
+
+## Key Utilities 📋
+
+1. **Validation Functions**: Common data validation utilities.
+2. **Encryption Tools**: Secure data encryption and decryption.
+3. **Formatting Helpers**: Standardized data formatting functions.
+
+_Last updated: May 23, 2025_
 
 ## Overview
 

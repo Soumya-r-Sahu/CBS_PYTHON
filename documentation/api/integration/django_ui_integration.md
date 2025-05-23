@@ -1,6 +1,14 @@
-# Django Integration
+# Django UI Integration Guide 🖥️
 
-This section of the comprehensive_framework_tests module provides tests for the Django frontend compatibility with the CBS_PYTHON backend API.
+This guide provides instructions for integrating Django's frontend with the CBS_PYTHON system.
+
+## Steps 📋
+
+1. **Setup Django Templates**: Configure template directories.
+2. **Integrate Static Files**: Link CSS and JavaScript.
+3. **Test Frontend Components**: Ensure compatibility with CBS_PYTHON APIs.
+
+_Last updated: May 23, 2025_
 
 ## Setup for Testing
 

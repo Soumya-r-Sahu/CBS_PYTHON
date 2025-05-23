@@ -1,6 +1,14 @@
-# Clean Architecture Diagrams
+# Architecture Diagrams 🖼️
 
-This document provides visual representations of the Clean Architecture implementation in the CBS_PYTHON project.
+This document contains visual representations of the CBS_PYTHON system architecture.
+
+## Diagrams 📊
+
+1. **System Overview**: High-level view of all components.
+2. **Module Interactions**: Shows how modules communicate.
+3. **Data Flow**: Illustrates data movement across layers.
+
+_Last updated: May 23, 2025_
 
 ---
 
@@ -141,7 +149,7 @@ graph TD
 
 ---
 
-## 📈 Implementation Status (as of May 17, 2025)
+## 📈 Implementation Status (as of May 23, 2025)
 
 | Module                | Status        |
 |-----------------------|--------------|
@@ -160,5 +168,3 @@ graph TD
 | BI Dashboards         | 🟠 In Progress|
 
 ---
-
-> **Last updated:** May 17, 2025

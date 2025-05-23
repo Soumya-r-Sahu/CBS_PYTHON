@@ -1,3 +1,15 @@
+# Security Integration Guide 🔒
+
+This guide provides instructions for integrating security features into CBS_PYTHON.
+
+## Steps 📋
+
+1. **Authentication**: Implement OAuth2 or JWT.
+2. **Authorization**: Use role-based access control.
+3. **Data Encryption**: Encrypt sensitive data at rest and in transit.
+
+_Last updated: May 23, 2025_
+
 # Core Banking System Security Module Documentation
 
 ## Overview

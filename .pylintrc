@@ -158,5 +158,4 @@ max-bool-expr=5
 
 [EXCEPTIONS]
 # Exceptions that are allowed with "except"
-overgeneral-exceptions=Exception,
-                       BaseException
+overgeneral-exceptions=Exception,BaseException

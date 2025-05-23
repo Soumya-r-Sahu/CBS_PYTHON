@@ -1,6 +1,14 @@
-# Cross-Framework Compatibility Updates
+# Cross-Framework Updates Guide 🔄
 
-This document summarizes the changes made to ensure the Core Banking System backend is compatible with various frontend frameworks, particularly Django and modern JavaScript frameworks.
+This document outlines updates required for cross-framework compatibility in CBS_PYTHON.
+
+## Key Areas 📌
+
+1. **API Standardization**: Ensure consistent API responses.
+2. **Data Format Alignment**: Use common data formats (e.g., JSON).
+3. **Error Handling**: Standardize error codes and messages.
+
+_Last updated: May 23, 2025_
 
 ## What Changed
 

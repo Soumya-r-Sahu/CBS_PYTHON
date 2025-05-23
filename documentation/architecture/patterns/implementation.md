@@ -1,17 +1,17 @@
-# Clean Architecture Implementation Guide
+# Clean Architecture Implementation Guide 🛠️
 
 This guide provides step-by-step instructions for implementing Clean Architecture in a new module within the CBS_PYTHON banking system.
 
-## Overview
+## Overview 📖
 
 Clean Architecture organizes code into concentric layers, each with a specific responsibility:
 
-1. **Domain Layer** (innermost): Contains business entities and rules
-2. **Application Layer**: Contains use cases and interfaces
-3. **Infrastructure Layer** (outermost): Contains implementations of interfaces
-4. **Presentation Layer**: Contains UI components
+1. **Domain Layer**: Business entities and rules.
+2. **Application Layer**: Use cases and interfaces.
+3. **Infrastructure Layer**: Implementations of interfaces.
+4. **Presentation Layer**: UI components.
 
-The fundamental rule is that dependencies always point inward: outer layers depend on inner layers, never the reverse.
+_Last updated: May 23, 2025_
 
 ## Step 1: Plan Your Module Structure
 

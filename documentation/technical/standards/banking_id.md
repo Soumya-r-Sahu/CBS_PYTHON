@@ -1,4 +1,14 @@
-# Banking ID Standards Implementation Progress
+# Banking ID Standards 📜
+
+This document outlines the standards for generating and managing banking IDs in CBS_PYTHON.
+
+## Guidelines 📋
+
+1. **Unique Identifiers**: Ensure all banking IDs are unique.
+2. **Format**: Use a consistent format for all IDs.
+3. **Validation**: Implement validation checks for all IDs.
+
+_Last updated: May 23, 2025_
 
 ## Completed Tasks
 

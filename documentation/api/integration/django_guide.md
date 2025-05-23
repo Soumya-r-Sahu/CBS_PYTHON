@@ -1,8 +1,8 @@
-# Django Integration Guide for CBS Banking API
+# Django Integration Guide 🛠️
 
 This guide provides detailed instructions for integrating the CBS Banking API with Django projects. The CBS banking system has been designed to work seamlessly with Django applications, providing a powerful backend for building banking and financial services.
 
-## Table of Contents
+## Table of Contents 📋
 
 1. [Requirements](#requirements)
 2. [Installation](#installation)
@@ -395,3 +395,5 @@ def api_view_with_error_handling(function):
 
     return wrapper
 ```
+
+_Last updated: May 23, 2025_

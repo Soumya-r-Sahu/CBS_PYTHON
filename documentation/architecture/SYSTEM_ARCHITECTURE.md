@@ -1,4 +1,4 @@
-# System Architecture Overview
+# System Architecture Overview 🏗️
 
 This document provides a high-level overview of the Core Banking System architecture.
 
@@ -20,7 +20,12 @@ This document provides a high-level overview of the Core Banking System architec
 └───────────────────┘     └───────────────────┘     └───────────────────┘
 ```
 
-## System Components
+## System Components 🧩
+
+1. **Core Banking Modules**: Handles accounts, loans, and transactions.
+2. **Digital Channels**: Provides internet and mobile banking services.
+3. **Integration Interfaces**: Connects with external systems.
+4. **Security Layer**: Ensures data protection and compliance.
 
 ### Core Banking
 The central module containing essential banking functions:
@@ -73,7 +78,7 @@ Data persistence and management:
 - **Authentication**: OAuth 2.0, JWT
 - **Messaging**: RabbitMQ
 
-Last updated: May 19, 2025
+_Last updated: May 23, 2025_
 
 
 ---

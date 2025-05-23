@@ -50,9 +50,13 @@ These tools can help maintain code quality and enforce best practices:
 
 4. **For Continuous Integration**: Add `check_requirements_files.py` to your CI pipeline to prevent duplicate requirement files.
 
-## Documentation
+## Documentation 📚
 
 See the following documentation files for more information on best practices:
 
-- [Import System Guide](documentation/technical/standards/import_system_guide.md)
-- [Requirements Management](documentation/technical/standards/requirements_management.md)
+- [Import System Guide](../standards/import_system_guide.md)
+- [Requirements Management](../standards/requirements_management.md)
+
+---
+
+_Last updated: May 23, 2025_

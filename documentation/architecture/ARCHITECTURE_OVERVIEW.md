@@ -1,7 +1,7 @@
 <!-- filepath: d:\Vs code\CBS_PYTHON\Documentation\architecture\ARCHITECTURE_OVERVIEW.md -->
-# Architecture Documentation
+# Architecture Overview 🏛️
 
-This document provides a comprehensive overview of the architecture, design patterns, and implementation plans for the Core Banking System.
+This document provides an overview of the architectural principles and design patterns used in the CBS_PYTHON project.
 
 ## Contents
 
@@ -10,6 +10,14 @@ This document provides a comprehensive overview of the architecture, design patt
 - [Patterns](./patterns/) - Design patterns
 - [CLEAN_ARCHITECTURE.md](./CLEAN_ARCHITECTURE.md) - Clean architecture implementation
 - [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md) - System architecture overview
+
+## Key Principles 📜
+
+| Principle       | Description                     |
+|-----------------|---------------------------------|
+| **Scalability** | Designed to handle growth       |
+| **Modularity**  | Loosely coupled components      |
+| **Security**    | Adheres to industry standards   |
 
 ## Key Architecture Principles
 
@@ -88,4 +96,4 @@ The system implements various design patterns:
 - Observer Pattern for event handling
 - Command Pattern for operation encapsulation
 
-Last updated: May 19, 2025
+_Last updated: May 23, 2025_

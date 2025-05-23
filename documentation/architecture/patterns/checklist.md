@@ -1,6 +1,14 @@
-# Clean Architecture Validation Checklist
+# Clean Architecture Checklist ✅
 
-Use this checklist to verify that a module follows Clean Architecture principles correctly.
+Use this checklist to ensure your module follows Clean Architecture principles:
+
+- [x] Domain entities are defined.
+- [x] Use cases are implemented.
+- [x] Interfaces are defined in the application layer.
+- [x] Infrastructure components implement application interfaces.
+- [x] Presentation layer exposes use cases.
+
+_Last updated: May 23, 2025_
 
 ## Domain Layer
 

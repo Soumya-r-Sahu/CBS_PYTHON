@@ -1,4 +1,4 @@
-# 🚀 GraphQL Implementation Roadmap for API Integration
+# 🗺️ GraphQL Implementation Roadmap for API Integration
 
 > **Status:** Planned | **Target Start:** Q2 2025 | **Owner:** Integration Interfaces Team
 
@@ -73,4 +73,4 @@ This document outlines the roadmap for implementing GraphQL support in the CBS_P
 
 ---
 
-> **Last updated:** May 17, 2025
+_Last updated: May 23, 2025_

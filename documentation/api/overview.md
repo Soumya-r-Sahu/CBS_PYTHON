@@ -1,6 +1,16 @@
-# CBS API Documentation
+# API Overview 🌐
 
-This document provides an overview of the Core Banking System APIs.
+This document provides an overview of the APIs available in CBS_PYTHON.
+
+## Available APIs 📋
+
+| API Name       | Description                     |
+|----------------|---------------------------------|
+| **Core Banking** | Handles accounts and transactions |
+| **Digital Channels** | Provides internet and mobile banking |
+| **Admin Module** | Centralized control and monitoring |
+
+_Last updated: May 23, 2025_
 
 ## API Overview
 

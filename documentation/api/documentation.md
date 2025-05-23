@@ -1,7 +1,15 @@
 <!-- filepath: d:\Vs code\CBS_PYTHON\Documentation\api\API_DOCUMENTATION.md -->
-# API Documentation
+# API Documentation 📖
 
-This document provides a comprehensive overview of all APIs provided by the Core Banking System.
+This document provides detailed documentation for the APIs in CBS_PYTHON.
+
+## Sections 📋
+
+| Section         | Description                     |
+|-----------------|---------------------------------|
+| **Endpoints**   | List of available API endpoints |
+| **Authentication** | How to authenticate requests |
+| **Error Codes** | Standardized error responses    |
 
 ## Contents
 
@@ -85,4 +93,4 @@ API usage is subject to rate limiting to ensure system stability:
 - 300 requests per minute for premium clients
 - 1000 requests per minute for internal systems
 
-Last updated: May 19, 2025
+_Last updated: May 23, 2025_

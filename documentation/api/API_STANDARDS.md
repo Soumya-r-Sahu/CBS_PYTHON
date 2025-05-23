@@ -1,6 +1,6 @@
-# API Standards
+# API Standards 📜
 
-This document outlines the API standards used in the Core Banking System.
+This document outlines the standards for designing and implementing APIs in CBS_PYTHON.
 
 ## RESTful API Design
 
@@ -43,13 +43,12 @@ Error responses follow a consistent format:
 }
 ```
 
-## Versioning
+## Key Guidelines 📋
 
-API versioning is handled through the URL path:
+| Aspect          | Standard                          |
+|-----------------|----------------------------------|
+| **Versioning**  | Use semantic versioning (v1, v2) |
+| **Authentication** | Use OAuth2 or JWT              |
+| **Error Handling** | Return standardized error codes |
 
-```
-/api/v1/accounts
-/api/v2/accounts
-```
-
-Last updated: May 19, 2025
+_Last updated: May 23, 2025_

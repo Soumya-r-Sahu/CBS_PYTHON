@@ -1,4 +1,4 @@
-# CBS_PYTHON Import System Guide
+# CBS_PYTHON Import System Guide 📦
 
 ## Overview
 
@@ -8,7 +8,7 @@ This guide explains how to use the centralized import system in the CBS_PYTHON p
 2. **Environment Detection**: Providing consistent environment detection across the codebase
 3. **Module Importing**: Standardized approach to dynamic module imports
 
-## Key Components
+## Key Components 🛠️
 
 The import system is primarily implemented in `utils/lib/packages.py` and includes:
 
@@ -16,7 +16,7 @@ The import system is primarily implemented in `utils/lib/packages.py` and includ
 - **Environment Detection**: Functions to detect and work with different environments
 - **Dynamic Imports**: Functions for importing modules dynamically
 
-## Basic Usage
+## Basic Usage ✅
 
 ### Standard Import Pattern
 
@@ -32,7 +32,7 @@ from core_banking.accounts.domain.models import Account
 from payments.upi.services import UPIPaymentService
 ```
 
-### Environment Detection
+### Environment Detection 🌍
 
 Use these functions to check the current environment:
 
@@ -115,4 +115,4 @@ If environment detection seems incorrect:
 
 ---
 
-*Last Updated: May 19, 2025 (v1.1.1)*
+_Last updated: May 23, 2025_
