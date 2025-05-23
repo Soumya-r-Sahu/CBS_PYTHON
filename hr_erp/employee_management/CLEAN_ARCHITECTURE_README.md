@@ -1,4 +1,4 @@
-# HR-ERP Employee Management: Clean Architecture Example
+cd "d:\Vs code\CBS_PYTHON" ; git status# HR-ERP Employee Management: Clean Architecture Example
 
 This directory contains a sample implementation of Clean Architecture principles for the HR-ERP module, focusing on the employee onboarding process. It serves as a reference implementation that can be used as a template for implementing Clean Architecture in other modules of the CBS_PYTHON system.
 
