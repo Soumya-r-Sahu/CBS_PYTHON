@@ -17,9 +17,10 @@ AI-Metadata:
 import logging
 import os
 import sys
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Dict, List, Any, Optional, Union, Tuple, TypedDict, cast
 from datetime import datetime
 import traceback
+import functools
 
 # Import the module interface
 from utils.lib.module_interface import ModuleInterface
@@ -41,6 +42,27 @@ except ImportError:
 # Configure logger
 logger = logging.getLogger(__name__)
 
+# Type definitions for better type checking
+class HealthStatus(TypedDict):
+    status: str
+    name: str
+    version: str
+    timestamp: str
+    details: Dict[str, Any]
+    
+class ChannelStatus(TypedDict):
+    available: bool
+    details: str
+    
+class ServiceStatus(TypedDict):
+    available: bool
+    details: str
+    
+class DependencyStatus(TypedDict):
+    available: bool
+    critical: bool
+    details: str
+
 class DigitalChannelsModule(ModuleInterface):
     """
     Digital Channels module implementation
@@ -60,8 +82,18 @@ class DigitalChannelsModule(ModuleInterface):
         purpose: Provide unified access to banking services across digital channels
         criticality: high
         failover_strategy: graceful_degradation
-        last_reviewed: 2025-05-19
+        last_reviewed: 2025-05-23
     """
+    
+    # Class-level caching for module instances
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls) -> 'DigitalChannelsModule':
+        """Get or create the singleton instance of this module"""
+        if cls._instance is None:
+            cls._instance = DigitalChannelsModule()
+        return cls._instance
     
     def __init__(self):
         """
@@ -78,12 +110,15 @@ class DigitalChannelsModule(ModuleInterface):
         
         # Define module-specific attributes
         self.supported_channels = ["web", "mobile", "api", "atm", "kiosk"]
-        self.channel_handlers = {}
+        self.channel_handlers: Dict[str, Any] = {}
         self.health_status = {
             "status": "initializing",
             "last_check": datetime.now().isoformat(),
             "issues": []
         }
+        
+        # Service implementation cache
+        self._service_impl_cache: Dict[str, Any] = {}
         
         # Register dependencies
         self.register_dependency("database", ["database.operations"], is_critical=True)
@@ -124,42 +159,88 @@ class DigitalChannelsModule(ModuleInterface):
         """
         try:
             registry = self.get_registry()
+            success_count = 0
+            service_count = 0
             
-            # Register channel services
-            registry.register("channels.web.authenticate", self.authenticate_web, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.mobile.authenticate", self.authenticate_mobile, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.api.authenticate", self.authenticate_api, 
-                             version="1.0.0", module_name=self.name)
+            # Helper function to register a service with error handling
+            def register_service(name: str, func: Any, version: str) -> bool:
+                nonlocal success_count, service_count
+                service_count += 1
+                try:
+                    registry.register(
+                        name, 
+                        func, 
+                        version=version, 
+                        module_name=self.name
+                    )
+                    self.service_registrations.append(name)
+                    success_count += 1
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to register service '{name}': {str(e)}")
+                    return False
+            
+            # Register channel authentication services
+            register_service("channels.web.authenticate", self.authenticate_web, "1.0.0")
+            register_service("channels.mobile.authenticate", self.authenticate_mobile, "1.0.0")
+            register_service("channels.api.authenticate", self.authenticate_api, "1.0.0")
             
             # Register user services
-            registry.register("channels.user.get_profile", self.get_user_profile, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.user.update_profile", self.update_user_profile, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.user.get_preferences", self.get_user_preferences, 
-                             version="1.0.0", module_name=self.name)
+            register_service("channels.user.get_profile", self.get_user_profile, "1.0.0")
+            register_service("channels.user.update_profile", self.update_user_profile, "1.0.0")
+            register_service("channels.user.get_preferences", self.get_user_preferences, "1.0.0")
             
             # Register session services
-            registry.register("channels.session.create", self.create_session, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.session.validate", self.validate_session, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.session.terminate", self.terminate_session, 
-                             version="1.0.0", module_name=self.name)
+            register_service("channels.session.create", self.create_session, "1.0.0")
+            register_service("channels.session.validate", self.validate_session, "1.0.0")
+            register_service("channels.session.terminate", self.terminate_session, "1.0.0")
             
             # Register transaction services
-            registry.register("channels.transaction.initiate", self.initiate_transaction, 
-                             version="1.0.0", module_name=self.name)
-            registry.register("channels.transaction.authorize", self.authorize_transaction, 
-                             version="1.0.0", module_name=self.name)
+            register_service("channels.transaction.initiate", self.initiate_transaction, "1.0.0")
+            register_service("channels.transaction.authorize", self.authorize_transaction, "1.0.0")
             
-            logger.info(f"Registered {self.name} module services")
-            return True
+            # Register fallbacks for critical services
+            self._register_fallbacks(registry)
+            
+            logger.info(f"Registered {success_count}/{service_count} {self.name} module services")
+            return success_count == service_count  # Return True only if all registrations succeeded
         except Exception as e:
             logger.error(f"Failed to register {self.name} module services: {str(e)}")
             return False
+    
+    def _register_fallbacks(self, registry: ServiceRegistry) -> None:
+        """
+        Register fallback implementations for critical services
+        
+        Args:
+            registry (ServiceRegistry): The service registry
+        """
+        # Authentication fallbacks
+        def auth_fallback(credentials: Dict[str, Any]) -> Dict[str, Any]:
+            """Fallback for authentication services"""
+            logger.warning("Using authentication fallback - service unavailable")
+            return {
+                "authenticated": False,
+                "error": "Authentication service unavailable",
+                "error_code": "SERVICE_UNAVAILABLE"
+            }
+        
+        # Session fallbacks
+        def session_fallback(user_id: str = "", session_id: str = "", **kwargs) -> Dict[str, Any]:
+            """Fallback for session services"""
+            logger.warning("Using session fallback - service unavailable")
+            return {
+                "success": False,
+                "error": "Session service unavailable",
+                "error_code": "SERVICE_UNAVAILABLE"
+            }
+        
+        # Register fallbacks
+        registry.register_fallback("channels.web.authenticate", auth_fallback)
+        registry.register_fallback("channels.mobile.authenticate", auth_fallback)
+        registry.register_fallback("channels.api.authenticate", auth_fallback)
+        registry.register_fallback("channels.session.create", session_fallback)
+        registry.register_fallback("channels.session.validate", session_fallback)
     
     def activate(self) -> bool:
         """
@@ -178,10 +259,15 @@ class DigitalChannelsModule(ModuleInterface):
             self._load_configuration()
             
             # Register services
-            self.register_services()
+            success = self.register_services()
             
-            logger.info(f"{self.name} module activated successfully")
-            return True
+            if success:
+                logger.info(f"{self.name} module activated successfully")
+                self.active = True
+                return True
+            else:
+                logger.error(f"{self.name} module activation failed")
+                return False
         except Exception as e:
             logger.error(f"Failed to activate {self.name} module: {str(e)}")
             return False
@@ -201,7 +287,14 @@ class DigitalChannelsModule(ModuleInterface):
             
             # Deregister services
             registry = self.get_registry()
-            registry.deactivate_module(self.name)
+            for service_name in self.service_registrations:
+                try:
+                    registry.deregister(service_name, module_name=self.name)
+                except Exception as e:
+                    logger.warning(f"Error deregistering service {service_name}: {str(e)}")
+            
+            self.service_registrations = []
+            self.active = False
             
             logger.info(f"{self.name} module deactivated successfully")
             return True
@@ -216,7 +309,7 @@ class DigitalChannelsModule(ModuleInterface):
         Returns:
             Dict[str, Any]: Health check results
         """
-        health_status = {
+        health_status: HealthStatus = {
             "status": "healthy",
             "name": self.name,
             "version": self.version,
@@ -237,20 +330,56 @@ class DigitalChannelsModule(ModuleInterface):
             dependency_status = self._check_dependencies()
             health_status["details"]["dependencies"] = dependency_status
             
-            # Determine overall status
+            # Determine overall status based on component health
             if not all(channel["available"] for channel in channel_status.values()):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: channel issues detected")
+                
             elif not all(service["available"] for service in service_status.values()):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: service issues detected")
+                
             elif not all(dep["available"] for dep in dependency_status.values() if dep["critical"]):
                 health_status["status"] = "degraded"
+                logger.warning(f"{self.name} module health degraded: critical dependency issues detected")
                 
         except Exception as e:
             health_status["status"] = "critical"
-            health_status["error"] = str(e)
+            health_status["details"]["error"] = str(e)
+            health_status["details"]["traceback"] = traceback.format_exc()
             logger.error(f"Health check failed for {self.name} module: {str(e)}")
             
         return health_status
+    
+    def get_service_implementation(self, service_name: str) -> Any:
+        """
+        Get an implementation of a service by name
+        
+        Args:
+            service_name (str): Name of the service
+            
+        Returns:
+            Any: Service implementation or None if not found
+        """
+        # Check cache first
+        if service_name in self._service_impl_cache:
+            return self._service_impl_cache[service_name]
+            
+        # Try to get the implementation
+        try:
+            registry = self.get_registry()
+            implementation = registry.get_service(service_name)
+            
+            if implementation:
+                # Cache the result
+                self._service_impl_cache[service_name] = implementation
+                return implementation
+            else:
+                logger.warning(f"Service implementation not found: {service_name}")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting service implementation for {service_name}: {str(e)}")
+            return None
     
     # Digital Channels Module specific methods
     
@@ -418,12 +547,12 @@ class DigitalChannelsModule(ModuleInterface):
         # Implementation would go here
         pass
     
-    def _check_channel_availability(self) -> Dict[str, Dict[str, Any]]:
+    def _check_channel_availability(self) -> Dict[str, ChannelStatus]:
         """
         Check channel availability
         
         Returns:
-            Dict[str, Dict[str, Any]]: Channel availability status
+            Dict[str, ChannelStatus]: Channel availability status
         """
         return {
             "web": {"available": True, "details": "Web channel is operational"},
@@ -433,12 +562,12 @@ class DigitalChannelsModule(ModuleInterface):
             "kiosk": {"available": True, "details": "Kiosk channel is operational"}
         }
     
-    def _check_services(self) -> Dict[str, Dict[str, Any]]:
+    def _check_services(self) -> Dict[str, ServiceStatus]:
         """
         Check critical services
         
         Returns:
-            Dict[str, Dict[str, Any]]: Service status
+            Dict[str, ServiceStatus]: Service status
         """
         return {
             "authentication": {"available": True, "details": "Authentication service is operational"},
@@ -446,12 +575,12 @@ class DigitalChannelsModule(ModuleInterface):
             "session": {"available": True, "details": "Session service is operational"}
         }
     
-    def _check_dependencies(self) -> Dict[str, Dict[str, Any]]:
+    def _check_dependencies(self) -> Dict[str, DependencyStatus]:
         """
         Check dependencies
         
         Returns:
-            Dict[str, Dict[str, Any]]: Dependency status
+            Dict[str, DependencyStatus]: Dependency status
         """
         return {
             "database": {"available": True, "critical": True, "details": "Database dependency is operational"},
@@ -469,3 +598,33 @@ class DigitalChannelsModule(ModuleInterface):
             str: Current timestamp
         """
         return datetime.now().isoformat()
+
+
+# Create module instance (using singleton pattern)
+def get_module_instance() -> DigitalChannelsModule:
+    """
+    Get the digital channels module instance (singleton)
+    
+    Returns:
+        DigitalChannelsModule: The digital channels module instance
+    """
+    return DigitalChannelsModule.get_instance()
+
+# Register module with module registry
+def register_module() -> DigitalChannelsModule:
+    """
+    Register the digital channels module with the module registry
+    
+    Returns:
+        DigitalChannelsModule: The registered module instance
+    """
+    from utils.lib.module_interface import ModuleRegistry
+    
+    # Get module registry
+    registry = ModuleRegistry.get_instance()
+    
+    # Create and register module (using singleton pattern)
+    module = get_module_instance()
+    registry.register_module(module)
+    
+    return module

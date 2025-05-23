@@ -72,7 +72,7 @@ class ModuleInterface(ABC):
             ServiceRegistry: The service registry instance
         """
         if self.registry is None:
-            self.registry = ServiceRegistry()
+            self.registry = ServiceRegistry.get_instance()
         return self.registry
     
     @abstractmethod
@@ -100,41 +100,35 @@ class ModuleInterface(ABC):
             "required_services": required_services,
             "is_critical": is_critical
         })
-        logger.info(f"Module {self.name} registered dependency on {module_name}")
+        
+        logger.debug(f"Module {self.name} registered dependency on {module_name}")
     
     def activate(self) -> bool:
         """
         Activate the module
         
         Returns:
-            bool: True if activation was successful
+            bool: True if successful, False otherwise
         """
-        if self.active:
-            logger.info(f"Module {self.name} already active")
-            return True
-            
-        # Check dependencies before activation
-        missing_deps = self.check_dependencies()
-        if missing_deps and any(dep["is_critical"] for dep in missing_deps):
-            logger.error(f"Module {self.name} missing critical dependencies: {missing_deps}")
-            return False
-            
         try:
-            # Register services
+            logger.info(f"Activating module {self.name} v{self.version}")
+            # Register services with the service registry
             if not self.register_services():
                 logger.error(f"Failed to register services for module {self.name}")
                 return False
                 
+            # Set module as active
             self.active = True
             self.health_status["status"] = "active"
             self.health_status["last_check"] = datetime.datetime.now().isoformat()
             
-            logger.info(f"Module {self.name} activated successfully")
+            logger.info(f"Module {self.name} v{self.version} activated successfully")
             return True
         except Exception as e:
             logger.error(f"Error activating module {self.name}: {str(e)}")
             self.health_status["status"] = "error"
-            self.health_status["details"]["error"] = str(e)
+            self.health_status["last_check"] = datetime.datetime.now().isoformat()
+            self.health_status["details"]["activation_error"] = str(e)
             return False
     
     def deactivate(self) -> bool:
@@ -142,95 +136,107 @@ class ModuleInterface(ABC):
         Deactivate the module
         
         Returns:
-            bool: True if deactivation was successful
+            bool: True if successful, False otherwise
         """
-        if not self.active:
-            logger.info(f"Module {self.name} already inactive")
-            return True
-            
         try:
-            # Deactivate services in registry
+            logger.info(f"Deactivating module {self.name}")
+            
+            # Deactivate all services from this module
             registry = self.get_registry()
-            deactivated = registry.deactivate_module(self.name)
+            success = registry.deactivate_module(self.name)
             
-            self.active = False
-            self.health_status["status"] = "inactive"
-            self.health_status["last_check"] = datetime.datetime.now().isoformat()
+            if success:
+                self.active = False
+                self.health_status["status"] = "inactive"
+                self.health_status["last_check"] = datetime.datetime.now().isoformat()
+                logger.info(f"Module {self.name} deactivated successfully")
+            else:
+                logger.error(f"Failed to deactivate module {self.name}")
+                self.health_status["status"] = "error"
+                self.health_status["last_check"] = datetime.datetime.now().isoformat()
+                self.health_status["details"]["deactivation_error"] = "Failed to deactivate module services"
             
-            logger.info(f"Module {self.name} deactivated, services affected: {len(deactivated)}")
-            return True
+            return success
         except Exception as e:
             logger.error(f"Error deactivating module {self.name}: {str(e)}")
             self.health_status["status"] = "error"
-            self.health_status["details"]["error"] = str(e)
+            self.health_status["last_check"] = datetime.datetime.now().isoformat()
+            self.health_status["details"]["deactivation_error"] = str(e)
             return False
     
     def check_health(self) -> Dict[str, Any]:
         """
-        Check module health
+        Check module health status
         
         Returns:
             dict: Health status information
         """
         try:
-            # Perform health check
-            health_details = self._perform_health_check()
+            logger.debug(f"Checking health for module {self.name}")
             
-            # Update status
-            self.health_status["status"] = "active" if self.active else "inactive"
+            # Update the timestamp
             self.health_status["last_check"] = datetime.datetime.now().isoformat()
-            self.health_status["details"] = health_details
             
+            # Check dependencies health
+            dependency_status = self.check_dependencies()
+            self.health_status["details"]["dependencies"] = dependency_status
+            
+            # Update overall status based on dependency health
+            if not self.active:
+                self.health_status["status"] = "inactive"
+            elif any(dep["status"] == "error" for dep in dependency_status if dep["is_critical"]):
+                self.health_status["status"] = "degraded"
+            else:
+                self.health_status["status"] = "healthy"
+                
             return self.health_status
         except Exception as e:
             logger.error(f"Error checking health for module {self.name}: {str(e)}")
             self.health_status["status"] = "error"
-            self.health_status["details"]["error"] = str(e)
+            self.health_status["last_check"] = datetime.datetime.now().isoformat()
+            self.health_status["details"]["health_check_error"] = str(e)
             return self.health_status
-    
-    def _perform_health_check(self) -> Dict[str, Any]:
-        """
-        Perform module-specific health checks
-        
-        Returns:
-            dict: Health check details
-        """
-        # Default implementation checks dependencies
-        missing_deps = self.check_dependencies()
-        
-        return {
-            "dependencies_met": not any(dep["is_critical"] for dep in missing_deps),
-            "missing_dependencies": missing_deps,
-            "services_registered": len(self.service_registrations)
-        }
     
     def check_dependencies(self) -> List[Dict[str, Any]]:
         """
-        Check if all dependencies are available
+        Check if all dependencies are available and healthy
         
         Returns:
-            list: List of missing dependencies
+            list: List of dependency statuses
         """
-        missing = []
+        results = []
         registry = self.get_registry()
         
         for dep in self.dependencies:
             module_name = dep["module_name"]
-            missing_services = []
+            required_services = dep["required_services"]
+            is_critical = dep["is_critical"]
             
-            for service_name in dep["required_services"]:
+            dep_status = {
+                "module_name": module_name,
+                "is_critical": is_critical,
+                "status": "healthy",
+                "details": {}
+            }
+            
+            # Check if all required services are available
+            missing_services = []
+            for service_name in required_services:
                 service = registry.get_service(service_name)
                 if service is None:
                     missing_services.append(service_name)
             
             if missing_services:
-                missing.append({
-                    "module_name": module_name,
-                    "missing_services": missing_services,
-                    "is_critical": dep["is_critical"]
-                })
+                if is_critical:
+                    dep_status["status"] = "error"
+                else:
+                    dep_status["status"] = "degraded"
+                    
+                dep_status["details"]["missing_services"] = missing_services
+                
+            results.append(dep_status)
         
-        return missing
+        return results
     
     def get_info(self) -> Dict[str, Any]:
         """
@@ -243,168 +249,6 @@ class ModuleInterface(ABC):
             "name": self.name,
             "version": self.version,
             "active": self.active,
-            "health_status": self.health_status["status"],
-            "dependencies": len(self.dependencies),
-            "registered_services": len(self.service_registrations)
+            "health": self.health_status["status"],
+            "last_check": self.health_status["last_check"]
         }
-
-class ModuleRegistry:
-    """
-    Registry for module instances
-    
-    Description:
-        This class provides a registry for module instances, allowing the
-        system to manage and orchestrate modules. It supports activating,
-        deactivating, and checking health across all registered modules.
-    
-    Usage:
-        # Get registry instance
-        registry = ModuleRegistry.get_instance()
-        
-        # Register module
-        registry.register_module(PaymentModule())
-        
-        # Activate all modules
-        registry.activate_all()
-    """
-    
-    _instance = None
-    
-    @classmethod
-    def get_instance(cls):
-        """
-        Get the singleton instance
-        
-        Returns:
-            ModuleRegistry: The singleton instance
-        """
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-    
-    def __init__(self):
-        """Initialize the module registry"""
-        self.modules = {}
-        logger.info("Module registry initialized")
-    
-    def register_module(self, module: ModuleInterface) -> bool:
-        """
-        Register a module
-        
-        Args:
-            module (ModuleInterface): Module instance to register
-            
-        Returns:
-            bool: True if registration was successful
-        """
-        if module.name in self.modules:
-            logger.warning(f"Module {module.name} already registered, replacing")
-            
-        self.modules[module.name] = module
-        logger.info(f"Module {module.name} v{module.version} registered")
-        return True
-    
-    def get_module(self, name: str) -> Optional[ModuleInterface]:
-        """
-        Get a module by name
-        
-        Args:
-            name (str): Module name
-            
-        Returns:
-            ModuleInterface: The module instance or None if not found
-        """
-        return self.modules.get(name)
-    
-    def list_modules(self) -> List[Dict[str, Any]]:
-        """
-        List all registered modules
-        
-        Returns:
-            list: List of module information dictionaries
-        """
-        return [module.get_info() for module in self.modules.values()]
-    
-    def activate_module(self, name: str) -> bool:
-        """
-        Activate a specific module
-        
-        Args:
-            name (str): Module name
-            
-        Returns:
-            bool: True if activation was successful
-        """
-        module = self.modules.get(name)
-        if not module:
-            logger.error(f"Module {name} not found")
-            return False
-            
-        return module.activate()
-    
-    def deactivate_module(self, name: str) -> bool:
-        """
-        Deactivate a specific module
-        
-        Args:
-            name (str): Module name
-            
-        Returns:
-            bool: True if deactivation was successful
-        """
-        module = self.modules.get(name)
-        if not module:
-            logger.error(f"Module {name} not found")
-            return False
-            
-        return module.deactivate()
-    
-    def activate_all(self) -> Dict[str, bool]:
-        """
-        Activate all modules
-        
-        Returns:
-            dict: Results of activation by module name
-        """
-        results = {}
-        
-        # First activate modules with no dependencies
-        for name, module in self.modules.items():
-            if not module.dependencies:
-                results[name] = module.activate()
-        
-        # Then activate the rest
-        for name, module in self.modules.items():
-            if name not in results:
-                results[name] = module.activate()
-        
-        return results
-    
-    def deactivate_all(self) -> Dict[str, bool]:
-        """
-        Deactivate all modules
-        
-        Returns:
-            dict: Results of deactivation by module name
-        """
-        results = {}
-        
-        # Deactivate in reverse order of dependency
-        for name, module in self.modules.items():
-            results[name] = module.deactivate()
-        
-        return results
-    
-    def check_health_all(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Check health of all modules
-        
-        Returns:
-            dict: Health status by module name
-        """
-        results = {}
-        
-        for name, module in self.modules.items():
-            results[name] = module.check_health()
-        
-        return results

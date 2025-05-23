@@ -17,7 +17,7 @@ project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root))  # Ensure project root is in path
 
 # Import centralized import system
-from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment, get_database_connection
+from utils.lib.packages import fix_path, import_module, is_production, is_development, is_test, is_debug_enabled, Environment, get_environment
 fix_path()  # Ensures the project root is in sys.path
 
 # Import colorama for colored console output
@@ -25,53 +25,27 @@ from colorama import init, Fore, Style
 # Initialize colorama
 init(autoreset=True)
 
-# Define additional environment functions for backward compatibility
-def get_environment():
-    """Get the current environment."""
-    if is_production():
-        return Environment.PRODUCTION
-    elif is_test():
-        return Environment.TEST
-    else:
-        return Environment.DEVELOPMENT
+# Set up environment color
+if is_production():
+    ENV_COLOR = Fore.RED
+    ENV_NAME = "PRODUCTION"
+elif is_test():
+    ENV_COLOR = Fore.YELLOW
+    ENV_NAME = "TESTING"
+else:
+    ENV_COLOR = Fore.GREEN
+    ENV_NAME = "DEVELOPMENT"
 
-def get_environment_name():
-    """Get the current environment name as a string."""
-    return get_environment()
-
-def is_testing():
-    """Alias for is_test()."""
-    return is_test()
-
-# Set up logging utilities
-# Create simple versions that can be used throughout the application
-def get_info_logger(name):
-    """Get a logger for info messages."""
-    import logging
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
-    return logger
-
-def get_error_logger(name):
-    """Get a logger for error messages."""
-    import logging
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.ERROR)
-    return logger
-
+# Configure logging
 def configure_root_logger():
     """Configure the root logger."""
-    import logging
-    import os
-    from pathlib import Path
-    
     # Create logs directory if it doesn't exist
     log_dir = Path(__file__).parent / "logs"
     log_dir.mkdir(exist_ok=True)
     
     # Configure root logger
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.INFO if not is_debug_enabled() else logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.FileHandler(log_dir / "cbs.log"),
@@ -79,20 +53,10 @@ def configure_root_logger():
         ]
     )
 
-# Set up environment color
-if is_production():
-    ENV_COLOR = Fore.RED
-    ENV_NAME = "PRODUCTION"
-elif is_testing() or is_test():
-    ENV_COLOR = Fore.YELLOW
-    ENV_NAME = "TESTING"
-else:
-    ENV_COLOR = Fore.GREEN
-    ENV_NAME = "DEVELOPMENT"
-
-# Set up logger
-logger = get_info_logger(__name__)
-error_logger = get_error_logger(__name__)
+# Set up loggers
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO if not is_debug_enabled() else logging.DEBUG)
+error_logger = logger  # Use same logger for errors
 
 # Configure root logger
 configure_root_logger()

@@ -119,22 +119,27 @@ def is_debug_enabled():
 def get_database_connection():
     """
     Get a connection to the database appropriate for the current environment.
-    This is a convenience function that imports and calls the database connection function.
+    
+    Returns:
+        A database connection object or None if connection failed
     """
     try:
-        # Try to import from the new structure
-        from database.python.common.database_operations import get_connection
+        from core_banking.database.db_helper import get_connection
+        return get_connection()
     except ImportError:
+        import logging
+        logging.getLogger(__name__).warning(
+            "Failed to import database module from core_banking. Using fallback connection."
+        )
+        
         try:
-            # Try to import from the old structure
-            from app.database.connection import get_connection
+            from database.python.common.database_operations import get_connection
+            return get_connection()
         except ImportError:
-            # Fallback implementation
-            def get_connection():
-                print("Warning: Using dummy database connection. Install required dependencies.")
-                return None
-    
-    return get_connection()
+            logging.getLogger(__name__).error(
+                "Failed to connect to database. Database modules not available."
+            )
+            return None
 
 # Run setup_imports if this module is executed directly
 if __name__ == "__main__":

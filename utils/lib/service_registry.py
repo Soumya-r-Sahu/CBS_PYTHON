@@ -8,6 +8,11 @@ Author: cbs-core-dev
 Version: 1.1.2
 """
 
+import logging
+from typing import Dict, List, Any, Optional, Callable
+
+logger = logging.getLogger(__name__)
+
 class ServiceRegistry:
     """
     Service registry for module services.
@@ -21,7 +26,7 @@ class ServiceRegistry:
     
     Usage:
         # Register a service
-        registry = ServiceRegistry()
+        registry = ServiceRegistry.get_instance()
         registry.register("payment.processor", PaymentProcessor(), "1.0.0", "payments")
         
         # Register a fallback
@@ -31,15 +36,22 @@ class ServiceRegistry:
         payment_service = registry.get_service("payment.processor")
         
         # Deactivate a module's services
-        registry.deactivate_module("payments")    """
+        registry.deactivate_module("payments")
+    """
     _instance = None
     
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ServiceRegistry, cls).__new__(cls)
-            cls._instance.services = {}
-            cls._instance.fallbacks = {}
+            cls._instance._initialize()
         return cls._instance
+    
+    def _initialize(self):
+        """Initialize the registry's internal state."""
+        self.services = {}
+        self.fallbacks = {}
+        self.modules = {}
+        logger.debug("Service Registry initialized")
     
     @classmethod
     def get_instance(cls):
@@ -53,7 +65,8 @@ class ServiceRegistry:
             cls._instance = cls()
         return cls._instance
     
-    def register(self, service_name, implementation, version='1.0.0', module_name=None):
+    def register(self, service_name: str, implementation: Any, version: str = '1.0.0', 
+                 module_name: Optional[str] = None) -> bool:
         """
         Register a service implementation
         
@@ -62,17 +75,33 @@ class ServiceRegistry:
             implementation (object): The service implementation
             version (str): Service implementation version
             module_name (str, optional): Name of the providing module
+            
+        Returns:
+            bool: True if registration was successful
         """
-        if service_name not in self.services:
-            self.services[service_name] = {}
-        
-        self.services[service_name][version] = {
-            'implementation': implementation,
-            'module_name': module_name,
-            'active': True
-        }
+        try:
+            if service_name not in self.services:
+                self.services[service_name] = {}
+            
+            self.services[service_name][version] = {
+                'implementation': implementation,
+                'module_name': module_name,
+                'active': True
+            }
+            
+            # Track module services
+            if module_name:
+                if module_name not in self.modules:
+                    self.modules[module_name] = []
+                self.modules[module_name].append(service_name)
+                
+            logger.debug(f"Registered service '{service_name}' v{version} from module '{module_name}'")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to register service '{service_name}': {str(e)}")
+            return False
     
-    def get_service(self, service_name, version='latest'):
+    def get_service(self, service_name: str, version: str = 'latest') -> Optional[Any]:
         """
         Get a service by name and optional version
         
@@ -83,72 +112,137 @@ class ServiceRegistry:
         Returns:
             The service implementation or fallback, or None if not found
         """
-        if service_name not in self.services:
-            # Check for fallback implementation
+        try:
+            if service_name not in self.services:
+                # Check for fallback implementation
+                if service_name in self.fallbacks:
+                    logger.debug(f"Using fallback for service '{service_name}'")
+                    return self.fallbacks[service_name]
+                logger.debug(f"Service '{service_name}' not found")
+                return None
+            
+            if version == 'latest':
+                # Return the latest version (assuming semantic versioning)
+                versions = list(self.services[service_name].keys())
+                if not versions:
+                    logger.debug(f"No versions found for service '{service_name}'")
+                    return None
+                    
+                latest = sorted(versions, key=lambda v: [int(x) for x in v.split('.')])[-1]
+                service_info = self.services[service_name][latest]
+            else:
+                # Return specific version if available
+                if version not in self.services[service_name]:
+                    logger.debug(f"Version '{version}' not found for service '{service_name}'")
+                    return None
+                service_info = self.services[service_name][version]
+            
+            # Check if the service is active
+            if not service_info['active']:
+                # Check for fallback implementation
+                if service_name in self.fallbacks:
+                    logger.debug(f"Using fallback for inactive service '{service_name}'")
+                    return self.fallbacks[service_name]
+                logger.debug(f"Service '{service_name}' is not active")
+                return None
+                
+            return service_info['implementation']
+        except Exception as e:
+            logger.error(f"Error retrieving service '{service_name}': {str(e)}")
+            # Return fallback if available
             if service_name in self.fallbacks:
+                logger.debug(f"Using fallback after error for service '{service_name}'")
                 return self.fallbacks[service_name]
             return None
-        
-        if version == 'latest':
-            # Return the latest version (assuming semantic versioning)
-            versions = list(self.services[service_name].keys())
-            if not versions:
-                return None
-            latest = sorted(versions, key=lambda v: [int(x) for x in v.split('.')])[-1]
-            service_info = self.services[service_name][latest]
-        else:
-            # Return specific version if available
-            if version not in self.services[service_name]:
-                return None
-            service_info = self.services[service_name][version]
-        
-        # Check if service is active
-        if service_info['active']:
-            return service_info['implementation']
-        
-        # Return fallback if available
-        if service_name in self.fallbacks:
-            return self.fallbacks[service_name]
-        
-        return None
-    
-    def register_fallback(self, service_name, implementation):
+
+    def register_fallback(self, service_name: str, implementation: Any) -> bool:
         """
         Register a fallback implementation for a service
-        Used when the primary implementation is unavailable
         
         Args:
-            service_name (str): Service name
-            implementation (object): Fallback implementation
-        """
-        self.fallbacks[service_name] = implementation
-    
-    def unregister(self, service_name, version=None):
-        """
-        Unregister a service or specific version
-        
-        Args:
-            service_name (str): Service name
-            version (str, optional): Specific version to unregister
-        
+            service_name (str): Service name to register fallback for
+            implementation (object): The fallback implementation
+            
         Returns:
-            bool: True if successful, False otherwise
+            bool: True if registration was successful
         """
-        if service_name not in self.services:
+        try:
+            self.fallbacks[service_name] = implementation
+            logger.debug(f"Registered fallback for service '{service_name}'")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to register fallback for service '{service_name}': {str(e)}")
             return False
-        
-        if version is None:
-            # Remove all versions
-            del self.services[service_name]
-            return True
-        elif version in self.services[service_name]:
-            # Remove specific version
-            del self.services[service_name][version]
-            return True
-        
-        return False
     
-    def deactivate_module(self, module_name):
+    def activate_service(self, service_name: str, version: str = 'all') -> bool:
+        """
+        Activate a service
+        
+        Args:
+            service_name (str): Service name to activate
+            version (str): Service version, or 'all' for all versions
+            
+        Returns:
+            bool: True if activation was successful
+        """
+        try:
+            if service_name not in self.services:
+                logger.debug(f"Service '{service_name}' not found")
+                return False
+                
+            if version == 'all':
+                # Activate all versions
+                for ver in self.services[service_name]:
+                    self.services[service_name][ver]['active'] = True
+                logger.debug(f"Activated all versions of service '{service_name}'")
+            else:
+                # Activate specific version
+                if version not in self.services[service_name]:
+                    logger.debug(f"Version '{version}' not found for service '{service_name}'")
+                    return False
+                self.services[service_name][version]['active'] = True
+                logger.debug(f"Activated service '{service_name}' v{version}")
+                
+            return True
+        except Exception as e:
+            logger.error(f"Failed to activate service '{service_name}': {str(e)}")
+            return False
+    
+    def deactivate_service(self, service_name: str, version: str = 'all') -> bool:
+        """
+        Deactivate a service
+        
+        Args:
+            service_name (str): Service name to deactivate
+            version (str): Service version, or 'all' for all versions
+            
+        Returns:
+            bool: True if deactivation was successful
+        """
+        try:
+            if service_name not in self.services:
+                logger.debug(f"Service '{service_name}' not found")
+                return False
+                
+            if version == 'all':
+                # Deactivate all versions
+                for ver in self.services[service_name]:
+                    self.services[service_name][ver]['active'] = False
+                logger.debug(f"Deactivated all versions of service '{service_name}'")
+            else:
+                # Deactivate specific version
+                if version not in self.services[service_name]:
+                    logger.debug(f"Version '{version}' not found for service '{service_name}'")
+                    return False
+                self.services[service_name][version]['active'] = False
+                logger.debug(f"Deactivated service '{service_name}' v{version}")
+                
+            return True
+        except Exception as e:
+            logger.error(f"Failed to deactivate service '{service_name}': {str(e)}")
+            return False
+    
+    def deactivate_module(self, module_name: str) -> bool:
         """
         Deactivate all services from a module
         
@@ -156,81 +250,57 @@ class ServiceRegistry:
             module_name (str): Module name to deactivate
             
         Returns:
-            list: List of deactivated service names
+            bool: True if deactivation was successful
         """
-        deactivated = []
-        
-        for service_name, versions in self.services.items():
-            for version, service_info in versions.items():
-                if service_info.get('module_name') == module_name and service_info['active']:
-                    service_info['active'] = False
-                    deactivated.append(f"{service_name}@{version}")
-        
-        return deactivated
+        try:
+            if module_name not in self.modules:
+                logger.debug(f"Module '{module_name}' not found")
+                return False
                 
-    def activate_module(self, module_name):
-        """
-        Activate all services from a module
-        
-        Args:
-            module_name (str): Module name to activate
+            success = True
+            for service_name in self.modules[module_name]:
+                if not self.deactivate_service(service_name, 'all'):
+                    success = False
+                    
+            if success:
+                logger.debug(f"Deactivated all services from module '{module_name}'")
+            else:
+                logger.warning(f"Some services from module '{module_name}' could not be deactivated")
+                
+            return success
+        except Exception as e:
+            logger.error(f"Failed to deactivate module '{module_name}': {str(e)}")
+            return False
             
-        Returns:
-            list: List of activated service names
-        """
-        activated = []
-        
-        for service_name, versions in self.services.items():
-            for version, service_info in versions.items():
-                if service_info.get('module_name') == module_name and not service_info['active']:
-                    service_info['active'] = True
-                    activated.append(f"{service_name}@{version}")
-        
-        return activated
-    
-    def list_services(self):
+    def list_services(self) -> Dict[str, List[str]]:
         """
         List all registered services
         
         Returns:
-            list: List of dictionaries containing service information
+            dict: Dictionary mapping service names to lists of available versions
         """
-        result = []
-        
+        result = {}
         for service_name, versions in self.services.items():
-            for version, service_info in versions.items():
-                result.append({
-                    'name': service_name,
-                    'version': version,
-                    'module': service_info.get('module_name', 'unknown'),
-                    'active': service_info['active'],
-                    'implementation': service_info['implementation'].__class__.__name__
-                })
-        
+            active_versions = []
+            for version, info in versions.items():
+                if info['active']:
+                    active_versions.append(version)
+            if active_versions:
+                result[service_name] = active_versions
         return result
-    
-    def list_fallbacks(self):
+        
+    def list_all_services(self) -> Dict[str, Dict[str, Any]]:
         """
-        List all registered fallbacks
+        List all registered services, including inactive ones
         
         Returns:
-            list: List of dictionaries containing fallback information
+            dict: Dictionary mapping service names to service information
         """
-        result = []
-        
-        for service_name, implementation in self.fallbacks.items():
-            result.append({
-                'name': service_name,
-                'implementation': implementation.__class__.__name__
-            })
-        
-        return result
-
-    def list_all_services(self):
-        """
-        List all registered services (for backward compatibility)
-        
-        Returns:
-            list: List of all registered service names
-        """
-        return [service['name'] for service in self.list_services()]
+        return {
+            service_name: {
+                "versions": list(versions.keys()),
+                "module": next((info["module_name"] for info in versions.values() 
+                              if info["module_name"]), None)
+            }
+            for service_name, versions in self.services.items()
+        }
