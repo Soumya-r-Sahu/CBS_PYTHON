@@ -1,7 +1,8 @@
 """
 Transaction Entity Module
 
-This module defines the Transaction entity and related value objects for the Core Banking System.
+This module defines the Transaction entity and related value objects for the Core Banking System,
+using the centralized utilities for validation and business rules.
 """
 from datetime import datetime
 from decimal import Decimal
@@ -12,6 +13,13 @@ from uuid import UUID, uuid4
 # Use centralized import system
 from utils.lib.packages import fix_path
 fix_path()  # Ensures project root is in sys.path
+
+from core_banking.utils.core_banking_utils import (
+    ValidationException,
+    BusinessRuleException,
+    MoneyUtility,
+    DateUtils
+)
 
 
 class TransactionStatus(Enum):
