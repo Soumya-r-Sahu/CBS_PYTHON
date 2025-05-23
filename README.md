@@ -2,12 +2,12 @@
 
 [![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green)](https://github.com/Soumya-r-Sahu/CBS_PYTHON)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/Soumya-r-Sahu/CBS_PYTHON)
-![Version 1.1.1](https://img.shields.io/badge/Version-1.1.1-brightgreen)
+![Version 1.1.2](https://img.shields.io/badge/Version-1.1.2-brightgreen)
 [![Changelog](https://img.shields.io/badge/Changelog-View-orange)](CHANGELOG.md)
 
 ---
 
-_Last updated: May 19, 2025_
+_Last updated: May 23, 2025_
 
 ---
 
@@ -206,7 +206,6 @@ erDiagram
 ```
 
 ---
----
 
 ## 🐞 Troubleshooting Guide
 
@@ -382,4 +381,4 @@ See the [Frontend Integration Guide](Documentation/api_guides/FRONTEND_INTEGRATI
 >
 > Made with ❤️ by [Soumya-r-Sahu](https://github.com/Soumya-r-Sahu)
 >
-> Version: v1.1.1 | Last Updated: May 19, 2025
+> Version: v1.1.2 | Last Updated: May 23, 2025

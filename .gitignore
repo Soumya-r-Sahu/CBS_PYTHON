@@ -115,3 +115,6 @@ local_config.py
 *_demo_data.csv
 *_sample_data.json
 *_test_data.sql
+
+# Ignore the dump directory
+/dump/

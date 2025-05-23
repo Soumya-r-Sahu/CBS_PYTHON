@@ -1,6 +1,14 @@
-# Upload Security
+# Upload Guide 📤
 
-This directory contains components for secure file uploads with validation and scanning.
+This guide provides instructions for securely uploading files in CBS_PYTHON.
+
+## Steps 📋
+
+1. **Prepare Files**: Ensure files meet the required format.
+2. **Secure Upload**: Use the secure upload endpoint.
+3. **Verify Upload**: Confirm the upload was successful.
+
+_Last updated: May 23, 2025_
 
 ## Components
 
