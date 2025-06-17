@@ -1,0 +1,219 @@
+# CBS_PYTHON V2.0 Production Docker Compose
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cbs_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Gateway Service
+  gateway-service:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/gateway_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=gateway-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Customer Service  
+  customer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/customer_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=customer-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Account Service
+  account-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/account_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=account-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Transaction Service
+  transaction-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/transaction_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=transaction-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Payment Service
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/payment_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=payment-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Loan Service
+  loan-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/loan_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=loan-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Notification Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8006:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/notification_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=notification-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Audit Service
+  audit-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8007:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/audit_service_db
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=audit-service
+      - SERVICE_VERSION=2.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: cbs_platform_network

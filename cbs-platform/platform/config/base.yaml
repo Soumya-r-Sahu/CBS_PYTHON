@@ -1,0 +1,118 @@
+# Platform Configuration
+# Base configuration for all environments
+
+app:
+  name: "CBS Platform"
+  version: "2.0.0"
+  description: "Core Banking System Platform"
+  
+# Database Configuration
+database:
+  engine: "postgresql"
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+  echo: false
+
+# Redis Configuration
+redis:
+  decode_responses: true
+  socket_keepalive: true
+  socket_keepalive_options: {}
+  connection_pool_kwargs: {}
+  max_connections: 50
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers: ["localhost:9092"]
+  auto_offset_reset: "earliest"
+  enable_auto_commit: true
+  group_id: "cbs-platform"
+  value_deserializer: "json"
+  value_serializer: "json"
+
+# Security Configuration
+security:
+  secret_key: "your-secret-key-here"
+  algorithm: "HS256"
+  access_token_expire_minutes: 30
+  refresh_token_expire_days: 7
+  password_hash_algorithm: "argon2"
+
+# API Configuration
+api:
+  title: "CBS Platform API"
+  description: "Core Banking System API"
+  version: "2.0.0"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+  openapi_url: "/openapi.json"
+
+# Logging Configuration
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    default:
+      format: "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    detailed:
+      format: "[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s"
+  handlers:
+    console:
+      class: "logging.StreamHandler"
+      level: "INFO"
+      formatter: "default"
+      stream: "ext://sys.stdout"
+    file:
+      class: "logging.FileHandler"
+      level: "DEBUG"
+      formatter: "detailed"
+      filename: "app.log"
+  loggers:
+    "": # root logger
+      level: "INFO"
+      handlers: ["console", "file"]
+      propagate: false
+    uvicorn:
+      level: "INFO"
+      handlers: ["console"]
+      propagate: false
+    sqlalchemy:
+      level: "WARNING"
+      handlers: ["console"]
+      propagate: false
+
+# Monitoring Configuration
+monitoring:
+  metrics:
+    enabled: true
+    endpoint: "/metrics"
+  health_check:
+    enabled: true
+    endpoint: "/health"
+  tracing:
+    enabled: true
+    service_name: "cbs-platform"
+    jaeger_endpoint: "http://localhost:14268/api/traces"
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  default_rate: "100/minute"
+  storage_url: "redis://localhost:6379"
+
+# CORS Configuration
+cors:
+  allow_origins: ["*"]
+  allow_credentials: true
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+
+# Feature Flags
+features:
+  enable_registration: true
+  enable_2fa: true
+  enable_push_notifications: true
+  enable_analytics: true
+  enable_ml_fraud_detection: false

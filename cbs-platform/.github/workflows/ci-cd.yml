@@ -1,0 +1,279 @@
+# filepath: /home/asus/CBS_PYTHON/cbs-platform/.github/workflows/ci-cd.yml
+name: CBS Platform CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "18"
+
+jobs:
+  # Code Quality and Testing
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [customer-service, account-service, payment-service, transaction-service, loan-service, notification-service, audit-service, gateway-service]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio pytest-cov black flake8 mypy
+    
+    - name: Lint with flake8
+      run: |
+        flake8 services/${{ matrix.service }}/src --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 services/${{ matrix.service }}/src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Type check with mypy
+      run: |
+        mypy services/${{ matrix.service }}/src --ignore-missing-imports
+    
+    - name: Format check with black
+      run: |
+        black --check services/${{ matrix.service }}/src
+    
+    - name: Run tests with pytest
+      run: |
+        cd services/${{ matrix.service }}
+        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+        REDIS_URL: redis://localhost:6379/0
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: services/${{ matrix.service }}/coverage.xml
+        flags: ${{ matrix.service }}
+        name: codecov-${{ matrix.service }}
+
+  # Security Scanning
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Bandit Security Linter
+      run: |
+        pip install bandit
+        bandit -r services/ -f json -o bandit-report.json
+    
+    - name: Run Safety Check
+      run: |
+        pip install safety
+        safety check --json --output safety-report.json
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  # Build and Package
+  build:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Build and push Docker images
+      run: |
+        services=("customer-service" "account-service" "payment-service" "transaction-service" "loan-service" "notification-service" "audit-service" "gateway-service")
+        for service in "${services[@]}"; do
+          echo "Building $service..."
+          docker build -t cbs-platform/$service:${{ github.sha }} -f services/$service/Dockerfile .
+          docker tag cbs-platform/$service:${{ github.sha }} cbs-platform/$service:latest
+          docker push cbs-platform/$service:${{ github.sha }}
+          docker push cbs-platform/$service:latest
+        done
+
+  # Deploy to Staging
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your staging deployment logic here
+        # For example, updating Kubernetes deployments, ECS services, etc.
+    
+    - name: Run staging tests
+      run: |
+        echo "Running staging integration tests..."
+        # Add your staging test commands here
+    
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#cbs-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Deploy to Production
+  deploy-production:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your production deployment logic here
+    
+    - name: Run smoke tests
+      run: |
+        echo "Running production smoke tests..."
+        # Add your production smoke test commands here
+    
+    - name: Create GitHub release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          Automated release of CBS Platform
+          
+          **Changes in this release:**
+          - See commit history for detailed changes
+          
+          **Deployment Information:**
+          - Build: ${{ github.sha }}
+          - Deployed: ${{ github.event.head_commit.timestamp }}
+        draft: false
+        prerelease: false
+    
+    - name: Notify teams
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#cbs-releases'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        text: |
+          🚀 CBS Platform v${{ github.run_number }} has been deployed to production!
+          
+          Build: ${{ github.sha }}
+          Deployed by: ${{ github.actor }}
+
+  # Performance Testing
+  performance:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install k6
+      run: |
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+    
+    - name: Run performance tests
+      run: |
+        k6 run --out json=performance-results.json tests/performance/load-test.js
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: performance-results.json
+
+  # Database Migration
+  migrate:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Alembic
+      run: pip install alembic psycopg2-binary
+    
+    - name: Run database migrations
+      run: |
+        services=("customer-service" "account-service" "payment-service" "transaction-service" "loan-service" "notification-service" "audit-service")
+        for service in "${services[@]}"; do
+          echo "Running migrations for $service..."
+          cd services/$service
+          alembic upgrade head
+          cd ../..
+        done
+      env:
+        DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}

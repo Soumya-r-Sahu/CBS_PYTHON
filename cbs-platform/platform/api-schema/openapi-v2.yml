@@ -1,0 +1,2124 @@
+openapi: 3.0.3
+info:
+  title: CBS_PYTHON V2.0 - Core Banking System API
+  description: |
+    Advanced microservices-based Core Banking System with comprehensive financial services.
+    
+    ## Features
+    - Microservices architecture with domain-driven design
+    - OAuth2 and API key authentication
+    - Real-time event streaming
+    - Advanced rate limiting and throttling
+    - GraphQL support for complex queries
+    - Webhook notifications
+    - Comprehensive audit logging
+    - Multi-tenancy support
+    
+    ## Security
+    - JWT-based authentication
+    - Role-based access control (RBAC)
+    - API key management
+    - Request/response encryption
+    - PCI DSS compliance
+    
+  version: 2.0.0
+  contact:
+    name: CBS Engineering Team
+    url: https://cbs-platform.com/support
+    email: api-support@cbs-platform.com
+  license:
+    name: Proprietary
+    url: https://cbs-platform.com/license
+  
+servers:
+  - url: https://api.cbs-platform.com/v2
+    description: Production API
+  - url: https://staging-api.cbs-platform.com/v2
+    description: Staging API
+  - url: http://localhost:8000/v2
+    description: Development API
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+  - OAuth2: []
+
+paths:
+  # Health and Status
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check the health status of all services
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /metrics:
+    get:
+      tags:
+        - System
+      summary: System metrics
+      description: Get system performance metrics
+      operationId: getMetrics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: System metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+
+  # Authentication & Authorization
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh JWT token
+      description: Refresh expired JWT token
+      operationId: refreshToken
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate JWT token
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # Customer Management
+  /customers:
+    get:
+      tags:
+        - Customers
+      summary: List customers
+      description: Get paginated list of customers
+      operationId: listCustomers
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - name: status
+          in: query
+          description: Filter by customer status
+          schema:
+            type: string
+            enum: [active, inactive, suspended, pending]
+        - name: search
+          in: query
+          description: Search customers by name, email, or phone
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
+
+    post:
+      tags:
+        - Customers
+      summary: Create customer
+      description: Create a new customer account
+      operationId: createCustomer
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+      responses:
+        '201':
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /customers/{customerId}:
+    get:
+      tags:
+        - Customers
+      summary: Get customer
+      description: Get customer details by ID
+      operationId: getCustomer
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdParam'
+      responses:
+        '200':
+          description: Customer details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Customers
+      summary: Update customer
+      description: Update customer information
+      operationId: updateCustomer
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
+      responses:
+        '200':
+          description: Customer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+
+    delete:
+      tags:
+        - Customers
+      summary: Delete customer
+      description: Soft delete customer account
+      operationId: deleteCustomer
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdParam'
+      responses:
+        '200':
+          description: Customer deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # Account Management
+  /accounts:
+    get:
+      tags:
+        - Accounts
+      summary: List accounts
+      description: Get paginated list of accounts
+      operationId: listAccounts
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: customerId
+          in: query
+          description: Filter by customer ID
+          schema:
+            type: string
+            format: uuid
+        - name: accountType
+          in: query
+          description: Filter by account type
+          schema:
+            type: string
+            enum: [savings, checking, business, loan, credit]
+        - name: status
+          in: query
+          description: Filter by account status
+          schema:
+            type: string
+            enum: [active, inactive, frozen, closed]
+      responses:
+        '200':
+          description: Account list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountListResponse'
+
+    post:
+      tags:
+        - Accounts
+      summary: Create account
+      description: Create a new bank account
+      operationId: createAccount
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Accounts
+      summary: Get account
+      description: Get account details by ID
+      operationId: getAccount
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      responses:
+        '200':
+          description: Account details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /accounts/{accountId}/balance:
+    get:
+      tags:
+        - Accounts
+      summary: Get account balance
+      description: Get current account balance
+      operationId: getAccountBalance
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      responses:
+        '200':
+          description: Account balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+
+  # Transaction Management
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: List transactions
+      description: Get paginated list of transactions
+      operationId: listTransactions
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: accountId
+          in: query
+          description: Filter by account ID
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          description: Filter by transaction type
+          schema:
+            type: string
+            enum: [debit, credit, transfer, payment, fee]
+        - name: status
+          in: query
+          description: Filter by transaction status
+          schema:
+            type: string
+            enum: [pending, completed, failed, cancelled]
+        - name: dateFrom
+          in: query
+          description: Filter transactions from date
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          description: Filter transactions to date
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Transaction list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionListResponse'
+
+    post:
+      tags:
+        - Transactions
+      summary: Create transaction
+      description: Create a new transaction
+      operationId: createTransaction
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransactionRequest'
+      responses:
+        '201':
+          description: Transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          description: Invalid transaction data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /transactions/{transactionId}:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction
+      description: Get transaction details by ID
+      operationId: getTransaction
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TransactionIdParam'
+      responses:
+        '200':
+          description: Transaction details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+
+  /transactions/transfer:
+    post:
+      tags:
+        - Transactions
+      summary: Transfer funds
+      description: Transfer funds between accounts
+      operationId: transferFunds
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '201':
+          description: Transfer completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+
+  # Payment Management
+  /payments:
+    get:
+      tags:
+        - Payments
+      summary: List payments
+      description: Get paginated list of payments
+      operationId: listPayments
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: customerId
+          in: query
+          description: Filter by customer ID
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Filter by payment status
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed, cancelled]
+        - name: type
+          in: query
+          description: Filter by payment type
+          schema:
+            type: string
+            enum: [upi, neft, rtgs, imps, wire, card]
+      responses:
+        '200':
+          description: Payment list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListResponse'
+
+    post:
+      tags:
+        - Payments
+      summary: Create payment
+      description: Initiate a new payment
+      operationId: createPayment
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '201':
+          description: Payment initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /payments/{paymentId}:
+    get:
+      tags:
+        - Payments
+      summary: Get payment
+      description: Get payment details by ID
+      operationId: getPayment
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PaymentIdParam'
+      responses:
+        '200':
+          description: Payment details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /payments/{paymentId}/cancel:
+    post:
+      tags:
+        - Payments
+      summary: Cancel payment
+      description: Cancel a pending payment
+      operationId: cancelPayment
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PaymentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelPaymentRequest'
+      responses:
+        '200':
+          description: Payment cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  # Loan Management
+  /loans:
+    get:
+      tags:
+        - Loans
+      summary: List loans
+      description: Get paginated list of loans
+      operationId: listLoans
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: customerId
+          in: query
+          description: Filter by customer ID
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Filter by loan status
+          schema:
+            type: string
+            enum: [draft, submitted, approved, disbursed, active, paid_off, defaulted]
+        - name: type
+          in: query
+          description: Filter by loan type
+          schema:
+            type: string
+            enum: [personal, home, auto, business, education]
+      responses:
+        '200':
+          description: Loan list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanListResponse'
+
+    post:
+      tags:
+        - Loans
+      summary: Apply for loan
+      description: Submit a loan application
+      operationId: applyForLoan
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplicationRequest'
+      responses:
+        '201':
+          description: Loan application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanResponse'
+
+  /loans/{loanId}:
+    get:
+      tags:
+        - Loans
+      summary: Get loan
+      description: Get loan details by ID
+      operationId: getLoan
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoanIdParam'
+      responses:
+        '200':
+          description: Loan details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanResponse'
+
+  /loans/{loanId}/approve:
+    post:
+      tags:
+        - Loans
+      summary: Approve loan
+      description: Approve a loan application
+      operationId: approveLoan
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoanIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApprovalRequest'
+      responses:
+        '200':
+          description: Loan approved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanResponse'
+
+  # Webhook Management
+  /webhooks:
+    get:
+      tags:
+        - Webhooks
+      summary: List webhooks
+      description: Get paginated list of webhook subscriptions
+      operationId: listWebhooks
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Webhook list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookListResponse'
+
+    post:
+      tags:
+        - Webhooks
+      summary: Create webhook
+      description: Create a new webhook subscription
+      operationId: createWebhook
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+
+  /webhooks/{webhookId}:
+    get:
+      tags:
+        - Webhooks
+      summary: Get webhook
+      description: Get webhook details by ID
+      operationId: getWebhook
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      responses:
+        '200':
+          description: Webhook details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+
+    delete:
+      tags:
+        - Webhooks
+      summary: Delete webhook
+      description: Delete a webhook subscription
+      operationId: deleteWebhook
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      responses:
+        '204':
+          description: Webhook deleted successfully
+
+  # GraphQL Endpoint
+  /graphql:
+    post:
+      tags:
+        - GraphQL
+      summary: GraphQL endpoint
+      description: Execute GraphQL queries and mutations
+      operationId: graphql
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphQLRequest'
+      responses:
+        '200':
+          description: GraphQL query executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphQLResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login endpoint
+    
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service-to-service authentication
+    
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.cbs-platform.com/oauth/authorize
+          tokenUrl: https://auth.cbs-platform.com/oauth/token
+          scopes:
+            read: Read access to resources
+            write: Write access to resources
+            admin: Administrative access
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number for pagination
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    
+    SortParam:
+      name: sort
+      in: query
+      description: Sort field and direction (e.g., name:asc, created_at:desc)
+      schema:
+        type: string
+        default: created_at:desc
+    
+    CustomerIdParam:
+      name: customerId
+      in: path
+      required: true
+      description: Customer unique identifier
+      schema:
+        type: string
+        format: uuid
+    
+    AccountIdParam:
+      name: accountId
+      in: path
+      required: true
+      description: Account unique identifier
+      schema:
+        type: string
+        format: uuid
+    
+    TransactionIdParam:
+      name: transactionId
+      in: path
+      required: true
+      description: Transaction unique identifier
+      schema:
+        type: string
+        format: uuid
+    
+    PaymentIdParam:
+      name: paymentId
+      in: path
+      required: true
+      description: Payment unique identifier
+      schema:
+        type: string
+        format: uuid
+    
+    LoanIdParam:
+      name: loanId
+      in: path
+      required: true
+      description: Loan unique identifier
+      schema:
+        type: string
+        format: uuid
+    
+    WebhookIdParam:
+      name: webhookId
+      in: path
+      required: true
+      description: Webhook unique identifier
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # Common Schemas
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+        - request_id
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        request_id:
+          type: string
+          format: uuid
+          description: Unique request identifier
+
+    ValidationErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            validation_errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                  code:
+                    type: string
+
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - message
+        - timestamp
+        - request_id
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          description: Success message
+        data:
+          type: object
+          description: Response data
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+          format: uuid
+
+    PaginationMeta:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - total_pages
+      properties:
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Items per page
+        total:
+          type: integer
+          description: Total number of items
+        total_pages:
+          type: integer
+          description: Total number of pages
+        has_next:
+          type: boolean
+          description: Whether there is a next page
+        has_previous:
+          type: boolean
+          description: Whether there is a previous page
+
+    # Health and System Schemas
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - timestamp
+        - services
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall system health status
+        timestamp:
+          type: string
+          format: date-time
+        services:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ServiceHealth'
+        version:
+          type: string
+          description: API version
+
+    ServiceHealth:
+      type: object
+      required:
+        - status
+        - response_time_ms
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        response_time_ms:
+          type: number
+          description: Service response time in milliseconds
+        last_check:
+          type: string
+          format: date-time
+        details:
+          type: object
+          description: Additional service health details
+
+    MetricsResponse:
+      type: object
+      required:
+        - timestamp
+        - metrics
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          properties:
+            requests_per_minute:
+              type: number
+            average_response_time_ms:
+              type: number
+            error_rate:
+              type: number
+            active_connections:
+              type: integer
+            memory_usage_mb:
+              type: number
+            cpu_usage_percent:
+              type: number
+
+    # Authentication Schemas
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Username or email
+        password:
+          type: string
+          format: password
+          description: User password
+        remember_me:
+          type: boolean
+          default: false
+          description: Extended session duration
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Refresh token
+
+    AuthResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+        refresh_token:
+          type: string
+          description: Refresh token
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          description: Token expiration time in seconds
+        scope:
+          type: string
+          description: Token scope
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    UserInfo:
+      type: object
+      required:
+        - id
+        - username
+        - roles
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        roles:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    # Customer Schemas
+    CreateCustomerRequest:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - phone
+        - date_of_birth
+        - address
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+        date_of_birth:
+          type: string
+          format: date
+        address:
+          $ref: '#/components/schemas/Address'
+        kyc_documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/KYCDocument'
+
+    UpdateCustomerRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+        address:
+          $ref: '#/components/schemas/Address'
+
+    CustomerResponse:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - email
+        - phone
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        customer_number:
+          type: string
+          description: Unique customer number
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [active, inactive, suspended, pending]
+        kyc_status:
+          type: string
+          enum: [pending, verified, rejected]
+        address:
+          $ref: '#/components/schemas/Address'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CustomerListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - postal_code
+        - country
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postal_code:
+          type: string
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+
+    KYCDocument:
+      type: object
+      required:
+        - type
+        - document_url
+      properties:
+        type:
+          type: string
+          enum: [passport, driver_license, national_id, utility_bill]
+        document_url:
+          type: string
+          format: uri
+        verification_status:
+          type: string
+          enum: [pending, verified, rejected]
+
+    # Account Schemas
+    CreateAccountRequest:
+      type: object
+      required:
+        - customer_id
+        - account_type
+        - currency
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        account_type:
+          type: string
+          enum: [savings, checking, business, loan, credit]
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USD
+        initial_deposit:
+          type: number
+          minimum: 0
+        branch_code:
+          type: string
+
+    AccountResponse:
+      type: object
+      required:
+        - id
+        - account_number
+        - customer_id
+        - account_type
+        - currency
+        - balance
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        account_number:
+          type: string
+          description: Unique account number
+        customer_id:
+          type: string
+          format: uuid
+        account_type:
+          type: string
+          enum: [savings, checking, business, loan, credit]
+        currency:
+          type: string
+        balance:
+          type: number
+          description: Current account balance
+        available_balance:
+          type: number
+          description: Available balance considering holds
+        status:
+          type: string
+          enum: [active, inactive, frozen, closed]
+        interest_rate:
+          type: number
+          description: Annual interest rate
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AccountListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    BalanceResponse:
+      type: object
+      required:
+        - account_id
+        - current_balance
+        - available_balance
+        - currency
+        - as_of
+      properties:
+        account_id:
+          type: string
+          format: uuid
+        current_balance:
+          type: number
+        available_balance:
+          type: number
+        currency:
+          type: string
+        holds:
+          type: array
+          items:
+            $ref: '#/components/schemas/BalanceHold'
+        as_of:
+          type: string
+          format: date-time
+
+    BalanceHold:
+      type: object
+      required:
+        - amount
+        - reason
+        - expires_at
+      properties:
+        amount:
+          type: number
+        reason:
+          type: string
+        reference:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+
+    # Transaction Schemas
+    CreateTransactionRequest:
+      type: object
+      required:
+        - account_id
+        - type
+        - amount
+        - currency
+        - description
+      properties:
+        account_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [debit, credit, transfer, payment, fee]
+        amount:
+          type: number
+          minimum: 0.01
+        currency:
+          type: string
+        description:
+          type: string
+          maxLength: 500
+        reference:
+          type: string
+          description: External reference number
+        metadata:
+          type: object
+          description: Additional transaction metadata
+
+    TransferRequest:
+      type: object
+      required:
+        - from_account_id
+        - to_account_id
+        - amount
+        - currency
+        - description
+      properties:
+        from_account_id:
+          type: string
+          format: uuid
+        to_account_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0.01
+        currency:
+          type: string
+        description:
+          type: string
+          maxLength: 500
+        reference:
+          type: string
+        scheduled_date:
+          type: string
+          format: date
+          description: Optional scheduled transfer date
+
+    TransactionResponse:
+      type: object
+      required:
+        - id
+        - account_id
+        - type
+        - amount
+        - currency
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        transaction_number:
+          type: string
+          description: Unique transaction number
+        account_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [debit, credit, transfer, payment, fee]
+        amount:
+          type: number
+        currency:
+          type: string
+        description:
+          type: string
+        reference:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed, cancelled]
+        balance_after:
+          type: number
+          description: Account balance after transaction
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        processed_at:
+          type: string
+          format: date-time
+
+    TransferResponse:
+      type: object
+      required:
+        - id
+        - from_account_id
+        - to_account_id
+        - amount
+        - currency
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        transfer_number:
+          type: string
+        from_account_id:
+          type: string
+          format: uuid
+        to_account_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        currency:
+          type: string
+        description:
+          type: string
+        reference:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, cancelled]
+        fee_amount:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+
+    TransactionListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # Payment Schemas
+    CreatePaymentRequest:
+      type: object
+      required:
+        - payer_account_id
+        - payee_account_id
+        - amount
+        - currency
+        - payment_type
+      properties:
+        payer_account_id:
+          type: string
+          format: uuid
+        payee_account_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0.01
+        currency:
+          type: string
+        payment_type:
+          type: string
+          enum: [upi, neft, rtgs, imps, wire, card]
+        description:
+          type: string
+          maxLength: 500
+        reference:
+          type: string
+        scheduled_date:
+          type: string
+          format: date
+        beneficiary_details:
+          $ref: '#/components/schemas/BeneficiaryDetails'
+
+    PaymentResponse:
+      type: object
+      required:
+        - id
+        - payer_account_id
+        - payee_account_id
+        - amount
+        - currency
+        - payment_type
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        payment_number:
+          type: string
+        payer_account_id:
+          type: string
+          format: uuid
+        payee_account_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        currency:
+          type: string
+        payment_type:
+          type: string
+          enum: [upi, neft, rtgs, imps, wire, card]
+        description:
+          type: string
+        reference:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, cancelled]
+        fee_amount:
+          type: number
+        exchange_rate:
+          type: number
+        beneficiary_details:
+          $ref: '#/components/schemas/BeneficiaryDetails'
+        created_at:
+          type: string
+          format: date-time
+        processed_at:
+          type: string
+          format: date-time
+
+    PaymentListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    CancelPaymentRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          maxLength: 500
+          description: Reason for cancellation
+
+    BeneficiaryDetails:
+      type: object
+      required:
+        - name
+        - account_number
+      properties:
+        name:
+          type: string
+        account_number:
+          type: string
+        bank_code:
+          type: string
+        bank_name:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+
+    # Loan Schemas
+    LoanApplicationRequest:
+      type: object
+      required:
+        - customer_id
+        - loan_type
+        - amount
+        - currency
+        - term_months
+        - purpose
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        loan_type:
+          type: string
+          enum: [personal, home, auto, business, education]
+        amount:
+          type: number
+          minimum: 1000
+        currency:
+          type: string
+        term_months:
+          type: integer
+          minimum: 1
+          maximum: 360
+        purpose:
+          type: string
+          maxLength: 500
+        collateral:
+          type: array
+          items:
+            $ref: '#/components/schemas/Collateral'
+        co_borrower_id:
+          type: string
+          format: uuid
+
+    LoanApprovalRequest:
+      type: object
+      required:
+        - approved_amount
+        - interest_rate
+        - terms_conditions
+      properties:
+        approved_amount:
+          type: number
+          minimum: 0
+        interest_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+        terms_conditions:
+          type: string
+        comments:
+          type: string
+
+    LoanResponse:
+      type: object
+      required:
+        - id
+        - customer_id
+        - loan_type
+        - requested_amount
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        loan_number:
+          type: string
+        customer_id:
+          type: string
+          format: uuid
+        loan_type:
+          type: string
+          enum: [personal, home, auto, business, education]
+        requested_amount:
+          type: number
+        approved_amount:
+          type: number
+        currency:
+          type: string
+        term_months:
+          type: integer
+        interest_rate:
+          type: number
+        status:
+          type: string
+          enum: [draft, submitted, approved, disbursed, active, paid_off, defaulted]
+        purpose:
+          type: string
+        outstanding_balance:
+          type: number
+        next_payment_date:
+          type: string
+          format: date
+        next_payment_amount:
+          type: number
+        collateral:
+          type: array
+          items:
+            $ref: '#/components/schemas/Collateral'
+        created_at:
+          type: string
+          format: date-time
+        approved_at:
+          type: string
+          format: date-time
+        disbursed_at:
+          type: string
+          format: date-time
+
+    LoanListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoanResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Collateral:
+      type: object
+      required:
+        - type
+        - value
+        - description
+      properties:
+        type:
+          type: string
+          enum: [property, vehicle, securities, cash, other]
+        value:
+          type: number
+        description:
+          type: string
+        documents:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    # Webhook Schemas
+    CreateWebhookRequest:
+      type: object
+      required:
+        - url
+        - events
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Webhook endpoint URL
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+              - customer.created
+              - customer.updated
+              - account.created
+              - account.status_changed
+              - transaction.created
+              - transaction.completed
+              - transaction.failed
+              - payment.created
+              - payment.completed
+              - payment.failed
+              - loan.application_submitted
+              - loan.approved
+              - loan.disbursed
+        secret:
+          type: string
+          description: Secret for webhook signature verification
+        active:
+          type: boolean
+          default: true
+
+    WebhookResponse:
+      type: object
+      required:
+        - id
+        - url
+        - events
+        - active
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        secret:
+          type: string
+          writeOnly: true
+        last_delivery:
+          type: string
+          format: date-time
+        delivery_count:
+          type: integer
+        failure_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    WebhookListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # GraphQL Schemas
+    GraphQLRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: GraphQL query or mutation
+        variables:
+          type: object
+          description: GraphQL variables
+        operationName:
+          type: string
+          description: GraphQL operation name
+
+    GraphQLResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          description: GraphQL response data
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              locations:
+                type: array
+                items:
+                  type: object
+              path:
+                type: array
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+        extensions:
+          type: object
+          description: GraphQL extensions
+
+  examples:
+    CustomerExample:
+      summary: Example customer
+      value:
+        id: "123e4567-e89b-12d3-a456-426614174000"
+        customer_number: "CUST-2024-001234"
+        first_name: "John"
+        last_name: "Doe"
+        email: "john.doe@example.com"
+        phone: "+1234567890"
+        status: "active"
+        kyc_status: "verified"
+        created_at: "2024-01-15T10:30:00Z"
+
+    AccountExample:
+      summary: Example account
+      value:
+        id: "987fcdeb-51a2-43d7-b456-326614174001"
+        account_number: "ACC-2024-567890"
+        customer_id: "123e4567-e89b-12d3-a456-426614174000"
+        account_type: "savings"
+        currency: "USD"
+        balance: 5000.00
+        available_balance: 4850.00
+        status: "active"
+        created_at: "2024-01-15T10:35:00Z"
+
+    TransactionExample:
+      summary: Example transaction
+      value:
+        id: "456789ab-cdef-1234-5678-901234567890"
+        transaction_number: "TXN-2024-789012"
+        account_id: "987fcdeb-51a2-43d7-b456-326614174001"
+        type: "credit"
+        amount: 1000.00
+        currency: "USD"
+        description: "Salary deposit"
+        status: "completed"
+        balance_after: 6000.00
+        created_at: "2024-01-20T14:30:00Z"
+
+  headers:
+    X-Request-ID:
+      description: Unique request identifier
+      schema:
+        type: string
+        format: uuid
+    
+    X-RateLimit-Limit:
+      description: Request limit per window
+      schema:
+        type: integer
+    
+    X-RateLimit-Remaining:
+      description: Remaining requests in current window
+      schema:
+        type: integer
+    
+    X-RateLimit-Reset:
+      description: Time when rate limit resets (Unix timestamp)
+      schema:
+        type: integer
+
+  links:
+    GetCustomerAccounts:
+      operationId: listAccounts
+      parameters:
+        customerId: '$response.body#/id'
+      description: Get accounts for this customer
+    
+    GetAccountTransactions:
+      operationId: listTransactions
+      parameters:
+        accountId: '$response.body#/id'
+      description: Get transactions for this account
+
+  callbacks:
+    WebhookEvent:
+      '{$request.body#/url}':
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    event_type:
+                      type: string
+                    event_id:
+                      type: string
+                      format: uuid
+                    timestamp:
+                      type: string
+                      format: date-time
+                    data:
+                      type: object
+                    signature:
+                      type: string
+          responses:
+            '200':
+              description: Webhook received successfully
+            '400':
+              description: Invalid webhook payload
+            '401':
+              description: Invalid webhook signature
+
+tags:
+  - name: System
+    description: System health and monitoring endpoints
+  - name: Authentication
+    description: Authentication and authorization operations
+  - name: Customers
+    description: Customer management operations
+  - name: Accounts
+    description: Account management operations
+  - name: Transactions
+    description: Transaction processing operations
+  - name: Payments
+    description: Payment processing operations
+  - name: Loans
+    description: Loan management operations
+  - name: Webhooks
+    description: Webhook subscription management
+  - name: GraphQL
+    description: GraphQL endpoint for complex queries
+
+externalDocs:
+  description: Find more information about CBS_PYTHON V2.0
+  url: https://docs.cbs-platform.com/v2

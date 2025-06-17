@@ -1,0 +1,60 @@
+# Development Environment Configuration
+# Overrides for development environment
+
+# Database Configuration
+database:
+  echo: true  # Enable SQL logging in development
+  pool_size: 5
+  max_overflow: 10
+
+# Redis Configuration
+redis:
+  decode_responses: true
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers: ["localhost:9092"]
+
+# Security Configuration (Development Only)
+security:
+  secret_key: "dev-secret-key-not-for-production"
+  access_token_expire_minutes: 60  # Longer expiry for development
+
+# API Configuration
+api:
+  debug: true
+  reload: true
+
+# Logging Configuration
+logging:
+  loggers:
+    "": # root logger
+      level: "DEBUG"
+    uvicorn:
+      level: "DEBUG"
+    sqlalchemy:
+      level: "INFO"  # Show SQL queries in development
+
+# Monitoring Configuration
+monitoring:
+  tracing:
+    enabled: false  # Disable tracing in development for simplicity
+
+# CORS Configuration
+cors:
+  allow_origins: ["http://localhost:3000", "http://localhost:8080"]
+
+# Feature Flags
+features:
+  enable_registration: true
+  enable_2fa: false  # Disable 2FA in development for easier testing
+  enable_push_notifications: false
+  enable_analytics: false
+  enable_ml_fraud_detection: false
+
+# Development Tools
+development:
+  auto_reload: true
+  debug_toolbar: true
+  mock_external_services: true
+  seed_data: true

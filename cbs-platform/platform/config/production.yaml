@@ -1,0 +1,145 @@
+# Production Environment Configuration
+# Optimized for production deployment
+
+# Database Configuration
+database:
+  echo: false  # Disable SQL logging in production
+  pool_size: 20
+  max_overflow: 50
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Redis Configuration
+redis:
+  decode_responses: true
+  socket_keepalive: true
+  connection_pool_kwargs:
+    max_connections: 100
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers: ["kafka-cluster:9092"]
+  security_protocol: "SASL_SSL"
+  sasl_mechanism: "PLAIN"
+
+# Security Configuration
+security:
+  # This should be set via environment variable in production
+  secret_key: "${JWT_SECRET_KEY}"
+  access_token_expire_minutes: 15  # Shorter expiry for production
+  allowed_hosts: ["*.yourdomain.com", "localhost"]
+
+# API Configuration
+api:
+  debug: false
+  reload: false
+
+# Logging Configuration
+logging:
+  loggers:
+    "": # root logger
+      level: "INFO"
+    uvicorn:
+      level: "WARNING"
+    sqlalchemy:
+      level: "ERROR"  # Minimal SQL logging in production
+
+# Monitoring Configuration
+monitoring:
+  tracing:
+    enabled: true
+    service_name: "cbs-platform-prod"
+    jaeger_endpoint: "http://jaeger-collector:14268/api/traces"
+  metrics:
+    enabled: true
+    prometheus_endpoint: "http://prometheus:9090"
+
+# CORS Configuration
+cors:
+  allow_origins: ["https://yourdomain.com", "https://app.yourdomain.com"]
+  allow_credentials: true
+  allow_methods: ["GET", "POST", "PUT", "DELETE"]
+  allow_headers: ["*"]
+
+# Feature Flags
+features:
+  enable_registration: true
+  enable_2fa: true
+  enable_push_notifications: true
+  enable_analytics: true
+  enable_ml_fraud_detection: true
+
+# Performance Configuration
+performance:
+  connection_pool_size: 50
+  max_connections_per_pool: 100
+  request_timeout: 30
+  max_retries: 3
+  circuit_breaker_threshold: 5
+  cache_ttl: 300
+
+# Service Discovery
+services:
+  customer-service:
+    url: "http://customer-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+  
+  account-service:
+    url: "http://account-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+  
+  payment-service:
+    url: "http://payment-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+  
+  transaction-service:
+    url: "http://transaction-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+  
+  loan-service:
+    url: "http://loan-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+  
+  notification-service:
+    url: "http://notification-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+  
+  audit-service:
+    url: "http://audit-service:8000"
+    health_check: "/health"
+    timeout: 30
+    retries: 3
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  default_rate: "1000/minute"
+  burst_rate: "100/minute"
+  storage_url: "redis://redis:6379"
+
+# Backup and Recovery
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention_days: 30
+  storage_location: "s3://your-backup-bucket"
+
+# Compliance
+compliance:
+  audit_log_retention_days: 2555  # 7 years
+  data_retention_policy: "7_years"
+  encryption_at_rest: true
+  encryption_in_transit: true
+  pci_dss_compliance: true
