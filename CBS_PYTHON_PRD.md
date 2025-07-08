@@ -87,10 +87,10 @@ CBS_PYTHON follows **Clean Architecture** principles with a **Domain-Driven Desi
 │             │             │    Flask)       │               │
 ├─────────────┴─────────────┴─────────────────┴───────────────┤
 │                   APPLICATION LAYER                         │
-├─────────────┬─────────────┬─────────────────┬───────────────┤
-│ Use Cases & │ Service     │ Authentication  │ Validation &  │
+├──────────────┬────────────┬─────────────────┬───────────────┤
+│ Use Cases &  │ Service    │ Authentication  │ Validation &  │
 │ Orchestration│ Layer      │ & Authorization │ Error Handling│
-├─────────────┴─────────────┴─────────────────┴───────────────┤
+├──────────────┴────────────┴─────────────────┴───────────────┤
 │                     DOMAIN LAYER                            │
 ├─────────────┬─────────────┬─────────────────┬───────────────┤
 │  Banking    │  Payment    │   Customer      │  Transaction  │

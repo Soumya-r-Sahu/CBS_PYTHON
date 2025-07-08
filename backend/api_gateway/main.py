@@ -1,53 +1,47 @@
 """
-CBS Platform V2.0 - Enhanced Encrypted API Gateway
-Production-ready API Gateway with end-to-end encryption, microservices routing,
-and comprehensive security features.
+API Gateway for Core Banking System V3.0
+
+This gateway routes requests to appropriate microservices and handles cross-cutting concerns.
 """
 
-import asyncio
-import base64
-import json
-import time
-import logging
-import uuid
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Union
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, HTTPException, Depends, Request, Response, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.middleware.compression import CompressionMiddleware
 import httpx
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import os
+from typing import Optional
 
-# Import platform components
-from platform.shared.auth import AuthenticationService, TokenData, AuthConfig
-from platform.shared.events import EventBus, LoggingEventHandler
-from .config import GatewayConfig
-from .middleware import (
-    EncryptionMiddleware, SecurityHeadersMiddleware, RateLimitMiddleware,
-    LoggingMiddleware, MetricsMiddleware, AuthenticationMiddleware,
-    CacheMiddleware, CircuitBreakerMiddleware, AuditMiddleware
+from ..shared.database import init_database, check_database_health
+
+app = FastAPI(
+    title="Core Banking API Gateway",
+    description="API Gateway for Core Banking System V3.0",
+    version="3.0.0"
 )
-from .routing import EncryptedServiceRouter
-from .health import HealthChecker
-from .encryption_service import EndToEndEncryptionService
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class EncryptedAPIGateway:
-    """
-    Enhanced API Gateway with end-to-end encryption for all sensitive operations.
-    Implements industry-grade security with encrypted communication channels.
-    """
+# Service URLs
+SERVICE_URLS = {
+    "auth": os.getenv("AUTH_SERVICE_URL", "http://localhost:8001"),
+    "customer": os.getenv("CUSTOMER_SERVICE_URL", "http://localhost:8003"),
+    "account": os.getenv("ACCOUNT_SERVICE_URL", "http://localhost:8002"),
+    "transaction": os.getenv("TRANSACTION_SERVICE_URL", "http://localhost:8004"),
+    "payment": os.getenv("PAYMENT_SERVICE_URL", "http://localhost:8005"),
+    "loan": os.getenv("LOAN_SERVICE_URL", "http://localhost:8006"),
+    "notification": os.getenv("NOTIFICATION_SERVICE_URL", "http://localhost:8007"),
+    "reporting": os.getenv("REPORTING_SERVICE_URL", "http://localhost:8008"),
+}
+
+# HTTP Client for service communication
+client = httpx.AsyncClient(timeout=30.0)
     
     def __init__(self, config: GatewayConfig):
         self.config = config

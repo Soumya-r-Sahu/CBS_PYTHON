@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBS Banking System</title>
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>CBS Banking</h1>
+                </div>
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/accounts" class="nav-link">Accounts</a>
+                    <a href="/transactions" class="nav-link">Transactions</a>
+                    <a href="/cards" class="nav-link">Cards</a>
+                    <a href="/loans" class="nav-link">Loans</a>
+                    <a href="/payments" class="nav-link">Payments</a>
+                    <a href="/reports" class="nav-link">Reports</a>
+                </nav>
+                <div class="user-menu">
+                    <span id="user-name">Loading...</span>
+                    <button id="logout-btn" class="btn btn-outline">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Welcome Section -->
+                <section class="welcome-section">
+                    <h2>Welcome to CBS Banking System</h2>
+                    <p>Your comprehensive banking solution</p>
+                </section>
+
+                <!-- Quick Actions -->
+                <section class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="actions-grid">
+                        <div class="action-card">
+                            <h4>View Accounts</h4>
+                            <p>Check your account balances and details</p>
+                            <a href="/accounts" class="btn btn-primary">View Accounts</a>
+                        </div>
+                        <div class="action-card">
+                            <h4>Transfer Money</h4>
+                            <p>Transfer funds between accounts</p>
+                            <a href="/transactions" class="btn btn-primary">Transfer</a>
+                        </div>
+                        <div class="action-card">
+                            <h4>Pay Bills</h4>
+                            <p>Pay your bills and manage payments</p>
+                            <a href="/payments" class="btn btn-primary">Pay Bills</a>
+                        </div>
+                        <div class="action-card">
+                            <h4>View Reports</h4>
+                            <p>Access your financial reports</p>
+                            <a href="/reports" class="btn btn-primary">View Reports</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Account Summary -->
+                <section class="account-summary">
+                    <h3>Account Summary</h3>
+                    <div id="accounts-container">
+                        <div class="loading">Loading accounts...</div>
+                    </div>
+                </section>
+
+                <!-- Recent Transactions -->
+                <section class="recent-transactions">
+                    <h3>Recent Transactions</h3>
+                    <div id="transactions-container">
+                        <div class="loading">Loading transactions...</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 CBS Banking System. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/terms">Terms of Service</a>
+                    <a href="/support">Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/src/js/banking-api-client.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/dashboard.js"></script>
+</body>
+</html>
